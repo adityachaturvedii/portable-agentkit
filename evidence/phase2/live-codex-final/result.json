@@ -1,0 +1,56 @@
+{
+  "engine": "codex",
+  "task_id": "phase2-subscription-smoke",
+  "status": "failed",
+  "error_class": "provider_error",
+  "exit_code": 1,
+  "elapsed_seconds": 3.288175,
+  "session_id": null,
+  "model": null,
+  "structured_output": null,
+  "final_text": null,
+  "usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "cached_input_tokens": null,
+    "cache_creation_tokens": null,
+    "reasoning_tokens": null,
+    "estimated_cost_usd": null,
+    "billed_cost_usd": null,
+    "source": "unavailable",
+    "final": false,
+    "provider_details": {}
+  },
+  "cancellation": {
+    "requested": false,
+    "reason": "leader-exited",
+    "term_sent": false,
+    "kill_sent": false,
+    "leader_reaped": true,
+    "process_group_gone": true,
+    "scope": "POSIX process group; detached descendants and remote effects are not covered"
+  },
+  "artifacts": {
+    "request.json": "9714b1379841b16f1d1fa96955d10f0eb5236acee992daa5ef1e6403a862ea69",
+    "stdout.redacted.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr.redacted.txt": "2d8b902fb51c4fb0108c58a40b037f3ed52641f00cdae67901d7cbda9b4b8473"
+  },
+  "provider_details": {
+    "version": "0.154.0",
+    "executable_sha256": "61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70",
+    "authentication": "subscription-reported",
+    "paid_overflow": "unknown",
+    "authorization": "Operator authorized one existing-subscription smoke; stop on usage/payment limits; no billing/auth changes.",
+    "managed_mode": "model-only"
+  },
+  "limitations": [
+    "Provider events and final text are claims; fixture acceptance is independently computed.",
+    "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+    "Process groups cannot prove detached-descendant or remote cancellation.",
+    "Whole-process guard denies global writes; parent provider network and auth access remain available.",
+    "Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.",
+    "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.",
+    "Codex built-in transport retries cannot be set to zero without changing provider; wall time bounds the process and reported retries terminate it. Hidden attempts remain unknown."
+  ],
+  "schema_version": 1
+}

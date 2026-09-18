@@ -1,2 +1,3 @@
 # Preserve the original unittest subtest output byte-for-byte for its recorded hash.
 audit/evaluations/baseline/regression-control.txt whitespace=-blank-at-eol
+evidence/phase2/live-codex/stderr.redacted.txt whitespace=-blank-at-eof

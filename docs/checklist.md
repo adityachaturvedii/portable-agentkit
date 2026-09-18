@@ -18,9 +18,24 @@
 - [x] Disposable synthetic tasks, negative contract cases and independent forward evaluation.
 - [x] Document adaptations, tested platform, limitations and local PR proposal.
 
+## Phase 2 — feasibility implementation, exit gate incomplete
+
+- [x] Verify exact `72a3ccd` base, clean prior tree and all 29 foundation tests; create separate branch/worktree.
+- [x] Read-only doctor with version/feature/auth/sandbox states; no global config changes.
+- [x] Provider-neutral v1 records, separate wire adapters, redacted raw evidence and nullable usage.
+- [x] Bounded process supervision, cancellation and same-group child cleanup.
+- [x] Disposable failure fixtures and independent output oracle; no deliberate live quota exhaustion.
+- [x] Real fake-credential, symlink, sibling, common Git metadata, loopback and process canaries.
+- [x] One Claude live subscription call; accepted by corrected offline replay, original false-positive record retained.
+- [x] Attempt Codex smoke under restrictions; preserve startup failure without relaxing guard.
+- [x] Matrix, usage limitations, evidence, decisions and Phase 3 recommendation.
+- [ ] Both engines complete a disposable live task: **Codex blocked** under the no-global-write guard.
+- [ ] Tool-enabled credential/egress isolation: **unsupported**, not implied by native CLI sandbox flags.
+
+See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-validation-report.md).
+
 ## Later phases (planned, not implemented)
 
-- [ ] Phase 2: doctor, authenticated CLI adapters, canary-secret isolation, cancellation.
 - [ ] Phase 3: trusted worktree broker, durable state, budgets and gated approvals.
 - [ ] Phase 4: cross-provider roles and measured routing.
 - [ ] Phase 5: hardware domain validation and optional GPU worker.
@@ -30,3 +45,5 @@
 ## Exit status
 
 Phase 0 complete. Phase 1 offline foundation complete on the observed macOS/Python environment. All ten procedures were exercised across invoice, independent-review and optimisation development cases. Review found two outcome contradictions; both were fixed and independently rechecked. Required browser/GPU/provider boundaries remain explicitly unverified and are later-phase gates, not Phase 1 passes. The external skill-creator validator was unavailable due to missing PyYAML; local pack checks passed.
+
+Phase 2 implementation and authorized feasibility experiments are recorded, with the full exit gate incomplete. No merge, push, PR, global CLI edit, plugin installation, GPU connection, API-key introduction or billing change occurred. Production delivery orchestration is not recommended yet; offline Phase 3 design/fixtures can proceed with execution disabled.

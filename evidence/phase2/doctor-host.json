@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "platform": {
+    "system": "Darwin",
+    "release": "25.6.0",
+    "machine": "arm64"
+  },
+  "sandbox_initialization": {
+    "state": "verified",
+    "evidence": "Seatbelt successfully initialized for a no-write/no-network true process; not a complete isolation proof."
+  },
+  "sandbox_executables": {
+    "sandbox-exec": true,
+    "bwrap": false,
+    "docker": false,
+    "podman": false
+  },
+  "engines": {
+    "codex": {
+      "engine": "codex",
+      "executable": "/Users/aditya/.nvm/versions/node/v22.19.0/bin/codex",
+      "version": "0.154.0",
+      "executable_sha256": "61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70",
+      "features": {
+        "--json": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--output-schema": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--ephemeral": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--ignore-user-config": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--ignore-rules": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--sandbox": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "tested_version": {
+          "state": "verified",
+          "evidence": "Compatibility target 0.154.0; different versions fail managed preflight."
+        }
+      },
+      "authentication": {
+        "state": "verified",
+        "evidence": "Official CLI reports ChatGPT login; no credential content read by toolkit."
+      },
+      "authentication_mode": "subscription",
+      "billing_mode": "subscription-reported",
+      "paid_overflow": "unknown",
+      "provider_details": {
+        "authentication_probe_network": "disabled",
+        "paid_overflow": "unknown; status commands do not establish account billing settings"
+      },
+      "schema_version": 1
+    },
+    "claude": {
+      "engine": "claude",
+      "executable": "/opt/homebrew/bin/claude",
+      "version": "2.1.220",
+      "executable_sha256": "8addc857f3fe64d5a0368af9ee50321b50afb4a6918ba3ef018ab84f5dbbe081",
+      "features": {
+        "--print": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--output-format": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--json-schema": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--safe-mode": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--setting-sources": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--settings": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--strict-mcp-config": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--tools": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "--no-session-persistence": {
+          "state": "verified",
+          "evidence": "Advertised by installed CLI help; effective behavior requires separate integration evidence."
+        },
+        "tested_version": {
+          "state": "verified",
+          "evidence": "Compatibility target 2.1.220; different versions fail managed preflight."
+        }
+      },
+      "authentication": {
+        "state": "verified",
+        "evidence": "Official CLI reports first-party Claude subscription login."
+      },
+      "authentication_mode": "subscription",
+      "billing_mode": "subscription-reported",
+      "paid_overflow": "unknown",
+      "provider_details": {
+        "subscription_type": "max",
+        "authentication_probe_network": "disabled",
+        "paid_overflow": "unknown; status commands do not establish account billing settings"
+      },
+      "schema_version": 1
+    }
+  },
+  "limitations": [
+    "Doctor never invokes inference or changes global settings. Temporary diagnostic files may be created and removed.",
+    "Presence, advertised features, and successful initialization are distinct from effective isolation.",
+    "Authentication is CLI-reported, not proof of remaining quota or paid-overflow configuration.",
+    "No credential contents or account identifiers are emitted."
+  ]
+}

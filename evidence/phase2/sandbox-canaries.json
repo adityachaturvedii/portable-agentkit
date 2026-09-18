@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "platform": "darwin",
+  "initialization": "verified",
+  "evidence": "Seatbelt successfully initialized for a no-write/no-network true process; not a complete isolation proof.",
+  "cases": {
+    "whole-process-offline": {
+      "status": "observed",
+      "exit_code": 0,
+      "stop_reason": null,
+      "observed": {
+        "read_workspace": {
+          "allowed": true
+        },
+        "read_fake_credential": {
+          "allowed": true
+        },
+        "read_symlink_to_fake_credential": {
+          "allowed": true
+        },
+        "write_workspace": {
+          "allowed": false,
+          "errno": 1
+        },
+        "write_sibling": {
+          "allowed": false,
+          "errno": 1
+        },
+        "write_runtime": {
+          "allowed": true
+        },
+        "overwrite_fake_credential": {
+          "allowed": false,
+          "errno": 1
+        },
+        "loopback_network": {
+          "allowed": false,
+          "errno": 1
+        },
+        "spawn_process": {
+          "allowed": true
+        },
+        "fake_env_visible": {
+          "allowed": true
+        }
+      },
+      "stderr": "",
+      "parent_verification": {
+        "canary_unchanged": true,
+        "workspace_write_exists": false,
+        "sibling_write_exists": false,
+        "runtime_write_exists": true
+      },
+      "process_group_gone": true
+    },
+    "whole-process-live-policy": {
+      "status": "observed",
+      "exit_code": 0,
+      "stop_reason": null,
+      "observed": {
+        "read_workspace": {
+          "allowed": true
+        },
+        "read_fake_credential": {
+          "allowed": true
+        },
+        "read_symlink_to_fake_credential": {
+          "allowed": true
+        },
+        "write_workspace": {
+          "allowed": false,
+          "errno": 1
+        },
+        "write_sibling": {
+          "allowed": false,
+          "errno": 1
+        },
+        "write_runtime": {
+          "allowed": true
+        },
+        "overwrite_fake_credential": {
+          "allowed": false,
+          "errno": 1
+        },
+        "loopback_network": {
+          "allowed": true
+        },
+        "spawn_process": {
+          "allowed": true
+        },
+        "fake_env_visible": {
+          "allowed": true
+        }
+      },
+      "stderr": "",
+      "parent_verification": {
+        "canary_unchanged": true,
+        "workspace_write_exists": false,
+        "sibling_write_exists": false,
+        "runtime_write_exists": true
+      },
+      "process_group_gone": true
+    },
+    "codex-native-read-only": {
+      "status": "unsupported",
+      "exit_code": 2,
+      "stop_reason": null,
+      "observed": null,
+      "stderr": "error: the following required arguments were not provided:\n  --permission-profile <NAME>\n  --sandbox-state-json <JSON>\n\nUsage: codex sandbox --permission-profile <NAME> --sandbox-state-json <JSON> --cd <DIR> --config <key=value> --sandbox-state-disable-network <COMMAND>...\n\nFor more information, try '--help'.\n",
+      "parent_verification": {
+        "canary_unchanged": true,
+        "workspace_write_exists": false,
+        "sibling_write_exists": false,
+        "runtime_write_exists": false
+      },
+      "process_group_gone": true
+    },
+    "codex-native-deny-canary": {
+      "status": "observed",
+      "exit_code": 0,
+      "stop_reason": null,
+      "observed": {
+        "read_workspace": {
+          "allowed": true
+        },
+        "read_fake_credential": {
+          "allowed": false,
+          "errno": 1
+        },
+        "read_symlink_to_fake_credential": {
+          "allowed": false,
+          "errno": 1
+        },
+        "write_workspace": {
+          "allowed": false,
+          "errno": 1
+        },
+        "write_sibling": {
+          "allowed": false,
+          "errno": 1
+        },
+        "write_runtime": {
+          "allowed": false,
+          "errno": 1
+        },
+        "overwrite_fake_credential": {
+          "allowed": false,
+          "errno": 1
+        },
+        "loopback_network": {
+          "allowed": false,
+          "errno": 1
+        },
+        "spawn_process": {
+          "allowed": true
+        },
+        "fake_env_visible": {
+          "allowed": true
+        }
+      },
+      "stderr": "",
+      "parent_verification": {
+        "canary_unchanged": true,
+        "workspace_write_exists": false,
+        "sibling_write_exists": false,
+        "runtime_write_exists": false
+      },
+      "process_group_gone": true
+    }
+  },
+  "limitations": [
+    "Only synthetic canaries; no real credentials opened.",
+    "Loopback only, not every network family or tool path.",
+    "Process spawn allowed; process groups are lifecycle controls, not isolation.",
+    "Claude native Bash sandbox not exercised by this offline OS/Codex probe."
+  ]
+}

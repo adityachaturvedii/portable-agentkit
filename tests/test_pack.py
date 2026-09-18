@@ -45,7 +45,7 @@ class PackTests(unittest.TestCase):
             self.assertEqual(list(home.iterdir()), [])
 
     def test_planned_commands_are_not_available(self):
-        for command in ("run", "approve-pr", "doctor", "update"):
+        for command in ("run", "approve-pr", "update"):
             result = subprocess.run([sys.executable, "-m", "agentkit", command], cwd=ROOT,
                                     capture_output=True, text=True, timeout=10)
             self.assertEqual(result.returncode, 2)

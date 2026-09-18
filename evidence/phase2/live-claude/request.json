@@ -1,0 +1,12 @@
+{
+  "engine": "claude",
+  "task_id": "phase2-subscription-smoke",
+  "cwd": "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-smoke-a0_n1a3m",
+  "timeout_seconds": 45,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "mode": "model-only",
+  "schema_version": 1,
+  "prompt_sha256": "6cc88c373383f794f2392dacb759979e265c6c10d8139f615b5200dadb4b2080",
+  "prompt_bytes": 104
+}

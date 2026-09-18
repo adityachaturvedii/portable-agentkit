@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "skills": 10,
+  "domains": 7,
+  "examples": 10,
+  "sources": 3,
+  "limits": "Offline structural checks only; no live source fetch, sandbox or provider verification."
+}
