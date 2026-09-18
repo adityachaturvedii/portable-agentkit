@@ -3,7 +3,7 @@
 from dataclasses import asdict, dataclass, field
 import math
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 SCHEMA_VERSION = 1
@@ -83,6 +83,21 @@ class LivePolicy:
     """
     subscription_smoke_authorized: bool = False
     evidence: str = "No trusted operator authorization supplied."
+
+
+@dataclass(frozen=True)
+class ExecutionBoundary:
+    """Trusted, controller-created boundary for a disposable owned-code run."""
+    workspace: str
+    denied_read_paths: Tuple[str, ...]
+    schema_version: int = SCHEMA_VERSION
+
+    def __post_init__(self):
+        if self.schema_version != SCHEMA_VERSION:
+            raise ValueError("unsupported boundary schema version")
+        paths = (self.workspace,) + tuple(self.denied_read_paths)
+        if not self.denied_read_paths or any(not isinstance(p, str) or not Path(p).is_absolute() for p in paths):
+            raise ValueError("boundary paths must be absolute and include denied paths")
 
 
 @dataclass

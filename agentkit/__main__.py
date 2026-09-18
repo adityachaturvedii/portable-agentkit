@@ -26,6 +26,15 @@ def main(argv=None):
     smoke.add_argument("--output", required=True, help="fresh result directory")
     smoke.add_argument("--authorize-subscription-smoke", action="store_true",
                        help="trusted operator authorization; does not establish account billing settings")
+    execution = commands.add_parser("execution-check", help="one disposable owned-code CLI check; blocked by default")
+    execution.add_argument("engine", choices=("codex", "claude"))
+    execution.add_argument("--output", required=True, help="fresh result directory")
+    execution.add_argument("--authorize-subscription-smoke", action="store_true",
+                           help="trusted operator authorization; does not establish account billing settings")
+    lifecycle = commands.add_parser("lifecycle-check", help="offline owned-code timeout and cancellation fixtures")
+    lifecycle.add_argument("--output", required=True, help="fresh result directory")
+    boundary = commands.add_parser("boundary-check", help="offline owned-code filesystem boundary canaries")
+    boundary.add_argument("--output", required=True, help="fresh result directory")
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -47,6 +56,21 @@ def main(argv=None):
             result = smoke_test(args.engine, args.output, args.authorize_subscription_smoke)
             print(json.dumps(result, indent=2))
             return 0 if result['acceptance']['passed'] else 1
+        elif args.command == "execution-check":
+            from .execution_check import run_execution_check
+            result = run_execution_check(args.engine, args.output, args.authorize_subscription_smoke)
+            print(json.dumps(result, indent=2))
+            return 0 if result['acceptance']['passed'] else 1
+        elif args.command == "lifecycle-check":
+            from .execution_check import lifecycle_check
+            result = lifecycle_check(args.output)
+            print(json.dumps(result, indent=2))
+            return 0 if result['passed'] else 1
+        elif args.command == "boundary-check":
+            from .execution_check import standalone_boundary_check
+            result = standalone_boundary_check(args.output)
+            print(json.dumps(result, indent=2))
+            return 0 if result['passed'] else 1
         else:
             print(json.dumps(check_pack(), indent=2))
         return 0

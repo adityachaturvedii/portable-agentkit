@@ -1,0 +1,86 @@
+{
+  "engine": "codex",
+  "task_id": "phase2-owned-code-followup",
+  "status": "succeeded",
+  "error_class": null,
+  "exit_code": 0,
+  "elapsed_seconds": 22.220667,
+  "session_id": "01a0b508-f692-7eb2-b1fb-b2cf5dbb7103",
+  "model": null,
+  "structured_output": {
+    "edited_file": "arithmetic.py",
+    "change": "Fixed add to use addition instead of subtraction.",
+    "test_result": "1 test passed using python3 -B -m unittest -v"
+  },
+  "final_text": "{\"edited_file\":\"arithmetic.py\",\"change\":\"Fixed add to use addition instead of subtraction.\",\"test_result\":\"1 test passed using python3 -B -m unittest -v\"}",
+  "usage": {
+    "input_tokens": 37264,
+    "output_tokens": 185,
+    "cached_input_tokens": 27264,
+    "cache_creation_tokens": null,
+    "reasoning_tokens": 0,
+    "estimated_cost_usd": null,
+    "billed_cost_usd": null,
+    "source": "codex.turn.completed",
+    "final": true,
+    "provider_details": {
+      "input_tokens": 37264,
+      "cached_input_tokens": 27264,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 185,
+      "reasoning_output_tokens": 0
+    }
+  },
+  "cancellation": {
+    "requested": false,
+    "reason": "leader-exited",
+    "term_sent": false,
+    "kill_sent": false,
+    "leader_reaped": true,
+    "process_group_gone": true,
+    "scope": "POSIX process group; detached descendants and remote effects are not covered"
+  },
+  "artifacts": {
+    "request.json": "6f6826eb72971fd24be7cce750d44183a056b240b136bd46c1b7047b29030787",
+    "stdout.redacted.jsonl": "011d8746e5d9dcce1e9bee0f44dbbed01c16aa38bf67aa4acafacb8b526a4b54",
+    "stderr.redacted.txt": "4b29f35e7a226d25c0c1c99c74e79251978f5e82a9c34df5b00cfdcb896ed5c1"
+  },
+  "provider_details": {
+    "terminal_type": "turn.completed",
+    "version": "0.154.0",
+    "executable_sha256": "61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70",
+    "authentication": "subscription-reported",
+    "paid_overflow": "unknown",
+    "authorization": "Operator authorized one small existing-subscription coding smoke; stop on limits/payment; no auth or billing changes.",
+    "managed_mode": "external-seatbelt-owned-code",
+    "denied_read_paths": [
+      "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-owned-check-rjjgdqf7/sibling-workspace/source.py",
+      "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-owned-check-rjjgdqf7/protected-canary/fake-credentials",
+      "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-owned-check-rjjgdqf7/controller-state/state.json"
+    ],
+    "installation_id_integrity": {
+      "before": {
+        "sha256": "6f88a696cf921829f5fd4027f4bacd7679723c737cf76e264a1d42576af010b3",
+        "size": 36,
+        "mode": "0o644"
+      },
+      "after": {
+        "sha256": "6f88a696cf921829f5fd4027f4bacd7679723c737cf76e264a1d42576af010b3",
+        "size": 36,
+        "mode": "0o644"
+      },
+      "unchanged": true,
+      "path": "/Users/aditya/.codex/installation_id"
+    }
+  },
+  "limitations": [
+    "Provider events and final text are claims; fixture acceptance is independently computed.",
+    "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+    "Process groups cannot prove detached-descendant or remote cancellation.",
+    "Whole-process guard permits writes only in the disposable workspace/runtime plus the literal Codex startup lock file.",
+    "Explicit disposable read canaries are denied; comprehensive parent credential isolation is not established.",
+    "Provider and tool traffic share the parent network boundary; tool network isolation is unsupported in this mode.",
+    "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry."
+  ],
+  "schema_version": 1
+}

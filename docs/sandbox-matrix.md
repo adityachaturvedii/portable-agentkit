@@ -23,3 +23,16 @@ Process-group cleanup tests kill TERM-resistant children on timeout/cancellation
 Official documentation provides context, not substituted evidence: [Codex configuration](https://learn.chatgpt.com/docs/config-file/config-reference) and [Claude sandboxing](https://code.claude.com/docs/en/sandboxing). Claude's native shell sandbox and built-in tools use different controls. Browser/computer/MCP/credential paths require separate tests; none is approved by this matrix.
 
 **Supported scope:** offline foundation, read-only diagnosis, fixture transport and a narrow authorized Claude model-only smoke on this host. **Unsupported:** tool-enabled managed execution, unattended untrusted work, comprehensive credential isolation and universal egress isolation. Codex's guarded live task remains blocked. No release claim extends beyond these observations.
+
+## Follow-up results — 2026-09-19
+
+The table above is the original `6bfb981` record. The [execution follow-up](phase2-execution-followup.md) adds a narrow host mode; it does not retroactively change those observations.
+
+| Engine / mode | Filesystem | Network | Process | Credential/state boundary | Status |
+|---|---|---|---|---|---|
+| Codex external-Seatbelt owned-code | Whole CLI can write only disposable workspace/runtime and literal existing `~/.codex/installation_id`; explicit sibling/fake-credential/controller reads denied | Provider and tools share allowed host network; tool egress unsupported | Bounded POSIX group; timeout/cancel fixture passed | Identifier hash/size/mode unchanged. Authenticated parent still has required auth access; comprehensive credential isolation unsupported | Ready only for trusted controller-created disposable workspaces on this host |
+| Claude external-Seatbelt owned-code | Whole CLI can write only disposable workspace/runtime and preselected fresh `~/.claude/session-env/<uuid>`; explicit protected reads denied; session path removed | Provider and tools share allowed host network; tool egress unsupported | Same bounded group result | Config/auth location remains read-only; complete Keychain/file-tool credential isolation unsupported | Ready only for trusted controller-created disposable workspaces on this host |
+| Codex/Claude nested native sandbox inside outer guard | Inner `sandbox_apply` fails on this macOS host | Not reached | Tool command unavailable | No fallback | Blocked by macOS nested-sandbox incompatibility |
+| Untrusted or broad local-project execution | Explicit canaries are insufficient to enumerate all sensitive paths | No tool/provider separation | Detached descendants unsupported | Real-secret isolation unproven | Blocked |
+
+The independent [boundary probe](../evidence/phase2-followup/boundary/boundary.json) directly attempted reads and writes; every protected operation returned `PermissionError`, the workspace write succeeded and all canary hashes stayed unchanged. The [lifecycle probe](../evidence/phase2-followup/lifecycle/lifecycle.json) verifies timeout/cancellation only for same-group local processes.

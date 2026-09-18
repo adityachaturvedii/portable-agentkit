@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "observed_date": "2026-09-19",
+  "base_revision": "6bfb981670a1f4e553c870995414452f2ce06b21",
+  "codex": {
+    "version": "0.154.0",
+    "captured_error": "failed to initialize in-process app-server client: Operation not permitted",
+    "required_path": "/Users/aditya/.codex/installation_id",
+    "required_operation": "read/write open plus exclusive file lock during in-process app-server initialization",
+    "correction": "allow file-write operations on this literal regular non-symlink only; retain blanket write denial elsewhere",
+    "before_and_after": {
+      "sha256": "6f88a696cf921829f5fd4027f4bacd7679723c737cf76e264a1d42576af010b3",
+      "size": 36,
+      "mode": "0644",
+      "unchanged": true
+    },
+    "source": "https://github.com/openai/codex/blob/rust-v0.154.0/codex-rs/app-server/src/in_process.rs",
+    "upstream_issue": "https://github.com/openai/codex/issues/42398"
+  },
+  "claude": {
+    "version": "2.1.220",
+    "required_paths": [
+      "preselected fresh ~/.claude/session-env/<session-id>",
+      "disposable directory selected through CLAUDE_CODE_TMPDIR and CLAUDE_TMPDIR"
+    ],
+    "rejected_correction": "redirecting CLAUDE_CONFIG_DIR hid existing subscription authentication",
+    "final_correction": "preserve existing auth location, allow only the preselected fresh session path, redirect temp state and remove session path after run"
+  },
+  "native_sandbox_nesting": {
+    "status": "unsupported",
+    "evidence": "Codex tool command returned sandbox-exec: sandbox_apply: Operation not permitted inside the whole-process Seatbelt guard.",
+    "selected_mode": "external Seatbelt profile is the sole OS filesystem boundary",
+    "tool_network_isolation": "unsupported"
+  },
+  "secret_handling": "No real credential content was read or recorded. Fake credentials only were used for boundary probes."
+}

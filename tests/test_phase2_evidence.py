@@ -10,9 +10,29 @@ from agentkit.runtime_contracts import CancellationStatus, ExecutionRequest
 from agentkit.smoke import acceptance
 
 ROOT = Path(__file__).resolve().parents[1] / 'evidence/phase2'
+FOLLOWUP = Path(__file__).resolve().parents[1] / 'evidence/phase2-followup'
 
 
 class EvidenceTests(unittest.TestCase):
+    def test_followup_evidence_hashes_and_acceptance(self):
+        manifest = json.loads((FOLLOWUP / 'manifest.json').read_text())
+        self.assertEqual(manifest['base_revision'], '6bfb981670a1f4e553c870995414452f2ce06b21')
+        self.assertGreater(len(manifest['files']), 30)
+        for name, digest in manifest['files'].items():
+            with self.subTest(name=name):
+                path = FOLLOWUP / name
+                self.assertIn(FOLLOWUP, path.resolve().parents)
+                self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), digest)
+        for engine in ('codex', 'claude'):
+            acceptance_record = json.loads((FOLLOWUP / ('live-' + engine) / 'acceptance.json').read_text())
+            self.assertTrue(acceptance_record['passed'])
+            self.assertTrue(acceptance_record['provider_test_execution']['passed'])
+            self.assertEqual(acceptance_record['changed_files'], ['arithmetic.py'])
+            result = json.loads((FOLLOWUP / ('live-' + engine) / 'result.json').read_text())
+            self.assertIsNone(result['usage']['billed_cost_usd'])
+        self.assertTrue(json.loads((FOLLOWUP / 'boundary/boundary.json').read_text())['passed'])
+        self.assertTrue(json.loads((FOLLOWUP / 'lifecycle/lifecycle.json').read_text())['passed'])
+
     def test_preserved_phase2_evidence_hashes(self):
         manifest = json.loads((ROOT / 'manifest.json').read_text())
         self.assertGreater(len(manifest['files']), 15)

@@ -1,0 +1,61 @@
+{
+  "engine": "claude",
+  "task_id": "phase2-owned-code-followup",
+  "status": "failed",
+  "error_class": "authentication",
+  "exit_code": 1,
+  "elapsed_seconds": 0.495876,
+  "session_id": null,
+  "model": null,
+  "structured_output": null,
+  "final_text": null,
+  "usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "cached_input_tokens": null,
+    "cache_creation_tokens": null,
+    "reasoning_tokens": null,
+    "estimated_cost_usd": null,
+    "billed_cost_usd": null,
+    "source": "unavailable",
+    "final": false,
+    "provider_details": {}
+  },
+  "cancellation": {
+    "requested": true,
+    "reason": "authentication",
+    "term_sent": true,
+    "kill_sent": false,
+    "leader_reaped": true,
+    "process_group_gone": true,
+    "scope": "POSIX process group; detached descendants and remote effects are not covered"
+  },
+  "artifacts": {
+    "request.json": "104ce5833705fa7ad4520ba9f9678ef8561dfae183468ac72ad6746a9f76296f",
+    "stdout.redacted.jsonl": "5017faf980b0d4aa3a9819e840ba3bc0cdd9dc46cf0f5a75be71934da29e7d8c",
+    "stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "provider_details": {
+    "version": "2.1.220",
+    "executable_sha256": "8addc857f3fe64d5a0368af9ee50321b50afb4a6918ba3ef018ab84f5dbbe081",
+    "authentication": "subscription-reported",
+    "paid_overflow": "unknown",
+    "authorization": "Operator authorized one small existing-subscription coding smoke; stop on limits/payment; no auth or billing changes.",
+    "managed_mode": "external-seatbelt-owned-code",
+    "denied_read_paths": [
+      "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-owned-check-wgkd_c0k/sibling-workspace/source.py",
+      "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-owned-check-wgkd_c0k/protected-canary/fake-credentials",
+      "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-owned-check-wgkd_c0k/controller-state/state.json"
+    ]
+  },
+  "limitations": [
+    "Provider events and final text are claims; fixture acceptance is independently computed.",
+    "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+    "Process groups cannot prove detached-descendant or remote cancellation.",
+    "Whole-process guard permits writes only in the disposable workspace/runtime plus the literal Codex startup lock file.",
+    "Explicit disposable read canaries are denied; comprehensive parent credential isolation is not established.",
+    "Provider and tool traffic share the parent network boundary; tool network isolation is unsupported in this mode.",
+    "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry."
+  ],
+  "schema_version": 1
+}
