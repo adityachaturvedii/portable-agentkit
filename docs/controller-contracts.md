@@ -10,6 +10,8 @@ The normal path is:
 
 Verification or concrete review findings can enter `repairing`, which returns only to `implemented`. `blocked` and `cancelled` are terminal in Phase 3. Every transition validates its expected source state inside the same transaction that appends its event. Dependency tasks must be at `awaiting_pr_approval` before a dependent task can enter `workspace_ready`.
 
+Execution roles are state-bound: `implementer` to `implementing`, `repair` to `repairing`, `verification` to `verifying`, and `reviewer` to `reviewing`. Reservation and start both check this mapping. Any `reconciliation_required` execution blocks new reservations until the controller records an explicit `not_started` or `terminated` resolution. Resolution releases held capacity but deliberately leaves the task blocked for a new trusted recovery decision.
+
 ## Durable records
 
 | Record | Required semantics |
@@ -26,11 +28,17 @@ Verification or concrete review findings can enter `repairing`, which returns on
 
 `UsageRecord` preserves nullable input, output, cached-input, cache-creation and reasoning token counters plus nullable estimated and billed cost. Missing values remain unknown. Provider-reported categories are not converted into exact limits or billing claims.
 
+All call/concurrency/repair/reserve counts require real integers and reject Boolean values. Elapsed limits and timeouts require finite positive integers or floats; completed elapsed time and observed costs require finite nonnegative values. NaN and either infinity are invalid.
+
 The controller can enforce reservation count, local concurrency, wall-time allocation and request timeout. It cannot enforce an exact provider token ceiling or monetary cap through the current CLI adapters. Capacity reserved for verification cannot be consumed by implementer or reviewer calls.
 
 ## Revision and approval binding
 
 The Git broker creates the base and candidate revisions. `set_head` invalidates evidence and approvals for older heads. Independent verification and review name the candidate revision, and packaging checks current passing evidence before producing a local package. The package itself is evidence, not approval. Worker text, provider terminal status or a package field cannot create a user approval.
+
+Independent verification reads the committed source into a fresh `/private/tmp` copy and writes the controller-owned acceptance test there. A macOS Seatbelt profile denies network, Mach service lookup and all writes except disposable runtime state; it denies reads of controller state, approvals, evidence, the managed repository/worktree and the invoking home. The child receives an allowlisted environment with an empty disposable `HOME`. Source/test manifests and the original worktree revision, cleanliness and manifest must remain unchanged. Absence of this verified profile blocks verification rather than falling back.
+
+When a check fails, the next repair prompt includes controller-generated JSON. Verification feedback contains the exact candidate revision, acceptance criteria, exit/stop status and at most the final 8 KiB of redacted test output. Review feedback contains the exact revision and already validated concrete findings. This data remains advice to the worker; it grants no authority.
 
 ## Restart semantics
 

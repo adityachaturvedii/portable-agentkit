@@ -66,6 +66,20 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [ ] Crash-safe process containment, detached descendants and remote cancellation: **unsupported**.
 - [ ] Broad repositories, hostile code, tool-network separation and comprehensive credential isolation: **blocked**.
 
+## Phase 3 corrective review
+
+- [x] Verify all five review findings against exact commit `17eba897c2cada2957642c36a4c5ddfb5d967a7b`; create `implementation/phase-3-review-fixes` in a separate worktree.
+- [x] Attach controller-generated JSON feedback to repair prompts, including structured review findings or bounded failed-test output and acceptance criteria.
+- [x] Prove feedback-dependent repair behavior for both failed verification and review findings.
+- [x] Run independent tests from a controller-created copy with controller-owned test content under a read-only, no-network Seatbelt profile.
+- [x] Scrub the verification environment, replace `HOME`, deny the invoking home plus controller, approval, evidence, repository and worktree paths, and compare both candidate and verification-copy manifests after execution.
+- [x] Pass the host boundary regression with disposable controller, approval, Git, worktree and fake-credential canaries; never inspect real credential contents.
+- [x] Bind implementer, repair, verification and reviewer reservations/starts to their valid task states; reject terminal and unresolved tasks.
+- [x] Add explicit reconciliation resolution that releases the held reservation while leaving the uncertain task blocked.
+- [x] Reject Boolean, nonnumeric, zero/negative where invalid, NaN and infinity in controller budget, timeout, elapsed and cost observations.
+- [x] Namespace repair/failure event IDs by task and test two tasks with the same signature.
+- [ ] Complete a new live cross-provider workflow: **still blocked/unverified because the retained Claude attempt ended with expired OAuth; no authentication change or live rerun was performed in this corrective pass**.
+
 ## Later phases (planned, not implemented)
 
 - [ ] Phase 4: cross-provider roles and measured routing.
@@ -79,6 +93,6 @@ Phase 0 complete. Phase 1 offline foundation complete on the observed macOS/Pyth
 
 Phase 2 implementation and authorized feasibility experiments are recorded. Both engines now pass the trusted disposable-workspace coding fixture on the tested macOS host. No merge, push, PR, global CLI edit, plugin installation, GPU connection, API-key introduction or billing change occurred in the follow-up. Phase 3 may begin only for that narrow mode; untrusted or broad local execution remains blocked.
 
-Phase 3 now implements the minimum local delivery graph for that narrow mode. The deterministic workflow reaches a revision-bound `awaiting_pr_approval` package, and 85 offline tests cover controller, Git, budget, repair, restart and evidence invariants. The bounded live attempt validated Codex implementation plus an independent test, then blocked when Claude reported an expired OAuth token. No reauthentication was attempted, no billing fact was inferred, and no live approval package was created. Phase 4 should wait for a successful cross-provider live review and remains limited to trusted controller-created disposable repositories.
+Phase 3 now implements the minimum local delivery graph for that narrow mode. After the corrective review, the deterministic workflow reaches a revision-bound `awaiting_pr_approval` package and 91 tests cover controller, Git, repair feedback, constrained verification, budget, numeric, lifecycle, restart and evidence invariants. The bounded live attempt validated Codex implementation plus an independent test, then blocked when Claude reported an expired OAuth token. No reauthentication was attempted, no billing fact was inferred, and no live approval package was created. Phase 4 should wait for a successful cross-provider live review and remains limited to trusted controller-created disposable repositories.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).

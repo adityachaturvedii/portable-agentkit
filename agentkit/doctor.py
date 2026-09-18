@@ -63,6 +63,17 @@ def owned_code_profile(runtime, workspace, denied_read_paths, startup_write_path
     return text
 
 
+def verification_profile(runtime, denied_read_paths):
+    """Read-only, no-network profile for independently controlled acceptance tests."""
+    text = '(version 1)(allow default)(deny file-write*)(deny network*)(deny mach-lookup)'
+    text += '(allow file-write* (subpath ' + json.dumps(str(Path(runtime).resolve())) + '))'
+    for path in denied_read_paths:
+        resolved = Path(path).resolve()
+        selector = 'literal' if resolved.is_file() else 'subpath'
+        text += '(deny file-read* (' + selector + ' ' + json.dumps(str(resolved)) + '))'
+    return text
+
+
 def native_sandbox_capability():
     if platform.system() != "Darwin" or not Path("/usr/bin/sandbox-exec").is_file():
         return Capability("unavailable", "This release has no verified whole-process diagnostic guard for this platform.")

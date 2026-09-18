@@ -115,15 +115,30 @@ class GitBroker:
                 stream.write(content)
         return destination
 
-    def manifest(self, root):
+    def manifest(self, root, *, exclude_git=False):
         root = Path(root).resolve()
         result = {}
         for path in sorted(root.rglob('*')):
             if path.is_symlink():
                 raise GitBrokerError('symlink in controlled workspace')
             if path.is_file():
-                result[str(path.relative_to(root))] = hashlib.sha256(path.read_bytes()).hexdigest()
+                relative = str(path.relative_to(root))
+                if exclude_git and (relative == '.git' or relative.startswith('.git/')):
+                    continue
+                result[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
         return result
+
+    def worktree_identity(self, repository, worktree):
+        repository = self._inside(repository, self.repositories)
+        worktree = self._inside(worktree, self.worktrees)
+        branch = branch_for_worktree(repository, worktree)
+        return {
+            'branch': branch,
+            'revision': self.revision(repository, branch),
+            'clean': self._git(repository, '-C', str(worktree), 'status', '--porcelain=v1',
+                               '--untracked-files=all') == '',
+            'manifest': self.manifest(worktree, exclude_git=True),
+        }
 
     def apply_worker_changes(self, repository, worktree, worker_copy, allowed_paths, message):
         repository = self._inside(repository, self.repositories)

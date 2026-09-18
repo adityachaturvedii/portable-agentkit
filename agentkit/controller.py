@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import json
+import math
 import os
 from pathlib import Path
 import sqlite3
@@ -24,6 +25,12 @@ TRANSITIONS = {
     'review_complete': {'packaging', 'repairing', 'blocked', 'cancelled'},
     'repairing': {'implemented', 'blocked', 'cancelled'},
     'packaging': {'awaiting_pr_approval', 'blocked', 'cancelled'},
+}
+ROLE_STATES = {
+    'implementer': 'implementing',
+    'repair': 'repairing',
+    'verification': 'verifying',
+    'reviewer': 'reviewing',
 }
 
 
@@ -74,7 +81,8 @@ class UsageRecord:
                 raise ControllerError('usage counters must be nonnegative integers or unknown')
         for name in ('estimated_cost_usd', 'billed_cost_usd'):
             value = getattr(self, name)
-            if value is not None and (type(value) not in (int, float) or value < 0):
+            if value is not None and (type(value) not in (int, float) or
+                                      not math.isfinite(value) or value < 0):
                 raise ControllerError('cost values must be nonnegative or unknown')
 
 
@@ -194,10 +202,16 @@ class ControllerStore:
         if (not isinstance(task_id, str) or not task_id or len(task_id) > 128 or
                 not task_id.replace('-', '').replace('_', '').isalnum()):
             raise ControllerError('invalid task id')
-        if max_repairs < 0 or max_repairs > 2:
+        if type(max_repairs) is not int or max_repairs < 0 or max_repairs > 2:
             raise ControllerError('Phase 3 allows at most two repairs')
-        if (max_calls < 1 or verification_reserve < 1 or verification_reserve >= max_calls or
-                max_concurrency < 1 or max_timeout_seconds <= 0 or max_elapsed_seconds <= 0):
+        if (type(max_calls) is not int or max_calls < 1 or
+                type(verification_reserve) is not int or verification_reserve < 1 or
+                verification_reserve >= max_calls or
+                type(max_concurrency) is not int or max_concurrency < 1 or
+                type(max_timeout_seconds) not in (int, float) or
+                not math.isfinite(max_timeout_seconds) or max_timeout_seconds <= 0 or
+                type(max_elapsed_seconds) not in (int, float) or
+                not math.isfinite(max_elapsed_seconds) or max_elapsed_seconds <= 0):
             raise ControllerError('invalid budget')
         now = _now()
         with self.transaction() as db:
@@ -299,11 +313,23 @@ class ControllerStore:
 
     def reserve_execution(self, task_id, role, engine, model, timeout_seconds, *, authority=None):
         self._require(authority)
+        if role not in ROLE_STATES:
+            raise ControllerError('invalid execution role')
+        if (type(timeout_seconds) not in (int, float) or not math.isfinite(timeout_seconds) or
+                timeout_seconds <= 0):
+            raise ControllerError('execution timeout must be a finite positive number')
         execution_id = str(uuid.uuid4())
         with self.transaction() as db:
-            budget = db.execute('SELECT * FROM budgets WHERE task_id=?', (task_id,)).fetchone()
+            budget = db.execute('''SELECT budgets.*,tasks.state AS task_state FROM budgets
+                                   JOIN tasks USING(task_id) WHERE task_id=?''', (task_id,)).fetchone()
             if not budget:
                 raise ControllerError('unknown task')
+            uncertain = db.execute("""SELECT 1 FROM executions WHERE task_id=? AND
+                                    status='reconciliation_required' LIMIT 1""", (task_id,)).fetchone()
+            if uncertain:
+                raise ReconciliationRequired('outstanding execution uncertainty must be resolved')
+            if budget['task_state'] != ROLE_STATES[role]:
+                raise ControllerError('role ' + role + ' is invalid while task is ' + budget['task_state'])
             if timeout_seconds > budget['max_timeout_seconds']:
                 raise BudgetExceeded('execution timeout exceeds task maximum')
             if budget['active_calls'] >= budget['max_concurrency']:
@@ -330,10 +356,19 @@ class ControllerStore:
     def start_execution(self, execution_id, pid=None, process_token=None, *, authority=None):
         self._require(authority)
         with self.transaction() as db:
-            row = db.execute('SELECT status,task_id,allocation_seconds FROM executions WHERE execution_id=?',
+            row = db.execute('''SELECT executions.status,executions.task_id,executions.role,
+                              executions.allocation_seconds,tasks.state AS task_state
+                              FROM executions JOIN tasks USING(task_id) WHERE execution_id=?''',
                              (execution_id,)).fetchone()
             if not row or row['status'] != 'reserved':
                 raise ControllerError('execution is not reserved')
+            if row['task_state'] != ROLE_STATES.get(row['role']):
+                raise ControllerError('execution role is invalid for current task state')
+            uncertain = db.execute("""SELECT 1 FROM executions WHERE task_id=? AND
+                                    status='reconciliation_required' LIMIT 1""",
+                                   (row['task_id'],)).fetchone()
+            if uncertain:
+                raise ReconciliationRequired('outstanding execution uncertainty must be resolved')
             db.execute('UPDATE executions SET status=?,pid=?,process_token=?,started_at=? WHERE execution_id=?',
                        ('running', pid, process_token, _now(), execution_id))
             self._append(db, row['task_id'], 'start-' + execution_id, 'execution_started',
@@ -342,7 +377,9 @@ class ControllerStore:
     def finish_execution(self, execution_id, status, elapsed_seconds, usage=UsageRecord(), result=None,
                          *, authority=None):
         self._require(authority)
-        if status not in ('succeeded', 'failed', 'cancelled', 'blocked') or elapsed_seconds < 0:
+        if (status not in ('succeeded', 'failed', 'cancelled', 'blocked') or
+                type(elapsed_seconds) not in (int, float) or not math.isfinite(elapsed_seconds) or
+                elapsed_seconds < 0 or not isinstance(usage, UsageRecord)):
             raise ControllerError('invalid execution outcome')
         with self.transaction() as db:
             row = db.execute('SELECT status,task_id,allocation_seconds FROM executions WHERE execution_id=?',
@@ -389,6 +426,29 @@ class ControllerStore:
                 blocked.append(row['execution_id'])
         return blocked
 
+    def resolve_execution_uncertainty(self, execution_id, resolution, note, *, authority=None):
+        """Release a reconciled reservation; the task intentionally remains blocked."""
+        self._require(authority)
+        if resolution not in ('not_started', 'terminated') or not isinstance(note, str) or not note.strip():
+            raise ControllerError('resolution requires not_started/terminated and a concrete note')
+        with self.transaction() as db:
+            row = db.execute('''SELECT execution_id,task_id,status,allocation_seconds FROM executions
+                              WHERE execution_id=?''', (execution_id,)).fetchone()
+            if not row or row['status'] != 'reconciliation_required':
+                raise ReconciliationRequired('execution has no outstanding uncertainty')
+            final_status = 'reconciled_' + resolution
+            db.execute('''UPDATE executions SET status=?,finished_at=?,reconciliation_note=?
+                          WHERE execution_id=?''',
+                       (final_status, _now(), note, execution_id))
+            db.execute('''UPDATE budgets SET reserved_calls=reserved_calls-1,
+                          active_calls=active_calls-1,completed_calls=completed_calls+1,
+                          reserved_elapsed_seconds=reserved_elapsed_seconds-?
+                          WHERE task_id=?''', (row['allocation_seconds'], row['task_id']))
+            self._append(db, row['task_id'], 'resolve-' + execution_id,
+                         'execution_uncertainty_resolved',
+                         {'execution_id': execution_id, 'resolution': resolution, 'note': note})
+        return final_status
+
     def add_evidence(self, task_id, evidence_id, revision, kind, status, artifact_sha256,
                      details, *, authority=None):
         self._require(authority)
@@ -419,14 +479,14 @@ class ControllerStore:
                           ON CONFLICT(task_id,signature) DO UPDATE SET count=excluded.count,last_details=excluded.last_details''',
                        (task_id, signature, count, details))
             if count >= 2:
-                self._append(db, task_id, 'failure-repeat-' + signature,
+                self._append(db, task_id, task_id + '-failure-repeat-' + signature,
                              'repeated_failure_checkpoint', {'signature': signature, 'count': count})
                 db.execute("""UPDATE tasks SET state='blocked',next_action=?,version=version+1,
                            updated_at=? WHERE task_id=?""",
                            ('inspect repeated failure: ' + signature, _now(), task_id))
                 return 'repeated_failure'
             if task['repair_count'] >= task['max_repairs']:
-                self._append(db, task_id, 'repair-exhausted-' + signature,
+                self._append(db, task_id, task_id + '-repair-exhausted-' + signature,
                              'repair_exhausted', {'signature': signature,
                                                   'repair_count': task['repair_count']})
                 db.execute("""UPDATE tasks SET state='blocked',next_action=?,version=version+1,
@@ -435,7 +495,7 @@ class ControllerStore:
                 return 'repair_exhausted'
             db.execute('UPDATE tasks SET repair_count=repair_count+1,updated_at=? WHERE task_id=?',
                        (_now(), task_id))
-            self._append(db, task_id, 'repair-allowed-' + signature,
+            self._append(db, task_id, task_id + '-repair-allowed-' + signature,
                          'repair_allowed', {'signature': signature,
                                             'repair_count': task['repair_count'] + 1})
             return 'repair_allowed'

@@ -3,15 +3,18 @@
 from dataclasses import asdict, dataclass
 import hashlib
 import json
-import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import time
 
 from .adapters import execute, execute_owned_code
 from .controller import (ControllerError, ControllerStore, UsageRecord)
+from .doctor import clean_environment, native_sandbox_capability, verification_profile
 from .git_broker import GitBroker
+from .process import run_process
+from .redaction import redacted_stream
 from .runtime_contracts import ExecutionBoundary, ExecutionRequest, LivePolicy
 
 
@@ -81,6 +84,121 @@ class FakeReviewer:
         findings = self.findings.pop(0) if self.findings else ()
         return EngineOutcome('succeeded', 0.001, UsageRecord(source='fake'),
                              {'simulated': True, 'revision': revision}, tuple(findings))
+
+
+def _file_manifest(root):
+    return {
+        str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(Path(root).rglob('*')) if path.is_file()
+    }
+
+
+class FixtureVerifier:
+    """Deterministic test adapter. It is simulated and provides no isolation claim."""
+    engine = 'fake-verifier'
+    model = 'deterministic-unittest-v1'
+
+    def __init__(self, broker):
+        self.broker = broker
+
+    def run(self, repository, worktree, head, test_source, attempt):
+        before = self.broker.worktree_identity(repository, worktree)
+        started = time.monotonic()
+        with tempfile.TemporaryDirectory(prefix='agentkit-fixture-verify-') as tmp:
+            workspace = Path(tmp)
+            (workspace / 'calculator.py').write_bytes((Path(worktree) / 'calculator.py').read_bytes())
+            (workspace / 'test_calculator.py').write_text(test_source)
+            run = subprocess.run([sys.executable, '-B', '-m', 'unittest', '-v'], cwd=str(workspace),
+                                 env={'PATH': '/usr/bin:/bin', 'HOME': str(workspace),
+                                      'PYTHONDONTWRITEBYTECODE': '1'},
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10, check=False)
+        after = self.broker.worktree_identity(repository, worktree)
+        unchanged = before == after and before['revision'] == head and before['clean']
+        status = 'succeeded' if run.returncode == 0 and unchanged else 'failed'
+        return EngineOutcome(status, time.monotonic() - started, UsageRecord(source='local-command'), {
+            'exit_code': run.returncode,
+            'output': (run.stdout + run.stderr).decode('utf-8', 'replace'),
+            'candidate_unchanged': unchanged,
+            'simulated': True,
+        })
+
+
+class ConstrainedVerifier:
+    """Run controller-owned tests on a read-only candidate copy under Seatbelt."""
+    engine = 'local'
+    model = 'python-unittest-seatbelt-v1'
+
+    def __init__(self, broker, controller_root, approval_root, evidence_root,
+                 *, additional_denied=(), capability_check=native_sandbox_capability,
+                 process_runner=run_process):
+        self.broker = broker
+        self.controller_root = Path(controller_root).resolve()
+        self.approval_root = Path(approval_root).resolve()
+        self.evidence_root = Path(evidence_root).resolve()
+        self.additional_denied = tuple(Path(path).resolve() for path in additional_denied)
+        self.capability_check = capability_check
+        self.process_runner = process_runner
+
+    def run(self, repository, worktree, head, test_source, attempt):
+        capability = self.capability_check()
+        if capability.state != 'verified':
+            return EngineOutcome('blocked', 0, UsageRecord(source='unavailable'), {
+                'error_class': 'sandbox_unavailable', 'output': capability.evidence,
+                'candidate_unchanged': None,
+            })
+        repository = Path(repository).resolve()
+        worktree = Path(worktree).resolve()
+        before = self.broker.worktree_identity(repository, worktree)
+        if before['revision'] != head or not before['clean']:
+            return EngineOutcome('failed', 0, UsageRecord(source='local-command'), {
+                'error_class': 'candidate_identity',
+                'output': 'candidate worktree is dirty or does not match the requested revision',
+                'candidate_unchanged': False,
+            })
+        started = time.monotonic()
+        with tempfile.TemporaryDirectory(prefix='agentkit-phase3-verify-', dir='/private/tmp') as tmp:
+            root = Path(tmp).resolve()
+            workspace = root / 'candidate'
+            runtime = root / 'runtime'
+            fake_home = root / 'empty-home'
+            for path in (workspace, runtime, fake_home):
+                path.mkdir(mode=0o700)
+            (workspace / 'calculator.py').write_bytes((worktree / 'calculator.py').read_bytes())
+            (workspace / 'test_calculator.py').write_text(test_source)
+            controlled_before = _file_manifest(workspace)
+            denied = (self.controller_root, self.approval_root, self.evidence_root,
+                      repository, worktree, Path.home().resolve()) + self.additional_denied
+            unique_denied = tuple(dict.fromkeys(str(path) for path in denied))
+            profile = verification_profile(runtime, unique_denied)
+            environment = clean_environment()
+            environment.update(HOME=str(fake_home), TMPDIR=str(runtime), PATH='/usr/bin:/bin',
+                               PYTHONDONTWRITEBYTECODE='1')
+            outcome = self.process_runner(
+                ['/usr/bin/sandbox-exec', '-p', profile, sys.executable, '-B', '-m', 'unittest', '-v'],
+                cwd=str(workspace), env=environment, timeout=10, max_bytes=1048576)
+            controlled_after = _file_manifest(workspace)
+        after = self.broker.worktree_identity(repository, worktree)
+        unchanged = (before == after and after['revision'] == head and after['clean'] and
+                     controlled_before == controlled_after)
+        passed = outcome.exit_code == 0 and outcome.stop_reason is None and unchanged
+        output = redacted_stream(outcome.stdout + outcome.stderr)
+        return EngineOutcome('succeeded' if passed else 'failed', outcome.elapsed_seconds,
+                             UsageRecord(source='local-command'), {
+            'exit_code': outcome.exit_code,
+            'stop_reason': outcome.stop_reason,
+            'output': output,
+            'candidate_unchanged': unchanged,
+            'controlled_test_sha256': controlled_before['test_calculator.py'],
+            'candidate_source_sha256': controlled_before['calculator.py'],
+            'environment_keys': sorted(environment),
+            'boundary': {
+                'mode': 'read-only-seatbelt-no-network',
+                'denied_read_paths': list(unique_denied),
+                'workspace_writes': 'denied',
+                'credential_environment': 'allowlisted',
+                'mach_service_lookup': 'denied',
+            },
+        })
 
 
 def _usage_from_result(result):
@@ -158,7 +276,7 @@ def validate_review(value):
 
 
 class DeliveryWorkflow:
-    def __init__(self, root, implementer, reviewer, *, live_authorized=False):
+    def __init__(self, root, implementer, reviewer, *, verifier=None, live_authorized=False):
         self.root = Path(root).resolve()
         if self.root.exists() or self.root.is_symlink():
             raise ControllerError('workflow root must be fresh')
@@ -173,6 +291,8 @@ class DeliveryWorkflow:
         self.broker = GitBroker(self.managed_root)
         self.implementer = implementer
         self.reviewer = reviewer
+        self.verifier = verifier or ConstrainedVerifier(
+            self.broker, self.controller_root, self.approval_root, self.evidence_root)
         self.policy = LivePolicy(live_authorized,
             'Operator authorized a bounded Phase 3 disposable end-to-end demonstration; no auth/billing changes.')
 
@@ -194,17 +314,6 @@ class DeliveryWorkflow:
         self.store.finish_execution(execution_id, outcome.status, outcome.elapsed_seconds,
                                     outcome.usage, outcome.details, authority=self.store.authority)
         return outcome, execution_id
-
-    def _verify(self, worktree):
-        started = time.monotonic()
-        run = subprocess.run(['python3', '-B', '-m', 'unittest', '-v'], cwd=str(worktree),
-                             env={'PATH': os.environ.get('PATH', ''), 'PYTHONDONTWRITEBYTECODE': '1'},
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10, check=False)
-        elapsed = time.monotonic() - started
-        text = run.stdout + run.stderr
-        return EngineOutcome('succeeded' if run.returncode == 0 else 'failed', elapsed,
-                             UsageRecord(source='local-command'),
-                             {'exit_code': run.returncode, 'output': text.decode('utf-8', 'replace')})
 
     def run(self, task_id='phase3-demo'):
         contract = {
@@ -230,6 +339,7 @@ class DeliveryWorkflow:
         attempt = 0
         review_findings = ()
         verification_records = []
+        repair_feedback = None
         while True:
             state = self.store.task(task_id)['state']
             if state == 'workspace_ready':
@@ -245,6 +355,9 @@ class DeliveryWorkflow:
             boundary = ExecutionBoundary(str(worker), denied)
             prompt = ('Read calculator.py and test_calculator.py. Fix the arithmetic defect by editing calculator.py only. '
                       'Run python3 -B -m unittest -v. Do not access any other path or network.')
+            if repair_feedback is not None:
+                prompt += ('\nController-generated repair feedback (JSON): ' +
+                           json.dumps(repair_feedback, sort_keys=True))
             impl_output = self.evidence_root / ('implementer-' + str(attempt))
             outcome, _ = self._run_engine(task_id, 'repair' if attempt else 'implementer',
                                           self.implementer.engine, self.implementer.model, 60,
@@ -262,18 +375,35 @@ class DeliveryWorkflow:
                              'run independent checks')
             self._transition(task_id, 'implemented', 'verifying', 'verifying-' + str(attempt),
                              'evaluate immutable tests')
-            verification, _ = self._run_engine(task_id, 'verification', 'local', 'python-unittest', 10,
-                                                lambda: self._verify(worktree))
+            verification, _ = self._run_engine(
+                task_id, 'verification', self.verifier.engine, self.verifier.model, 10,
+                lambda: self.verifier.run(repository, worktree, head, TEST_SOURCE, attempt))
             artifact = self.store.put_artifact(json.dumps(verification.details, sort_keys=True))
             evidence_id = 'verification-' + str(attempt)
-            evidence_status = 'passed' if verification.status == 'succeeded' else 'failed'
+            evidence_status = ('passed' if verification.status == 'succeeded' else
+                               'blocked' if verification.status == 'blocked' else 'failed')
             self.store.add_evidence(task_id, evidence_id, head, 'independent-check', evidence_status,
                                     artifact, verification.details, authority=self.store.authority)
             verification_records.append({'id': evidence_id, 'revision': head,
                                          'status': evidence_status, 'artifact_sha256': artifact})
+            if verification.status == 'blocked':
+                self._transition(task_id, 'verifying', 'blocked', 'verification-blocked-' + str(attempt),
+                                 'restore the required constrained verification environment')
+                break
             if verification.status != 'succeeded':
+                repair_feedback = {
+                    'kind': 'failed_test',
+                    'revision': head,
+                    'acceptance': contract['acceptance'],
+                    'failed_test': {
+                        'exit_code': verification.details.get('exit_code'),
+                        'stop_reason': verification.details.get('stop_reason'),
+                        'output': str(verification.details.get('output', ''))[-8192:],
+                    },
+                }
                 decision = self.store.record_failure(task_id, hashlib.sha256(artifact.encode()).hexdigest(),
-                                                     verification.details['output'], authority=self.store.authority)
+                                                     str(verification.details.get('output', '')),
+                                                     authority=self.store.authority)
                 if decision == 'repair_allowed':
                     self._transition(task_id, 'verifying', 'repairing', 'repair-check-' + str(attempt),
                                      'repair concrete verification failure')
@@ -307,6 +437,11 @@ class DeliveryWorkflow:
                                  'inspect invalid or failed review')
                 break
             if review.findings:
+                repair_feedback = {
+                    'kind': 'review_findings',
+                    'revision': head,
+                    'findings': list(review.findings),
+                }
                 signature = hashlib.sha256(json.dumps(review.findings, sort_keys=True).encode()).hexdigest()
                 decision = self.store.record_failure(task_id, signature, json.dumps(review.findings),
                                                      authority=self.store.authority)
