@@ -1,0 +1,311 @@
+{
+  "task": {
+    "task_id": "phase3-demo",
+    "state": "awaiting_pr_approval",
+    "objective": "Correct the disposable arithmetic defect and prepare a local PR approval package.",
+    "contract_json": "{\"acceptance\":[{\"expected\":\"all immutable unittest cases pass\",\"id\":\"total\"}],\"max_repairs\":2,\"non_goals\":[\"publication\",\"merge\",\"personal repositories\"],\"objective\":\"Correct the disposable arithmetic defect and prepare a local PR approval package.\",\"risk\":\"routine\",\"scope\":[\"calculator.py\"]}",
+    "dependencies_json": "[]",
+    "implementer_engine": "fake-codex",
+    "implementer_model": "deterministic-v1",
+    "reviewer_engine": "fake-claude",
+    "reviewer_model": "deterministic-v1",
+    "base_revision": "bb3265e847051b69ac69bffcacb5c2661e737495",
+    "head_revision": "eb94e4b8091aba4eb8154b4ee933c1917424f108",
+    "branch": "agentkit/phase3-demo",
+    "worktree": "/private/tmp/agentkit-phase3-sim-final-v3-20260919/managed/worktrees/phase3-demo",
+    "repair_count": 0,
+    "max_repairs": 2,
+    "next_action": "await explicit user approval bound to this head",
+    "version": 11,
+    "created_at": "2026-09-18T20:34:37.917749+00:00",
+    "updated_at": "2026-09-18T20:34:39.385127+00:00"
+  },
+  "budget": {
+    "task_id": "phase3-demo",
+    "max_calls": 9,
+    "max_elapsed_seconds": 540.0,
+    "max_concurrency": 1,
+    "max_timeout_seconds": 60.0,
+    "verification_reserve": 2,
+    "reserved_calls": 0,
+    "completed_calls": 3,
+    "active_calls": 0,
+    "elapsed_seconds": 0.21361887400000001,
+    "reserved_elapsed_seconds": 0.0
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "event_id": "task-created-phase3-demo",
+      "task_id": "phase3-demo",
+      "event_type": "task_created",
+      "payload_json": "{\"dependencies\":[],\"objective\":\"Correct the disposable arithmetic defect and prepare a local PR approval package.\"}",
+      "created_at": "2026-09-18T20:34:37.918624+00:00"
+    },
+    {
+      "sequence": 2,
+      "event_id": "phase3-demo-contracted",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"received\",\"to\":\"contracted\"}",
+      "created_at": "2026-09-18T20:34:37.926466+00:00"
+    },
+    {
+      "sequence": 3,
+      "event_id": "phase3-demo-workspace",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"contracted\",\"to\":\"workspace_ready\"}",
+      "created_at": "2026-09-18T20:34:38.231694+00:00"
+    },
+    {
+      "sequence": 4,
+      "event_id": "phase3-demo-implementing-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"workspace_ready\",\"to\":\"implementing\"}",
+      "created_at": "2026-09-18T20:34:38.236177+00:00"
+    },
+    {
+      "sequence": 5,
+      "event_id": "reserve-8299f9f7-a688-4364-be48-0e6a0a0f2b81",
+      "task_id": "phase3-demo",
+      "event_type": "execution_reserved",
+      "payload_json": "{\"execution_id\":\"8299f9f7-a688-4364-be48-0e6a0a0f2b81\",\"role\":\"implementer\",\"timeout_seconds\":60}",
+      "created_at": "2026-09-18T20:34:38.515386+00:00"
+    },
+    {
+      "sequence": 6,
+      "event_id": "start-8299f9f7-a688-4364-be48-0e6a0a0f2b81",
+      "task_id": "phase3-demo",
+      "event_type": "execution_started",
+      "payload_json": "{\"execution_id\":\"8299f9f7-a688-4364-be48-0e6a0a0f2b81\",\"pid\":null}",
+      "created_at": "2026-09-18T20:34:38.522524+00:00"
+    },
+    {
+      "sequence": 7,
+      "event_id": "finish-8299f9f7-a688-4364-be48-0e6a0a0f2b81",
+      "task_id": "phase3-demo",
+      "event_type": "execution_finished",
+      "payload_json": "{\"elapsed_seconds\":0.00019495800000002284,\"execution_id\":\"8299f9f7-a688-4364-be48-0e6a0a0f2b81\",\"status\":\"succeeded\"}",
+      "created_at": "2026-09-18T20:34:38.526208+00:00"
+    },
+    {
+      "sequence": 8,
+      "event_id": "phase3-demo-implemented-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"implementing\",\"to\":\"implemented\"}",
+      "created_at": "2026-09-18T20:34:38.723186+00:00"
+    },
+    {
+      "sequence": 9,
+      "event_id": "phase3-demo-verifying-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"implemented\",\"to\":\"verifying\"}",
+      "created_at": "2026-09-18T20:34:38.728001+00:00"
+    },
+    {
+      "sequence": 10,
+      "event_id": "reserve-9e94f788-1843-483b-b81e-36dbe5dd08fe",
+      "task_id": "phase3-demo",
+      "event_type": "execution_reserved",
+      "payload_json": "{\"execution_id\":\"9e94f788-1843-483b-b81e-36dbe5dd08fe\",\"role\":\"verification\",\"timeout_seconds\":10}",
+      "created_at": "2026-09-18T20:34:38.732078+00:00"
+    },
+    {
+      "sequence": 11,
+      "event_id": "start-9e94f788-1843-483b-b81e-36dbe5dd08fe",
+      "task_id": "phase3-demo",
+      "event_type": "execution_started",
+      "payload_json": "{\"execution_id\":\"9e94f788-1843-483b-b81e-36dbe5dd08fe\",\"pid\":null}",
+      "created_at": "2026-09-18T20:34:38.735762+00:00"
+    },
+    {
+      "sequence": 12,
+      "event_id": "finish-9e94f788-1843-483b-b81e-36dbe5dd08fe",
+      "task_id": "phase3-demo",
+      "event_type": "execution_finished",
+      "payload_json": "{\"elapsed_seconds\":0.212423916,\"execution_id\":\"9e94f788-1843-483b-b81e-36dbe5dd08fe\",\"status\":\"succeeded\"}",
+      "created_at": "2026-09-18T20:34:38.952120+00:00"
+    },
+    {
+      "sequence": 13,
+      "event_id": "evidence-verification-0",
+      "task_id": "phase3-demo",
+      "event_type": "evidence_recorded",
+      "payload_json": "{\"evidence_id\":\"verification-0\",\"kind\":\"independent-check\",\"revision\":\"eb94e4b8091aba4eb8154b4ee933c1917424f108\",\"status\":\"passed\"}",
+      "created_at": "2026-09-18T20:34:38.958008+00:00"
+    },
+    {
+      "sequence": 14,
+      "event_id": "phase3-demo-verified-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"verifying\",\"to\":\"verified\"}",
+      "created_at": "2026-09-18T20:34:38.961677+00:00"
+    },
+    {
+      "sequence": 15,
+      "event_id": "phase3-demo-reviewing-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"verified\",\"to\":\"reviewing\"}",
+      "created_at": "2026-09-18T20:34:38.965639+00:00"
+    },
+    {
+      "sequence": 16,
+      "event_id": "reserve-c3509b0e-c7d1-4187-9018-c3f3e02d39f6",
+      "task_id": "phase3-demo",
+      "event_type": "execution_reserved",
+      "payload_json": "{\"execution_id\":\"c3509b0e-c7d1-4187-9018-c3f3e02d39f6\",\"role\":\"reviewer\",\"timeout_seconds\":60}",
+      "created_at": "2026-09-18T20:34:39.257471+00:00"
+    },
+    {
+      "sequence": 17,
+      "event_id": "start-c3509b0e-c7d1-4187-9018-c3f3e02d39f6",
+      "task_id": "phase3-demo",
+      "event_type": "execution_started",
+      "payload_json": "{\"execution_id\":\"c3509b0e-c7d1-4187-9018-c3f3e02d39f6\",\"pid\":null}",
+      "created_at": "2026-09-18T20:34:39.262694+00:00"
+    },
+    {
+      "sequence": 18,
+      "event_id": "finish-c3509b0e-c7d1-4187-9018-c3f3e02d39f6",
+      "task_id": "phase3-demo",
+      "event_type": "execution_finished",
+      "payload_json": "{\"elapsed_seconds\":0.001,\"execution_id\":\"c3509b0e-c7d1-4187-9018-c3f3e02d39f6\",\"status\":\"succeeded\"}",
+      "created_at": "2026-09-18T20:34:39.266679+00:00"
+    },
+    {
+      "sequence": 19,
+      "event_id": "evidence-review-0",
+      "task_id": "phase3-demo",
+      "event_type": "evidence_recorded",
+      "payload_json": "{\"evidence_id\":\"review-0\",\"kind\":\"independent-review\",\"revision\":\"eb94e4b8091aba4eb8154b4ee933c1917424f108\",\"status\":\"passed\"}",
+      "created_at": "2026-09-18T20:34:39.270877+00:00"
+    },
+    {
+      "sequence": 20,
+      "event_id": "phase3-demo-reviewed-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"reviewing\",\"to\":\"review_complete\"}",
+      "created_at": "2026-09-18T20:34:39.274268+00:00"
+    },
+    {
+      "sequence": 21,
+      "event_id": "phase3-demo-packaging",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"review_complete\",\"to\":\"packaging\"}",
+      "created_at": "2026-09-18T20:34:39.278465+00:00"
+    },
+    {
+      "sequence": 22,
+      "event_id": "evidence-approval-package",
+      "task_id": "phase3-demo",
+      "event_type": "evidence_recorded",
+      "payload_json": "{\"evidence_id\":\"approval-package\",\"kind\":\"approval-package\",\"revision\":\"eb94e4b8091aba4eb8154b4ee933c1917424f108\",\"status\":\"passed\"}",
+      "created_at": "2026-09-18T20:34:39.377741+00:00"
+    },
+    {
+      "sequence": 23,
+      "event_id": "phase3-demo-awaiting-pr-approval",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"packaging\",\"to\":\"awaiting_pr_approval\"}",
+      "created_at": "2026-09-18T20:34:39.385099+00:00"
+    }
+  ],
+  "executions": [
+    {
+      "execution_id": "8299f9f7-a688-4364-be48-0e6a0a0f2b81",
+      "task_id": "phase3-demo",
+      "role": "implementer",
+      "engine": "fake-codex",
+      "model": "deterministic-v1",
+      "allocation_seconds": 60.0,
+      "status": "succeeded",
+      "pid": null,
+      "process_token": "controller-supervised",
+      "started_at": "2026-09-18T20:34:38.522486+00:00",
+      "finished_at": "2026-09-18T20:34:38.526107+00:00",
+      "elapsed_seconds": 0.00019495800000002284,
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":null,\"estimated_cost_usd\":null,\"input_tokens\":null,\"output_tokens\":null,\"reasoning_tokens\":null,\"source\":\"fake\"}",
+      "result_json": "{\"call\":1,\"simulated\":true}",
+      "reconciliation_note": null
+    },
+    {
+      "execution_id": "9e94f788-1843-483b-b81e-36dbe5dd08fe",
+      "task_id": "phase3-demo",
+      "role": "verification",
+      "engine": "local",
+      "model": "python-unittest",
+      "allocation_seconds": 10.0,
+      "status": "succeeded",
+      "pid": null,
+      "process_token": "controller-supervised",
+      "started_at": "2026-09-18T20:34:38.735730+00:00",
+      "finished_at": "2026-09-18T20:34:38.951976+00:00",
+      "elapsed_seconds": 0.212423916,
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":null,\"estimated_cost_usd\":null,\"input_tokens\":null,\"output_tokens\":null,\"reasoning_tokens\":null,\"source\":\"local-command\"}",
+      "result_json": "{\"exit_code\":0,\"output\":\"python3: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead\\ntest_total (test_calculator.CalculatorTest) ... ok\\n\\n----------------------------------------------------------------------\\nRan 1 test in 0.000s\\n\\nOK\\n\"}",
+      "reconciliation_note": null
+    },
+    {
+      "execution_id": "c3509b0e-c7d1-4187-9018-c3f3e02d39f6",
+      "task_id": "phase3-demo",
+      "role": "reviewer",
+      "engine": "fake-claude",
+      "model": "deterministic-v1",
+      "allocation_seconds": 60.0,
+      "status": "succeeded",
+      "pid": null,
+      "process_token": "controller-supervised",
+      "started_at": "2026-09-18T20:34:39.262648+00:00",
+      "finished_at": "2026-09-18T20:34:39.266560+00:00",
+      "elapsed_seconds": 0.001,
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":null,\"estimated_cost_usd\":null,\"input_tokens\":null,\"output_tokens\":null,\"reasoning_tokens\":null,\"source\":\"fake\"}",
+      "result_json": "{\"revision\":\"eb94e4b8091aba4eb8154b4ee933c1917424f108\",\"simulated\":true}",
+      "reconciliation_note": null
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "verification-0",
+      "task_id": "phase3-demo",
+      "revision": "eb94e4b8091aba4eb8154b4ee933c1917424f108",
+      "kind": "independent-check",
+      "status": "passed",
+      "artifact_sha256": "54b8b64853fb708a0501783c4cdb40b2ffa6f3d5739ceede2b4d47dcd782ee08",
+      "details_json": "{\"exit_code\":0,\"output\":\"python3: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead\\ntest_total (test_calculator.CalculatorTest) ... ok\\n\\n----------------------------------------------------------------------\\nRan 1 test in 0.000s\\n\\nOK\\n\"}",
+      "stale": 0,
+      "created_at": "2026-09-18T20:34:38.957964+00:00"
+    },
+    {
+      "evidence_id": "review-0",
+      "task_id": "phase3-demo",
+      "revision": "eb94e4b8091aba4eb8154b4ee933c1917424f108",
+      "kind": "independent-review",
+      "status": "passed",
+      "artifact_sha256": "8513f1be9812e2ff95e00b66eb2c1e2246c7c9d7bf298409ec50375df51affd4",
+      "details_json": "{\"details\":{\"revision\":\"eb94e4b8091aba4eb8154b4ee933c1917424f108\",\"simulated\":true},\"findings\":[],\"revision\":\"eb94e4b8091aba4eb8154b4ee933c1917424f108\",\"status\":\"succeeded\"}",
+      "stale": 0,
+      "created_at": "2026-09-18T20:34:39.270848+00:00"
+    },
+    {
+      "evidence_id": "approval-package",
+      "task_id": "phase3-demo",
+      "revision": "eb94e4b8091aba4eb8154b4ee933c1917424f108",
+      "kind": "approval-package",
+      "status": "passed",
+      "artifact_sha256": "6a4dfb88b0eefe11c2f2f66fddcdf29a7996dddced7f3019bd8cd122b4b00d96",
+      "details_json": "{\"base_revision\":\"bb3265e847051b69ac69bffcacb5c2661e737495\",\"head_revision\":\"eb94e4b8091aba4eb8154b4ee933c1917424f108\"}",
+      "stale": 0,
+      "created_at": "2026-09-18T20:34:39.377687+00:00"
+    }
+  ],
+  "approvals": []
+}

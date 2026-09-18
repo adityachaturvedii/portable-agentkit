@@ -1,0 +1,10 @@
+{
+  "approval_records": 0,
+  "base_revision": "bb3265e847051b69ac69bffcacb5c2661e737495",
+  "classification": "simulated",
+  "completed_calls": 3,
+  "head_revision": "eb94e4b8091aba4eb8154b4ee933c1917424f108",
+  "note": "Deterministic fake engine adapters; independent local unittest and Git revision binding are real local operations.",
+  "result": "complete",
+  "state": "awaiting_pr_approval"
+}

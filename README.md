@@ -1,6 +1,6 @@
-# Portable Agentkit — skill foundation and CLI feasibility
+# Portable Agentkit — skills, bounded CLI adapters and durable local delivery
 
-A standalone toolkit with ten curated procedures, seven domain references, versioned contracts, source attribution and disposable validation fixtures. Phase 2 adds CLI diagnosis, bounded integration adapters and a narrow trusted disposable-workspace execution mode on the tested macOS host.
+A standalone toolkit with ten curated procedures, seven domain references, versioned contracts, source attribution and disposable validation fixtures. Phase 2 adds CLI diagnosis and a narrow trusted disposable-workspace execution mode on the tested macOS host. Phase 3 adds transactional local orchestration, controller-owned Git worktrees, independent checks and review, bounded repair and a revision-bound local approval package.
 
 ## Use from a checkout
 
@@ -13,6 +13,7 @@ python3 -m agentkit show fault-diagnosis --domain backend-database
 python3 -m agentkit validate contracts/examples/fault-diagnosis.json
 python3 -m agentkit check
 python3 -m unittest discover -s tests -v
+python3 -m agentkit controller-demo --output /tmp/agentkit-phase3-demo
 ```
 
 Run these commands from this directory. To move machines, copy the entire directory, preserving relative paths. For a clean source copy, use `git archive HEAD` after committing. Skills link to shared contracts and notices, so copying a single SKILL.md is insufficient. Relocation is tested; installation, CLI skill auto-discovery and rollback are later work.
@@ -29,7 +30,8 @@ Run these commands from this directory. To move machines, copy the entire direct
 | CPU defect fixtures and native-baseline comparison | Tested development cases; no general quality improvement established |
 | Claude/Codex adapters, read-only doctor, bounded POSIX transport and cancellation | Implemented; both CLIs passed live disposable coding checks and independent acceptance |
 | Sandbox boundaries / credential isolation | Explicit macOS workspace/protected-path canaries passed; comprehensive credential and tool-network isolation unsupported |
-| Durable controller, protected approvals, budgets, Git broker and cross-provider orchestration | Planned Phases 3–4; unavailable |
+| Durable controller, protected approval records, budgets and controller-owned Git broker | Implemented and tested with deterministic adapters |
+| Cross-provider disposable delivery workflow | Live Codex implementation/check passed; Claude review blocked on expired OAuth, so full live path remains unverified |
 | Browser automation, CUDA/GPU worker, GitHub publication, installer/update | Not implemented; separate later gates |
 
 The procedures describe desired engineering behavior. They are not enforcement of authenticated roles, monetary ceilings or publication permissions. Git worktrees are not sandboxes. Unattended untrusted execution is unsupported. Managed Linux/WSL2/Windows execution has not been validated; the current guard is macOS-specific.
@@ -46,6 +48,8 @@ The explicit `smoke` command runs only a fixed synthetic integer-sum task. `exec
 
 See [adapter contracts](docs/runtime-contracts.md), [original Phase 2 report](docs/phase2-validation-report.md), [execution follow-up](docs/phase2-execution-followup.md) and [sandbox matrix](docs/sandbox-matrix.md). Phase 3 may begin for the tested trusted disposable-workspace mode only.
 
+`controller-demo` runs the complete Phase 3 path with deterministic adapters by default. It creates a disposable repository, task branch/worktree and worker copy; commits one allowed source change; runs an immutable test and independent review; then writes a local approval package and stops at `awaiting_pr_approval`. The package records no approval and performs no publication. Read the [controller contracts](docs/controller-contracts.md) and [Phase 3 validation report](docs/phase3-validation-report.md). Live mode requires the explicit subscription-smoke flag and remains limited to the previously tested macOS profile.
+
 ## Inspect the work
 
 - [Implementation checklist](docs/checklist.md), [decision log](docs/decisions.md), [phase requirements](docs/requirements.md), [threat model](docs/threat-model.md)
@@ -53,6 +57,7 @@ See [adapter contracts](docs/runtime-contracts.md), [original Phase 2 report](do
 - [Shared skill contract](docs/skill-contract.md), [handoff formats](contracts/README.md), [domain procedures](domains/README.md)
 - [Validation report](docs/validation-report.md), [local PR proposal](docs/pr-proposal.md)
 - [Phase 2 validation](docs/phase2-validation-report.md), [execution follow-up](docs/phase2-execution-followup.md), [sandbox matrix](docs/sandbox-matrix.md), [CLI source/compatibility review](docs/cli-source-review.md)
+- [Phase 3 controller contracts](docs/controller-contracts.md), [Phase 3 validation](docs/phase3-validation-report.md), [archived evidence](evidence/phase3/manifest.json)
 - [Original implementation specification](docs/implementation-spec.md)
 
 The user authorized private GitHub publication on 2026-09-19: [adityachaturvedii/portable-agentkit](https://github.com/adityachaturvedii/portable-agentkit). All three phase branches are preserved; `implementation/phase-2` is the default branch for the latest work. No PR or merge is authorized by that publication request. Earlier validation records describe the local-only state at their recorded dates. Upstream MIT notices cover adapted material; an outbound license for original toolkit code will be chosen before broader distribution.

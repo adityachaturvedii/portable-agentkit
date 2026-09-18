@@ -36,3 +36,13 @@ The table above is the original `6bfb981` record. The [execution follow-up](phas
 | Untrusted or broad local-project execution | Explicit canaries are insufficient to enumerate all sensitive paths | No tool/provider separation | Detached descendants unsupported | Real-secret isolation unproven | Blocked |
 
 The independent [boundary probe](../evidence/phase2-followup/boundary/boundary.json) directly attempted reads and writes; every protected operation returned `PermissionError`, the workspace write succeeded and all canary hashes stayed unchanged. The [lifecycle probe](../evidence/phase2-followup/lifecycle/lifecycle.json) verifies timeout/cancellation only for same-group local processes.
+
+## Phase 3 application — 2026-09-19
+
+| Workflow role | Candidate access | Controller / Git access | Network and credentials | Effective status |
+|---|---|---|---|---|
+| Implementer, external-Seatbelt owned-code | Read/write plain tracked-file copy; broker accepts only contract paths and commits to controller-owned worktree | Explicit read denies name controller state, approval output, actual worktree and shared `.git`; worker copy contains no `.git` | Existing provider authentication and provider network remain available to parent CLI; tool-network separation unsupported | Live Codex candidate and independent test passed. Same profile's Phase 2 canaries establish named-path enforcement. |
+| Reviewer, model-only | Candidate files embedded with exact revision; tools disabled; snapshot manifest checked unchanged | No controller authority or repository metadata is supplied | Existing provider authentication and provider network remain available; comprehensive credential isolation unsupported | Adapter boundary is read-only. Live Claude review blocked on expired OAuth before a verdict. |
+| Restarted controller with active execution | No replacement is launched | Durable row becomes `reconciliation_required`; task becomes blocked | No credential action | Process ownership/termination must be reconciled externally; crash-safe containment unsupported. |
+
+The Git broker is an additional integrity boundary, not an OS sandbox. It rejects source-copy additions, removals, renames, symlinks and protected-file changes. Phase 3 did not repeat credential canaries or probe real secrets; it reused the exact tested execution profile and preserved the Phase 2 limits.

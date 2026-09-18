@@ -1,0 +1,12 @@
+{
+  "engine": "claude",
+  "task_id": "phase3-live-reviewer",
+  "cwd": "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-review-empty-kjgqbx2c",
+  "timeout_seconds": 60,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "mode": "model-only",
+  "schema_version": 1,
+  "prompt_sha256": "d45ab749c0be0138dd83ae3e941ca75be0e08a85d1d90576a6f0b5d8bae52678",
+  "prompt_bytes": 856
+}

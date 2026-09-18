@@ -47,9 +47,27 @@
 
 See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-validation-report.md).
 
+## Phase 3 — minimum durable delivery workflow
+
+- [x] Verify exact `39afb7feac0bde09fc390b85c4d8c8db83bea0b3`, preserve the clean Phase 2 tree and create `implementation/phase-3` in a dedicated worktree.
+- [x] Persist validated task transitions, append-only events, dependencies, revisions, executions, evidence and next actions transactionally in SQLite.
+- [x] Keep controller authority out of worker data; worker output cannot change state, reserve budget or record approval.
+- [x] Create one controller-owned repository, task branch and worktree; give the implementer a plain tracked-file copy without `.git` and apply only contract-allowed changes through the Git broker.
+- [x] Bind verification, review and the local approval package to the candidate revision; revision changes stale prior evidence and approvals.
+- [x] Integrate either existing provider adapter as implementer and the other as model-only reviewer; keep deterministic adapters as the default test path.
+- [x] Enforce two repairs at most and stop repeated identical findings with a durable checkpoint.
+- [x] Reserve calls, concurrency, timeout and elapsed allocations before launch; preserve unknown usage and distinct cached-token categories.
+- [x] Reconcile active executions after restart as blocked when process ownership cannot be established; never launch a silent replacement.
+- [x] Produce a local summary, diff, revisions, checks, review findings, limitations, resources and proposed PR text, ending at `awaiting_pr_approval` with no recorded approval.
+- [x] Test illegal transitions, duplicate/immutable events, concurrent reservations, stale evidence/approval, authority forgery, repair limits, cancellation and restart reconciliation.
+- [x] Complete and archive a deterministic disposable workflow through `awaiting_pr_approval`.
+- [x] Attempt one bounded live cross-provider workflow: Codex implementation and independent test passed; Claude review failed closed on an expired OAuth token, with no approval package.
+- [ ] Complete a live cross-provider workflow through review after the operator independently restores Claude subscription authentication.
+- [ ] Crash-safe process containment, detached descendants and remote cancellation: **unsupported**.
+- [ ] Broad repositories, hostile code, tool-network separation and comprehensive credential isolation: **blocked**.
+
 ## Later phases (planned, not implemented)
 
-- [ ] Phase 3: trusted worktree broker, durable state, budgets and gated approvals.
 - [ ] Phase 4: cross-provider roles and measured routing.
 - [ ] Phase 5: hardware domain validation and optional GPU worker.
 - [ ] Phase 6: GitHub broker, installation/update/rollback and machine handover.
@@ -60,5 +78,7 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 Phase 0 complete. Phase 1 offline foundation complete on the observed macOS/Python environment. All ten procedures were exercised across invoice, independent-review and optimisation development cases. Review found two outcome contradictions; both were fixed and independently rechecked. Required browser/GPU/provider boundaries remain explicitly unverified and are later-phase gates, not Phase 1 passes. The external skill-creator validator was unavailable due to missing PyYAML; local pack checks passed.
 
 Phase 2 implementation and authorized feasibility experiments are recorded. Both engines now pass the trusted disposable-workspace coding fixture on the tested macOS host. No merge, push, PR, global CLI edit, plugin installation, GPU connection, API-key introduction or billing change occurred in the follow-up. Phase 3 may begin only for that narrow mode; untrusted or broad local execution remains blocked.
+
+Phase 3 now implements the minimum local delivery graph for that narrow mode. The deterministic workflow reaches a revision-bound `awaiting_pr_approval` package, and 85 offline tests cover controller, Git, budget, repair, restart and evidence invariants. The bounded live attempt validated Codex implementation plus an independent test, then blocked when Claude reported an expired OAuth token. No reauthentication was attempted, no billing fact was inferred, and no live approval package was created. Phase 4 should wait for a successful cross-provider live review and remains limited to trusted controller-created disposable repositories.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).

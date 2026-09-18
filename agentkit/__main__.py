@@ -35,6 +35,13 @@ def main(argv=None):
     lifecycle.add_argument("--output", required=True, help="fresh result directory")
     boundary = commands.add_parser("boundary-check", help="offline owned-code filesystem boundary canaries")
     boundary.add_argument("--output", required=True, help="fresh result directory")
+    delivery = commands.add_parser("controller-demo", help="run the Phase 3 disposable delivery workflow")
+    delivery.add_argument("--output", required=True, help="fresh workflow root")
+    delivery.add_argument("--live", action="store_true", help="use installed subscription CLIs instead of fake engines")
+    delivery.add_argument("--implementer", choices=("codex", "claude"), default="codex",
+                          help="live implementer; the other provider performs review")
+    delivery.add_argument("--authorize-subscription-smoke", action="store_true",
+                          help="authorize one bounded disposable implementer/reviewer demonstration")
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -71,6 +78,13 @@ def main(argv=None):
             result = standalone_boundary_check(args.output)
             print(json.dumps(result, indent=2))
             return 0 if result['passed'] else 1
+        elif args.command == "controller-demo":
+            from .delivery import run_demo
+            result = run_demo(args.output, live=args.live, authorized=args.authorize_subscription_smoke,
+                              implementer_engine=args.implementer)
+            print(json.dumps({'task': result['task'], 'approval_package': result['approval_package'],
+                              'root': result['root']}, indent=2))
+            return 0 if result['task']['state'] == 'awaiting_pr_approval' else 1
         else:
             print(json.dumps(check_pack(), indent=2))
         return 0

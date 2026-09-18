@@ -1,0 +1,275 @@
+{
+  "task": {
+    "task_id": "phase3-demo",
+    "state": "blocked",
+    "objective": "Correct the disposable arithmetic defect and prepare a local PR approval package.",
+    "contract_json": "{\"acceptance\":[{\"expected\":\"all immutable unittest cases pass\",\"id\":\"total\"}],\"max_repairs\":2,\"non_goals\":[\"publication\",\"merge\",\"personal repositories\"],\"objective\":\"Correct the disposable arithmetic defect and prepare a local PR approval package.\",\"risk\":\"routine\",\"scope\":[\"calculator.py\"]}",
+    "dependencies_json": "[]",
+    "implementer_engine": "codex",
+    "implementer_model": null,
+    "reviewer_engine": "claude",
+    "reviewer_model": null,
+    "base_revision": "669a2c08e969b7468c9978db8c0e7948ab4b7f68",
+    "head_revision": "6ce4151a4dd6bdf90f0969387272bf19fef471de",
+    "branch": "agentkit/phase3-demo",
+    "worktree": "/private/tmp/agentkit-phase3-live-20260919/managed/worktrees/phase3-demo",
+    "repair_count": 0,
+    "max_repairs": 2,
+    "next_action": "inspect invalid or failed review",
+    "version": 9,
+    "created_at": "2026-09-18T20:23:18.074412+00:00",
+    "updated_at": "2026-09-18T20:23:47.042687+00:00"
+  },
+  "budget": {
+    "task_id": "phase3-demo",
+    "max_calls": 9,
+    "max_elapsed_seconds": 540.0,
+    "max_concurrency": 1,
+    "max_timeout_seconds": 60.0,
+    "verification_reserve": 2,
+    "reserved_calls": 0,
+    "completed_calls": 3,
+    "active_calls": 0,
+    "elapsed_seconds": 26.156950124999998
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "event_id": "task-created-phase3-demo",
+      "task_id": "phase3-demo",
+      "event_type": "task_created",
+      "payload_json": "{\"dependencies\":[],\"objective\":\"Correct the disposable arithmetic defect and prepare a local PR approval package.\"}",
+      "created_at": "2026-09-18T20:23:18.075393+00:00"
+    },
+    {
+      "sequence": 2,
+      "event_id": "phase3-demo-contracted",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"received\",\"to\":\"contracted\"}",
+      "created_at": "2026-09-18T20:23:18.082075+00:00"
+    },
+    {
+      "sequence": 3,
+      "event_id": "phase3-demo-workspace",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"contracted\",\"to\":\"workspace_ready\"}",
+      "created_at": "2026-09-18T20:23:18.378092+00:00"
+    },
+    {
+      "sequence": 4,
+      "event_id": "phase3-demo-implementing-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"workspace_ready\",\"to\":\"implementing\"}",
+      "created_at": "2026-09-18T20:23:18.382655+00:00"
+    },
+    {
+      "sequence": 5,
+      "event_id": "reserve-4d3a7ea0-144c-43cf-b7ab-25d64a98a555",
+      "task_id": "phase3-demo",
+      "event_type": "execution_reserved",
+      "payload_json": "{\"execution_id\":\"4d3a7ea0-144c-43cf-b7ab-25d64a98a555\",\"role\":\"implementer\",\"timeout_seconds\":60}",
+      "created_at": "2026-09-18T20:23:18.647415+00:00"
+    },
+    {
+      "sequence": 6,
+      "event_id": "start-4d3a7ea0-144c-43cf-b7ab-25d64a98a555",
+      "task_id": "phase3-demo",
+      "event_type": "execution_started",
+      "payload_json": "{\"execution_id\":\"4d3a7ea0-144c-43cf-b7ab-25d64a98a555\",\"pid\":null}",
+      "created_at": "2026-09-18T20:23:18.650566+00:00"
+    },
+    {
+      "sequence": 7,
+      "event_id": "finish-4d3a7ea0-144c-43cf-b7ab-25d64a98a555",
+      "task_id": "phase3-demo",
+      "event_type": "execution_finished",
+      "payload_json": "{\"elapsed_seconds\":24.892412,\"execution_id\":\"4d3a7ea0-144c-43cf-b7ab-25d64a98a555\",\"status\":\"succeeded\"}",
+      "created_at": "2026-09-18T20:23:44.062610+00:00"
+    },
+    {
+      "sequence": 8,
+      "event_id": "phase3-demo-implemented-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"implementing\",\"to\":\"implemented\"}",
+      "created_at": "2026-09-18T20:23:44.280846+00:00"
+    },
+    {
+      "sequence": 9,
+      "event_id": "phase3-demo-verifying-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"implemented\",\"to\":\"verifying\"}",
+      "created_at": "2026-09-18T20:23:44.284384+00:00"
+    },
+    {
+      "sequence": 10,
+      "event_id": "reserve-e1136cc2-1274-4dc5-a5b5-b1ff628026c0",
+      "task_id": "phase3-demo",
+      "event_type": "execution_reserved",
+      "payload_json": "{\"execution_id\":\"e1136cc2-1274-4dc5-a5b5-b1ff628026c0\",\"role\":\"verification\",\"timeout_seconds\":10}",
+      "created_at": "2026-09-18T20:23:44.288144+00:00"
+    },
+    {
+      "sequence": 11,
+      "event_id": "start-e1136cc2-1274-4dc5-a5b5-b1ff628026c0",
+      "task_id": "phase3-demo",
+      "event_type": "execution_started",
+      "payload_json": "{\"execution_id\":\"e1136cc2-1274-4dc5-a5b5-b1ff628026c0\",\"pid\":null}",
+      "created_at": "2026-09-18T20:23:44.291460+00:00"
+    },
+    {
+      "sequence": 12,
+      "event_id": "finish-e1136cc2-1274-4dc5-a5b5-b1ff628026c0",
+      "task_id": "phase3-demo",
+      "event_type": "execution_finished",
+      "payload_json": "{\"elapsed_seconds\":0.2269711249999986,\"execution_id\":\"e1136cc2-1274-4dc5-a5b5-b1ff628026c0\",\"status\":\"succeeded\"}",
+      "created_at": "2026-09-18T20:23:44.522186+00:00"
+    },
+    {
+      "sequence": 13,
+      "event_id": "evidence-verification-0",
+      "task_id": "phase3-demo",
+      "event_type": "evidence_recorded",
+      "payload_json": "{\"evidence_id\":\"verification-0\",\"kind\":\"independent-check\",\"revision\":\"6ce4151a4dd6bdf90f0969387272bf19fef471de\",\"status\":\"passed\"}",
+      "created_at": "2026-09-18T20:23:44.527629+00:00"
+    },
+    {
+      "sequence": 14,
+      "event_id": "phase3-demo-verified-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"verifying\",\"to\":\"verified\"}",
+      "created_at": "2026-09-18T20:23:44.531665+00:00"
+    },
+    {
+      "sequence": 15,
+      "event_id": "phase3-demo-reviewing-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"verified\",\"to\":\"reviewing\"}",
+      "created_at": "2026-09-18T20:23:44.535461+00:00"
+    },
+    {
+      "sequence": 16,
+      "event_id": "reserve-aec43022-f0e7-4e2b-a71f-c9501ebaaefc",
+      "task_id": "phase3-demo",
+      "event_type": "execution_reserved",
+      "payload_json": "{\"execution_id\":\"aec43022-f0e7-4e2b-a71f-c9501ebaaefc\",\"role\":\"reviewer\",\"timeout_seconds\":60}",
+      "created_at": "2026-09-18T20:23:44.818720+00:00"
+    },
+    {
+      "sequence": 17,
+      "event_id": "start-aec43022-f0e7-4e2b-a71f-c9501ebaaefc",
+      "task_id": "phase3-demo",
+      "event_type": "execution_started",
+      "payload_json": "{\"execution_id\":\"aec43022-f0e7-4e2b-a71f-c9501ebaaefc\",\"pid\":null}",
+      "created_at": "2026-09-18T20:23:44.822489+00:00"
+    },
+    {
+      "sequence": 18,
+      "event_id": "finish-aec43022-f0e7-4e2b-a71f-c9501ebaaefc",
+      "task_id": "phase3-demo",
+      "event_type": "execution_finished",
+      "payload_json": "{\"elapsed_seconds\":1.037567,\"execution_id\":\"aec43022-f0e7-4e2b-a71f-c9501ebaaefc\",\"status\":\"failed\"}",
+      "created_at": "2026-09-18T20:23:46.966594+00:00"
+    },
+    {
+      "sequence": 19,
+      "event_id": "evidence-review-0",
+      "task_id": "phase3-demo",
+      "event_type": "evidence_recorded",
+      "payload_json": "{\"evidence_id\":\"review-0\",\"kind\":\"independent-review\",\"revision\":\"6ce4151a4dd6bdf90f0969387272bf19fef471de\",\"status\":\"failed\"}",
+      "created_at": "2026-09-18T20:23:47.016586+00:00"
+    },
+    {
+      "sequence": 20,
+      "event_id": "phase3-demo-review-blocked-0",
+      "task_id": "phase3-demo",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"reviewing\",\"to\":\"blocked\"}",
+      "created_at": "2026-09-18T20:23:47.042648+00:00"
+    }
+  ],
+  "executions": [
+    {
+      "execution_id": "4d3a7ea0-144c-43cf-b7ab-25d64a98a555",
+      "task_id": "phase3-demo",
+      "role": "implementer",
+      "engine": "codex",
+      "model": null,
+      "allocation_seconds": 60.0,
+      "status": "succeeded",
+      "pid": null,
+      "process_token": "controller-supervised",
+      "started_at": "2026-09-18T20:23:18.650524+00:00",
+      "finished_at": "2026-09-18T20:23:44.062453+00:00",
+      "elapsed_seconds": 24.892412,
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":34688,\"estimated_cost_usd\":null,\"input_tokens\":36983,\"output_tokens\":183,\"reasoning_tokens\":0,\"source\":\"codex.turn.completed\"}",
+      "result_json": "{\"artifacts\":{\"request.json\":\"2e1729d2dde9823d2fa147b2bb692d8ddf85977c98b4983e7992a92d16f3a3cc\",\"stderr.redacted.txt\":\"c48fe2befaef2ec21ded2e90ae34299feee2e05bdcf1852aadaa61e6bf222357\",\"stdout.redacted.jsonl\":\"1f0c5a3a36ce1961ead97d389cfdbe02d3850dc5373a8fe7311df79848c9bce5\"},\"error_class\":null,\"limitations\":[\"Provider events and final text are claims; fixture acceptance is independently computed.\",\"Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.\",\"Process groups cannot prove detached-descendant or remote cancellation.\",\"Whole-process guard permits writes only in the disposable workspace/runtime plus the literal Codex startup lock file.\",\"Explicit disposable read canaries are denied; comprehensive parent credential isolation is not established.\",\"Provider and tool traffic share the parent network boundary; tool network isolation is unsupported in this mode.\",\"No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.\",\"Codex built-in transport retries cannot be configured to zero with its built-in subscription provider; reported reconnects stop the run and wall time bounds it. Hidden attempts remain unknown.\"]}",
+      "reconciliation_note": null
+    },
+    {
+      "execution_id": "e1136cc2-1274-4dc5-a5b5-b1ff628026c0",
+      "task_id": "phase3-demo",
+      "role": "verification",
+      "engine": "local",
+      "model": "python-unittest",
+      "allocation_seconds": 10.0,
+      "status": "succeeded",
+      "pid": null,
+      "process_token": "controller-supervised",
+      "started_at": "2026-09-18T20:23:44.291423+00:00",
+      "finished_at": "2026-09-18T20:23:44.522019+00:00",
+      "elapsed_seconds": 0.2269711249999986,
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":null,\"estimated_cost_usd\":null,\"input_tokens\":null,\"output_tokens\":null,\"reasoning_tokens\":null,\"source\":\"local-command\"}",
+      "result_json": "{\"exit_code\":0,\"output\":\"test_total (test_calculator.CalculatorTest) ... ok\\n\\n----------------------------------------------------------------------\\nRan 1 test in 0.000s\\n\\nOK\\n\"}",
+      "reconciliation_note": null
+    },
+    {
+      "execution_id": "aec43022-f0e7-4e2b-a71f-c9501ebaaefc",
+      "task_id": "phase3-demo",
+      "role": "reviewer",
+      "engine": "claude",
+      "model": null,
+      "allocation_seconds": 60.0,
+      "status": "failed",
+      "pid": null,
+      "process_token": "controller-supervised",
+      "started_at": "2026-09-18T20:23:44.822451+00:00",
+      "finished_at": "2026-09-18T20:23:46.965956+00:00",
+      "elapsed_seconds": 1.037567,
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":null,\"estimated_cost_usd\":null,\"input_tokens\":null,\"output_tokens\":null,\"reasoning_tokens\":null,\"source\":\"unavailable\"}",
+      "result_json": "{\"artifacts\":{\"request.json\":\"04289659f0ceb50be758bbe82a93208e381fa58382f035dd786c19849e2217f4\",\"stderr.redacted.txt\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"stdout.redacted.jsonl\":\"8e2278b27fa431d3b954d5d62d3d5924112aa49fe756f0b0f49218483b021df7\"},\"candidate_revision\":\"6ce4151a4dd6bdf90f0969387272bf19fef471de\",\"error_class\":\"authentication\",\"limitations\":[\"Provider events and final text are claims; fixture acceptance is independently computed.\",\"Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.\",\"Process groups cannot prove detached-descendant or remote cancellation.\",\"Whole-process guard denies global writes; parent provider network and auth access remain available.\",\"Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.\",\"No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.\"],\"parse_error\":null}",
+      "reconciliation_note": null
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "verification-0",
+      "task_id": "phase3-demo",
+      "revision": "6ce4151a4dd6bdf90f0969387272bf19fef471de",
+      "kind": "independent-check",
+      "status": "passed",
+      "artifact_sha256": "ef0c83ee8acab57cebc56b7e50b8df65d4e4c9967b64fc021ef9b6266c8b549d",
+      "details_json": "{\"exit_code\":0,\"output\":\"test_total (test_calculator.CalculatorTest) ... ok\\n\\n----------------------------------------------------------------------\\nRan 1 test in 0.000s\\n\\nOK\\n\"}",
+      "stale": 0,
+      "created_at": "2026-09-18T20:23:44.527593+00:00"
+    },
+    {
+      "evidence_id": "review-0",
+      "task_id": "phase3-demo",
+      "revision": "6ce4151a4dd6bdf90f0969387272bf19fef471de",
+      "kind": "independent-review",
+      "status": "failed",
+      "artifact_sha256": "96aae59a8a2e98be4389b38d701d2d1581dbd9c7f9d421611ea6c4a519af082f",
+      "details_json": "{\"details\":{\"artifacts\":{\"request.json\":\"04289659f0ceb50be758bbe82a93208e381fa58382f035dd786c19849e2217f4\",\"stderr.redacted.txt\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"stdout.redacted.jsonl\":\"8e2278b27fa431d3b954d5d62d3d5924112aa49fe756f0b0f49218483b021df7\"},\"candidate_revision\":\"6ce4151a4dd6bdf90f0969387272bf19fef471de\",\"error_class\":\"authentication\",\"limitations\":[\"Provider events and final text are claims; fixture acceptance is independently computed.\",\"Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.\",\"Process groups cannot prove detached-descendant or remote cancellation.\",\"Whole-process guard denies global writes; parent provider network and auth access remain available.\",\"Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.\",\"No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.\"],\"parse_error\":null},\"findings\":[],\"revision\":\"6ce4151a4dd6bdf90f0969387272bf19fef471de\",\"status\":\"failed\"}",
+      "stale": 0,
+      "created_at": "2026-09-18T20:23:47.016535+00:00"
+    }
+  ],
+  "approvals": []
+}

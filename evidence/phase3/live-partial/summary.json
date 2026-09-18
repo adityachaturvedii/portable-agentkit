@@ -1,0 +1,105 @@
+{
+  "approval_package_created": false,
+  "approval_records": 0,
+  "base_revision": "669a2c08e969b7468c9978db8c0e7948ab4b7f68",
+  "billing_observation": "No billed-cost observation. No payment or usage-limit request was reported; billing remains unknown.",
+  "blocker": "Claude reviewer returned authentication failure because its existing OAuth token had expired.",
+  "candidate_independent_check": "passed",
+  "classification": "live-partial",
+  "completed_calls": 3,
+  "executions": [
+    {
+      "elapsed_seconds": 24.892412,
+      "engine": "codex",
+      "result": {
+        "artifacts": {
+          "request.json": "2e1729d2dde9823d2fa147b2bb692d8ddf85977c98b4983e7992a92d16f3a3cc",
+          "stderr.redacted.txt": "c48fe2befaef2ec21ded2e90ae34299feee2e05bdcf1852aadaa61e6bf222357",
+          "stdout.redacted.jsonl": "1f0c5a3a36ce1961ead97d389cfdbe02d3850dc5373a8fe7311df79848c9bce5"
+        },
+        "error_class": null,
+        "limitations": [
+          "Provider events and final text are claims; fixture acceptance is independently computed.",
+          "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+          "Process groups cannot prove detached-descendant or remote cancellation.",
+          "Whole-process guard permits writes only in the disposable workspace/runtime plus the literal Codex startup lock file.",
+          "Explicit disposable read canaries are denied; comprehensive parent credential isolation is not established.",
+          "Provider and tool traffic share the parent network boundary; tool network isolation is unsupported in this mode.",
+          "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.",
+          "Codex built-in transport retries cannot be configured to zero with its built-in subscription provider; reported reconnects stop the run and wall time bounds it. Hidden attempts remain unknown."
+        ]
+      },
+      "role": "implementer",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": null,
+        "cached_input_tokens": 34688,
+        "estimated_cost_usd": null,
+        "input_tokens": 36983,
+        "output_tokens": 183,
+        "reasoning_tokens": 0,
+        "source": "codex.turn.completed"
+      }
+    },
+    {
+      "elapsed_seconds": 0.2269711249999986,
+      "engine": "local",
+      "result": {
+        "exit_code": 0,
+        "output": "test_total (test_calculator.CalculatorTest) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      },
+      "role": "verification",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": null,
+        "cached_input_tokens": null,
+        "estimated_cost_usd": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null,
+        "source": "local-command"
+      }
+    },
+    {
+      "elapsed_seconds": 1.037567,
+      "engine": "claude",
+      "result": {
+        "artifacts": {
+          "request.json": "04289659f0ceb50be758bbe82a93208e381fa58382f035dd786c19849e2217f4",
+          "stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout.redacted.jsonl": "8e2278b27fa431d3b954d5d62d3d5924112aa49fe756f0b0f49218483b021df7"
+        },
+        "candidate_revision": "6ce4151a4dd6bdf90f0969387272bf19fef471de",
+        "error_class": "authentication",
+        "limitations": [
+          "Provider events and final text are claims; fixture acceptance is independently computed.",
+          "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+          "Process groups cannot prove detached-descendant or remote cancellation.",
+          "Whole-process guard denies global writes; parent provider network and auth access remain available.",
+          "Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.",
+          "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry."
+        ],
+        "parse_error": null
+      },
+      "role": "reviewer",
+      "status": "failed",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": null,
+        "cached_input_tokens": null,
+        "estimated_cost_usd": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null,
+        "source": "unavailable"
+      }
+    }
+  ],
+  "head_revision": "6ce4151a4dd6bdf90f0969387272bf19fef471de",
+  "operator_action": "No reauthentication or authentication/billing change was attempted.",
+  "result": "blocked",
+  "state": "blocked",
+  "total_elapsed_seconds": 26.156950124999998
+}
