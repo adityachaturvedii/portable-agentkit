@@ -190,6 +190,8 @@ def validate_handoff(data):
                 raise ValidationError("blocked review cannot be complete")
             if payload["verdict"] == "no-findings" and payload["findings"]:
                 raise ValidationError("no-findings verdict contradicts findings")
+            if payload["verdict"] == "findings" and not payload["findings"]:
+                raise ValidationError("findings verdict requires at least one finding")
         elif payload["head_revision"] != data["revision"]:
             raise ValidationError("delivery head differs from candidate")
         elif complete and any(f["disposition"] == "open" for f in payload["findings"]):
@@ -200,12 +202,18 @@ def validate_handoff(data):
                 refs(risk["evidence_ids"], "passed", True)
             elif risk["evidence_ids"]:
                 refs(risk["evidence_ids"], current=True)
-    if kind == "measured-optimisation" and payload["decision"] == "accepted":
-        if not complete or payload["correctness"] != "passed":
+    if kind == "measured-optimisation":
+        if payload["decision"] == "accepted" and (not complete or payload["correctness"] != "passed"):
             raise ValidationError("accepted optimization requires completed correctness")
-        passes = [e["id"] for e in evidence.values() if e["method"] == "command"
-                  and e["status"] == "passed" and e["revision"] == data["revision"]]
-        refs(passes, "passed", True, "command")
+        if complete:
+            if payload["decision"] == "incomplete" or payload["correctness"] not in ("passed", "failed"):
+                raise ValidationError("complete optimization requires a terminal decision and observed correctness")
+            if not payload["experiments"]:
+                raise ValidationError("complete optimization requires an experiment")
+            observations = [e["id"] for e in evidence.values() if e["method"] == "command"
+                            and e["status"] == payload["correctness"]
+                            and e["revision"] == data["revision"]]
+            refs(observations, payload["correctness"], True, "command")
     if kind == "task-contract" and complete:
         if not payload["scope"] or not payload["acceptance"]:
             raise ValidationError("complete contract requires scope and acceptance")

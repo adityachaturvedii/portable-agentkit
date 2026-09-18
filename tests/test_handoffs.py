@@ -109,6 +109,24 @@ class HandoffTests(unittest.TestCase):
         data["evidence"] = [observation()]
         self.rejects(data)
 
+    def test_complete_optimization_requires_terminal_observed_experiment(self):
+        data = template("measured-optimisation")
+        data["status"] = "complete"
+        self.rejects(data)
+        data["payload"].update(correctness="failed", decision="rejected",
+                               experiments=["Shortcut fails the independent output parity check."])
+        self.rejects(data)  # A claim without a recorded observation is insufficient.
+        data["evidence"] = [observation("parity", "failed")]
+        validate_handoff(data)
+        data["payload"]["experiments"] = []
+        self.rejects(data)
+
+    def test_findings_verdict_requires_actual_findings(self):
+        data = template("independent-review")
+        data["status"] = "complete"
+        data["payload"].update(reviewer="reviewer", implementation_authors=["builder"], verdict="findings")
+        self.rejects(data)
+
     def test_delivery_must_bind_head_and_keep_unknown_usage(self):
         data = template("delivery-evidence")
         validate_handoff(data)

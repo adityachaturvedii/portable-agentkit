@@ -8,11 +8,11 @@ macOS, Apple-provided Python 3.9.6, Git 2.54.0. Runtime uses only the Python sta
 
 ## Automated checks
 
-`python3 -m unittest discover -s tests -v`: 25 tests passed in the initial run. The final run is recorded in the local receipt. Tests exercise 18 explicit intent/domain cases, six buggy/corrected disposable CPU project families, malformed JSON, unsupported kinds/versions, duplicate evidence, stale revisions, self-reports, self-review, missing browser and incorrect optimization outcomes. A relocation test copies the entire toolkit to a path containing spaces and runs checks with an empty HOME; HOME remains empty.
+`python3 -m unittest discover -s tests -v`: 27 tests passed after adding archived-evidence integrity and a common independent acceptance oracle for both agent fixes. The final run is recorded in the local receipt. Tests exercise 18 explicit intent/domain cases, six buggy/corrected disposable CPU project families, malformed JSON, unsupported kinds/versions, duplicate evidence, stale revisions, self-reports, self-review, missing browser and incorrect optimization outcomes. A relocation test copies the entire toolkit to a path containing spaces and runs checks with an empty HOME; HOME remains empty.
 
 The six CPU families cover invoice arithmetic, split leakage, a scalar gradient, inference cache identity, stable softmax and SQLite idempotency. Each planted defect fails its independent expectations and its corrected counterpart passes. Scalar/CPU examples do not validate a training framework, CUDA, mixed precision or a real serving system. The 18 selection cases exercise explicit intent mapping, not learned or natural-language routing.
 
-`python3 -m agentkit check`: verifies skill inventory, relative references, exact notice bytes and all ten blocked format examples. Separately, all 88 upstream file hashes were compared with the downloaded pinned snapshots and matched. Offline package checking does not contact upstream or establish publisher signatures.
+`python3 -m agentkit check`: verifies skill inventory, relative references, exact notice bytes and all ten blocked format examples. Separately, all 88 upstream file hashes were compared with the downloaded pinned snapshots and matched. Offline package checking does not contact upstream or establish publisher signatures. The system skill-creator `quick_validate.py` could not run because PyYAML is absent (`ModuleNotFoundError: yaml`); that check is unavailable, not passed. No dependency was installed to bypass the limitation.
 
 ## Independent forward task and matched native baseline
 
