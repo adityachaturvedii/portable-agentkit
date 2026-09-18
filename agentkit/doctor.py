@@ -98,12 +98,14 @@ def auth_summary(engine, outcome):
     else:
         try:
             data = json.loads(outcome.stdout)
-            if not isinstance(data, dict) or outcome.exit_code != 0:
-                raise ValueError("auth status failed or is not an object")
+            if not isinstance(data, dict):
+                raise ValueError("auth status is not an object")
+            if data.get("loggedIn") is False:
+                return Capability("unavailable", "Official CLI reports no login in this execution context."), "none", {}
+            if outcome.exit_code != 0:
+                raise ValueError("authenticated status command failed")
             if data.get("loggedIn") is True and data.get("authMethod") == "claude.ai" and data.get("apiProvider") == "firstParty":
                 return Capability("verified", "Official CLI reports first-party Claude subscription login."), "subscription", {"subscription_type": data.get("subscriptionType")}
-            if data.get("loggedIn") is False:
-                return Capability("unavailable", "No authentication visible to the CLI in this execution context; Keychain restrictions may hide an existing login."), "none", {}
             if data.get("loggedIn") is True:
                 return Capability("verified", "Non-subscription authentication reported; managed execution blocked."), "other", {}
         except (ValueError, TypeError):

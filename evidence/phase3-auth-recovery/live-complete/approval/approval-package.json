@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "task_id": "phase3-demo",
+  "status": "awaiting_pr_approval",
+  "summary": "Correct arithmetic total implementation in the disposable fixture.",
+  "repository": "/private/tmp/agentkit-phase3-auth-live/managed/repositories/phase3-demo",
+  "branch": "agentkit/phase3-demo",
+  "base_revision": "9ac4d45200c55b3c3f2876f0f0ad1ab19a88cf26",
+  "head_revision": "873e3a2306f28c3bf61849b96f80fba119297b9d",
+  "diff": "diff --git a/calculator.py b/calculator.py\nindex 1fcbd09..06164e9 100644\n--- a/calculator.py\n+++ b/calculator.py\n@@ -1,3 +1,3 @@\n def total(left, right):\n     \"\"\"Return the arithmetic sum.\"\"\"\n-    return left - right\n+    return left + right",
+  "verification": [
+    {
+      "id": "verification-0",
+      "revision": "873e3a2306f28c3bf61849b96f80fba119297b9d",
+      "status": "passed",
+      "artifact_sha256": "595ce6277a07f23bef604e5aad4d8550fd16904719e7ce448883519a5ce32a3e",
+      "stale": false
+    }
+  ],
+  "review_findings": [],
+  "limitations": [
+    "Trusted disposable macOS workflow only.",
+    "No publication, merge, hostile-code, detached-process or remote-cancellation support.",
+    "Reported usage is observational; billed cost remains unknown."
+  ],
+  "resources": {
+    "budget": {
+      "task_id": "phase3-demo",
+      "max_calls": 9,
+      "max_elapsed_seconds": 540.0,
+      "max_concurrency": 1,
+      "max_timeout_seconds": 60.0,
+      "verification_reserve": 2,
+      "reserved_calls": 0,
+      "completed_calls": 3,
+      "active_calls": 0,
+      "elapsed_seconds": 29.420842,
+      "reserved_elapsed_seconds": 0.0
+    },
+    "executions": [
+      {
+        "execution_id": "21a08df5-f3fc-4e8b-8dc4-bae243efb29e",
+        "role": "implementer",
+        "engine": "codex",
+        "elapsed_seconds": 25.94564,
+        "usage": {
+          "billed_cost_usd": null,
+          "cache_creation_tokens": null,
+          "cached_input_tokens": 27008,
+          "estimated_cost_usd": null,
+          "input_tokens": 37016,
+          "output_tokens": 203,
+          "reasoning_tokens": 0,
+          "source": "codex.turn.completed"
+        }
+      },
+      {
+        "execution_id": "3ca330a0-7a9d-4d29-8ae5-b97c3710bfbc",
+        "role": "verification",
+        "engine": "local",
+        "elapsed_seconds": 0.243396,
+        "usage": {
+          "billed_cost_usd": null,
+          "cache_creation_tokens": null,
+          "cached_input_tokens": null,
+          "estimated_cost_usd": null,
+          "input_tokens": null,
+          "output_tokens": null,
+          "reasoning_tokens": null,
+          "source": "local-command"
+        }
+      },
+      {
+        "execution_id": "5636ace9-1448-4c24-bca8-c139ec2c77c2",
+        "role": "reviewer",
+        "engine": "claude",
+        "elapsed_seconds": 3.231806,
+        "usage": {
+          "billed_cost_usd": null,
+          "cache_creation_tokens": 2831,
+          "cached_input_tokens": 0,
+          "estimated_cost_usd": 0.031795000000000004,
+          "input_tokens": 2,
+          "output_tokens": 139,
+          "reasoning_tokens": null,
+          "source": "claude.result"
+        }
+      }
+    ]
+  },
+  "proposed_pr": {
+    "title": "Fix disposable arithmetic total",
+    "body": "Correct `total` to add its operands. Verified with the immutable unittest suite and independent review."
+  },
+  "approval": {
+    "recorded": false,
+    "note": "Worker output is not approval; explicit head-bound user approval is required."
+  },
+  "artifact_sha256": "899aeb246863eb3a1aa91ad93a561a5134e9f6958c81c3a23b171d0325c3ecbb"
+}

@@ -1,0 +1,12 @@
+{
+  "engine": "codex",
+  "task_id": "phase3-live-implementer",
+  "cwd": "/private/tmp/agentkit-phase3-auth-live/managed/worker-copies/phase3-demo-0",
+  "timeout_seconds": 60,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "mode": "owned-code",
+  "schema_version": 1,
+  "prompt_sha256": "ede6e30e5903b515b1ecd732986ae9f9f34f7a77706f7d47dffaeef75268ffc0",
+  "prompt_bytes": 171
+}

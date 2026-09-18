@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from pathlib import Path
 import sys
 
 from .pack import catalog, check_pack, render, select
@@ -42,6 +43,18 @@ def main(argv=None):
                           help="live implementer; the other provider performs review")
     delivery.add_argument("--authorize-subscription-smoke", action="store_true",
                           help="authorize one bounded disposable implementer/reviewer demonstration")
+    delivery.add_argument("--resume", action="store_true",
+                          help="resume the exact stage at a verified authentication checkpoint")
+    delivery.add_argument("--recover-review-format", action="store_true",
+                          help="offline recovery of one hash-matched provider-success fenced JSON review")
+    auth_status = commands.add_parser("auth-status", help="sanitized official CLI subscription status")
+    auth_status.add_argument("provider", choices=("codex", "claude"))
+    auth_login = commands.add_parser("auth-login", help="official interactive subscription login; output is not captured")
+    auth_login.add_argument("provider", choices=("codex", "claude"))
+    auth_login.add_argument("--method", choices=("browser", "device"), default="browser")
+    auth_login.add_argument("--timeout", type=float, default=600)
+    auth_login.add_argument("--workflow", help="existing workflow root with an authentication checkpoint")
+    auth_login.add_argument("--task-id", default="phase3-demo")
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -79,12 +92,52 @@ def main(argv=None):
             print(json.dumps(result, indent=2))
             return 0 if result['passed'] else 1
         elif args.command == "controller-demo":
-            from .delivery import run_demo
-            result = run_demo(args.output, live=args.live, authorized=args.authorize_subscription_smoke,
-                              implementer_engine=args.implementer)
+            from .delivery import (DeliveryWorkflow, LiveImplementer, LiveReviewer, run_demo)
+            if args.resume and args.recover_review_format:
+                raise ValueError('choose either authentication resume or review-format recovery')
+            if args.recover_review_format:
+                if not args.live or not args.authorize_subscription_smoke:
+                    raise ValueError('review-format recovery requires the original live authorization context')
+                workflow = DeliveryWorkflow.open(args.output, LiveImplementer(args.implementer),
+                                                 LiveReviewer('claude' if args.implementer == 'codex' else 'codex'),
+                                                 live_authorized=True)
+                result = workflow.recover_review_format()
+            else:
+                result = run_demo(args.output, live=args.live, authorized=args.authorize_subscription_smoke,
+                                  implementer_engine=args.implementer, resume=args.resume)
             print(json.dumps({'task': result['task'], 'approval_package': result['approval_package'],
                               'root': result['root']}, indent=2))
-            return 0 if result['task']['state'] == 'awaiting_pr_approval' else 1
+            return 0 if result['task']['state'] in ('awaiting_pr_approval', 'authentication_required') else 1
+        elif args.command == "auth-status":
+            from .auth import probe_authentication
+            print(json.dumps(probe_authentication(args.provider).to_dict(), indent=2))
+        elif args.command == "auth-login":
+            from .auth import guided_login, safe_login_reason
+            from .controller import ControllerStore
+            if args.provider == 'claude' and args.method != 'browser':
+                raise ValueError('Claude Code supports browser login with manual code handoff, not device mode')
+            store = None
+            claim = None
+            if args.workflow:
+                root = Path(args.workflow).resolve()
+                store = ControllerStore(root / 'controller')
+                if sys.stdin.isatty() and sys.stdout.isatty() and sys.stderr.isatty():
+                    claim = store.claim_authentication_login(args.task_id, args.provider,
+                                                              authority=store.authority)
+                    if not claim['claimed'] and claim['status'] == 'in_progress':
+                        print(json.dumps({'provider': args.provider, 'status': 'login_in_progress',
+                                          'machine': 'this host'}, indent=2))
+                        return 1
+            result = guided_login(args.provider, args.method, timeout_seconds=args.timeout)
+            if store is not None and claim is not None and claim['claimed']:
+                outcome = 'succeeded' if result.status in ('succeeded', 'already_authenticated') else (
+                    'timed_out' if result.status == 'timed_out' else
+                    'cancelled' if result.status == 'cancelled' else 'failed')
+                store.finish_authentication_login(
+                    claim['session_id'], outcome, auth_mode=result.authentication.mode,
+                    reason=safe_login_reason(result), authority=store.authority)
+            print(json.dumps(result.to_dict(), indent=2))
+            return 0 if result.status in ('succeeded', 'already_authenticated') else 1
         else:
             print(json.dumps(check_pack(), indent=2))
         return 0

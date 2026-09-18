@@ -14,6 +14,7 @@ python3 -m agentkit validate contracts/examples/fault-diagnosis.json
 python3 -m agentkit check
 python3 -m unittest discover -s tests -v
 python3 -m agentkit controller-demo --output /tmp/agentkit-phase3-demo
+python3 -m agentkit auth-status claude
 ```
 
 Run these commands from this directory. To move machines, copy the entire directory, preserving relative paths. For a clean source copy, use `git archive HEAD` after committing. Skills link to shared contracts and notices, so copying a single SKILL.md is insufficient. Relocation is tested; installation, CLI skill auto-discovery and rollback are later work.
@@ -31,7 +32,8 @@ Run these commands from this directory. To move machines, copy the entire direct
 | Claude/Codex adapters, read-only doctor, bounded POSIX transport and cancellation | Implemented; both CLIs passed live disposable coding checks and independent acceptance |
 | Sandbox boundaries / credential isolation | Explicit macOS workspace/protected-path canaries passed; comprehensive credential and tool-network isolation unsupported |
 | Durable controller, protected approval records, budgets and controller-owned Git broker | Implemented and tested with deterministic adapters |
-| Cross-provider disposable delivery workflow | Live Codex implementation/check passed; Claude review blocked on expired OAuth, so full live path remains unverified |
+| Guided subscription-auth recovery | Implemented with uncaptured official CLI terminal handoff, durable stage checkpoint, bounded retries and revision/evidence revalidation |
+| Cross-provider disposable delivery workflow | Deterministic path passes; the bounded live result is recorded in the current validation report |
 | Browser automation, CUDA/GPU worker, GitHub publication, installer/update | Not implemented; separate later gates |
 
 The procedures describe desired engineering behavior. They are not enforcement of authenticated roles, monetary ceilings or publication permissions. Git worktrees are not sandboxes. Unattended untrusted execution is unsupported. Managed Linux/WSL2/Windows execution has not been validated; the current guard is macOS-specific.
@@ -50,6 +52,8 @@ See [adapter contracts](docs/runtime-contracts.md), [original Phase 2 report](do
 
 `controller-demo` runs the complete Phase 3 path with deterministic implementer/reviewer adapters by default. It creates a disposable repository, task branch/worktree and worker copy; commits one allowed source change; runs controller-owned tests in a separate read-only/no-network verification copy; performs independent review; then writes a local approval package and stops at `awaiting_pr_approval`. The package records no approval and performs no publication. Read the [controller contracts](docs/controller-contracts.md), [Phase 3 validation report](docs/phase3-validation-report.md) and [corrective review](docs/phase3-review-findings.md). Live mode requires the explicit subscription-smoke flag and remains limited to the previously tested macOS profile.
 
+When live execution reports missing or expired subscription login, the workflow stops at `authentication_required` after finalizing the failed call. Use `auth-login` in a real local terminal, then rerun `controller-demo` with the same output, live authorization and `--resume`. Login output is attached directly to the terminal and is never captured in evidence. See [guided authentication recovery](docs/authentication-recovery.md) for Codex browser/device commands, Claude's manual code handoff, checkpoint rules and limitations.
+
 ## Inspect the work
 
 - [Implementation checklist](docs/checklist.md), [decision log](docs/decisions.md), [phase requirements](docs/requirements.md), [threat model](docs/threat-model.md)
@@ -58,6 +62,7 @@ See [adapter contracts](docs/runtime-contracts.md), [original Phase 2 report](do
 - [Validation report](docs/validation-report.md), [local PR proposal](docs/pr-proposal.md)
 - [Phase 2 validation](docs/phase2-validation-report.md), [execution follow-up](docs/phase2-execution-followup.md), [sandbox matrix](docs/sandbox-matrix.md), [CLI source/compatibility review](docs/cli-source-review.md)
 - [Phase 3 controller contracts](docs/controller-contracts.md), [Phase 3 validation](docs/phase3-validation-report.md), [archived evidence](evidence/phase3/manifest.json)
+- [Guided authentication recovery](docs/authentication-recovery.md), [live completion evidence](evidence/phase3-auth-recovery/manifest.json)
 - [Original implementation specification](docs/implementation-spec.md)
 
 The user authorized private GitHub publication on 2026-09-19: [adityachaturvedii/portable-agentkit](https://github.com/adityachaturvedii/portable-agentkit). All three phase branches are preserved; `implementation/phase-2` is the default branch for the latest work. No PR or merge is authorized by that publication request. Earlier validation records describe the local-only state at their recorded dates. Upstream MIT notices cover adapted material; an outbound license for original toolkit code will be chosen before broader distribution.

@@ -8,7 +8,7 @@ The normal path is:
 
 `received -> contracted -> workspace_ready -> implementing -> implemented -> verifying -> verified -> reviewing -> review_complete -> packaging -> awaiting_pr_approval`
 
-Verification or concrete review findings can enter `repairing`, which returns only to `implemented`. `blocked` and `cancelled` are terminal in Phase 3. Every transition validates its expected source state inside the same transaction that appends its event. Dependency tasks must be at `awaiting_pr_approval` before a dependent task can enter `workspace_ready`.
+Verification or concrete review findings can enter `repairing`, which returns only to `implemented`. A classified provider authentication failure from `implementing`, `repairing`, or `reviewing` enters `authentication_required` through the dedicated recovery method. Only a verified first-party subscription login can restore the exact interrupted state. `blocked` and `cancelled` remain terminal. Every transition validates its expected source state inside the same transaction that appends its event. Dependency tasks must be at `awaiting_pr_approval` before a dependent task can enter `workspace_ready`.
 
 Execution roles are state-bound: `implementer` to `implementing`, `repair` to `repairing`, `verification` to `verifying`, and `reviewer` to `reviewing`. Reservation and start both check this mapping. Any `reconciliation_required` execution blocks new reservations until the controller records an explicit `not_started` or `terminated` resolution. Resolution releases held capacity but deliberately leaves the task blocked for a new trusted recovery decision.
 
@@ -23,6 +23,8 @@ Execution roles are state-bound: `implementer` to `implementing`, `repair` to `r
 | Evidence | ID, task, exact revision, kind, status, content hash, details, stale flag and timestamp. Evidence for a noncurrent revision is rejected. |
 | Approval | ID, task, repository, branch, exact head, action, expiry, source and stale flag. It can be written only through controller authority after `awaiting_pr_approval`. |
 | Failure signature | Stable signature, count and concrete details. A repeated signature or exhausted repair count blocks the task. |
+| Authentication checkpoint | Provider/account context, interrupted role/state, failed execution, exact candidate, evidence references, bounded attempt count and sanitized status. No secrets or transcripts. |
+| Authentication session | One active interactive login per provider/account context, shared by waiting tasks and resolved only from an official sanitized status probe. |
 
 ## Usage and limits
 
@@ -43,3 +45,5 @@ When a check fails, the next repair prompt includes controller-generated JSON. V
 ## Restart semantics
 
 On restart, the controller inspects reserved, running and cancellation-requested rows before any replacement launch. Without independently established process ownership, it marks them `reconciliation_required`, records a reconciliation event and blocks the task. SQLite durability alone is not process containment. Detached descendants and remote cancellation remain unsupported.
+
+An `authentication_required` task is already free of active execution reservations and survives restart as a recoverable checkpoint. Login waiting does not consume calls, elapsed allocation, concurrency or repair count. Resume rejects any subsequently discovered `reconciliation_required` execution, changed candidate, stale referenced evidence, non-subscription login or arbitrary blocked state. See [guided authentication recovery](authentication-recovery.md).

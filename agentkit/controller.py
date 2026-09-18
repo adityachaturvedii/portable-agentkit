@@ -12,7 +12,7 @@ import threading
 import uuid
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 TRANSITIONS = {
     'received': {'contracted', 'blocked', 'cancelled'},
     'contracted': {'workspace_ready', 'blocked', 'cancelled'},
@@ -25,6 +25,7 @@ TRANSITIONS = {
     'review_complete': {'packaging', 'repairing', 'blocked', 'cancelled'},
     'repairing': {'implemented', 'blocked', 'cancelled'},
     'packaging': {'awaiting_pr_approval', 'blocked', 'cancelled'},
+    'authentication_required': {'cancelled'},
 }
 ROLE_STATES = {
     'implementer': 'implementing',
@@ -59,6 +60,10 @@ class StaleApproval(ControllerError):
 
 
 class ReconciliationRequired(ControllerError):
+    pass
+
+
+class AuthenticationRecoveryError(ControllerError):
     pass
 
 
@@ -168,15 +173,39 @@ class ControllerStore:
               count INTEGER NOT NULL, last_details TEXT NOT NULL,
               PRIMARY KEY(task_id, signature)
             );
+            CREATE TABLE IF NOT EXISTS authentication_sessions(
+              session_id TEXT PRIMARY KEY, provider TEXT NOT NULL,
+              account_context TEXT NOT NULL, status TEXT NOT NULL,
+              owner_task_id TEXT NOT NULL REFERENCES tasks(task_id),
+              attempt INTEGER NOT NULL, auth_mode TEXT, result_reason TEXT,
+              created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS one_active_authentication_session
+              ON authentication_sessions(provider,account_context)
+              WHERE status IN ('waiting','in_progress');
+            CREATE TABLE IF NOT EXISTS authentication_checkpoints(
+              checkpoint_id TEXT PRIMARY KEY,
+              task_id TEXT NOT NULL UNIQUE REFERENCES tasks(task_id),
+              provider TEXT NOT NULL, account_context TEXT NOT NULL,
+              interrupted_state TEXT NOT NULL, interrupted_role TEXT NOT NULL,
+              candidate_revision TEXT NOT NULL, execution_id TEXT NOT NULL,
+              evidence_refs_json TEXT NOT NULL, status TEXT NOT NULL,
+              login_session_id TEXT REFERENCES authentication_sessions(session_id),
+              login_attempts INTEGER NOT NULL DEFAULT 0,
+              created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+            );
             CREATE TRIGGER IF NOT EXISTS events_no_update
               BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT, 'events are append-only'); END;
             CREATE TRIGGER IF NOT EXISTS events_no_delete
               BEFORE DELETE ON events BEGIN SELECT RAISE(ABORT, 'events are append-only'); END;
             ''')
             existing = db.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
-            if existing and int(existing['value']) != SCHEMA_VERSION:
+            if existing and int(existing['value']) not in (1, SCHEMA_VERSION):
                 raise ControllerError('unsupported controller schema')
-            db.execute("INSERT OR IGNORE INTO meta(key,value) VALUES('schema_version',?)", (str(SCHEMA_VERSION),))
+            if existing:
+                db.execute("UPDATE meta SET value=? WHERE key='schema_version'", (str(SCHEMA_VERSION),))
+            else:
+                db.execute("INSERT INTO meta(key,value) VALUES('schema_version',?)", (str(SCHEMA_VERSION),))
 
     @contextmanager
     def transaction(self):
@@ -449,6 +478,259 @@ class ControllerStore:
                          {'execution_id': execution_id, 'resolution': resolution, 'note': note})
         return final_status
 
+    def checkpoint_authentication(self, task_id, execution_id, provider, *,
+                                  account_context='default-subscription', evidence_refs=(),
+                                  auth_reason='missing_or_expired', authority=None):
+        """Pause only a provider stage that ended with a classified auth failure."""
+        self._require(authority)
+        if provider not in ('codex', 'claude'):
+            raise AuthenticationRecoveryError('unsupported authentication provider')
+        if (not isinstance(account_context, str) or not account_context.strip() or
+                len(account_context) > 128 or auth_reason not in ('missing', 'expired', 'missing_or_expired')):
+            raise AuthenticationRecoveryError('invalid authentication checkpoint metadata')
+        refs = tuple(evidence_refs)
+        if any(not isinstance(item, str) or not item for item in refs):
+            raise AuthenticationRecoveryError('evidence references must be nonempty strings')
+        checkpoint_id = str(uuid.uuid4())
+        now = _now()
+        with self.transaction() as db:
+            task = db.execute('SELECT state,head_revision FROM tasks WHERE task_id=?', (task_id,)).fetchone()
+            execution = db.execute('SELECT * FROM executions WHERE execution_id=? AND task_id=?',
+                                   (execution_id, task_id)).fetchone()
+            if not task or task['state'] not in ('implementing', 'repairing', 'reviewing'):
+                raise AuthenticationRecoveryError('authentication recovery is invalid for this task state')
+            expected_role = {'implementing': 'implementer', 'repairing': 'repair',
+                             'reviewing': 'reviewer'}[task['state']]
+            if (not execution or execution['role'] != expected_role or execution['engine'] != provider or
+                    execution['status'] not in ('failed', 'blocked')):
+                raise AuthenticationRecoveryError('interrupted execution is not a completed provider stage')
+            try:
+                result = json.loads(execution['result_json'] or '{}')
+            except (TypeError, ValueError):
+                result = {}
+            if result.get('error_class') != 'authentication':
+                raise AuthenticationRecoveryError('only classified authentication failures are recoverable')
+            if db.execute("SELECT 1 FROM executions WHERE task_id=? AND status IN "
+                          "('reserved','running','cancel_requested','reconciliation_required') LIMIT 1",
+                          (task_id,)).fetchone():
+                raise ReconciliationRequired('execution uncertainty must be resolved before authentication recovery')
+            for evidence_id in refs:
+                evidence = db.execute('''SELECT 1 FROM evidence WHERE evidence_id=? AND task_id=?
+                                      AND revision=? AND stale=0''',
+                                      (evidence_id, task_id, task['head_revision'])).fetchone()
+                if not evidence:
+                    raise StaleEvidence('authentication checkpoint references stale or absent evidence')
+            session = db.execute('''SELECT session_id FROM authentication_sessions
+                                  WHERE provider=? AND account_context=?
+                                  AND status IN ('waiting','in_progress')''',
+                                 (provider, account_context)).fetchone()
+            if session:
+                session_id = session['session_id']
+            else:
+                session_id = str(uuid.uuid4())
+                db.execute('''INSERT INTO authentication_sessions(session_id,provider,account_context,status,
+                              owner_task_id,attempt,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)''',
+                           (session_id, provider, account_context, 'waiting', task_id, 0, now, now))
+            db.execute('''INSERT INTO authentication_checkpoints(checkpoint_id,task_id,provider,
+                          account_context,interrupted_state,interrupted_role,candidate_revision,
+                          execution_id,evidence_refs_json,status,login_session_id,created_at,updated_at)
+                          VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+                       (checkpoint_id, task_id, provider, account_context, task['state'], expected_role,
+                        task['head_revision'], execution_id, _json(list(refs)), 'waiting', session_id, now, now))
+            self._append(db, task_id, task_id + '-authentication-required-' + checkpoint_id,
+                         'authentication_required', {
+                             'checkpoint_id': checkpoint_id, 'provider': provider,
+                             'interrupted_state': task['state'], 'interrupted_role': expected_role,
+                             'candidate_revision': task['head_revision'], 'evidence_refs': list(refs),
+                             'reason': auth_reason,
+                         })
+            db.execute('''UPDATE tasks SET state='authentication_required',next_action=?,
+                          version=version+1,updated_at=? WHERE task_id=?''',
+                       ('complete official ' + provider + ' subscription login', now, task_id))
+        return self.authentication_checkpoint(task_id)
+
+    def claim_authentication_login(self, task_id, provider, *, authority=None):
+        """Atomically elect one interactive login owner for a provider/account context."""
+        self._require(authority)
+        now = _now()
+        with self.transaction() as db:
+            checkpoint = db.execute('SELECT * FROM authentication_checkpoints WHERE task_id=?',
+                                    (task_id,)).fetchone()
+            task = db.execute('SELECT state FROM tasks WHERE task_id=?', (task_id,)).fetchone()
+            if (not checkpoint or not task or task['state'] != 'authentication_required' or
+                    checkpoint['provider'] != provider or checkpoint['status'] == 'resumed'):
+                raise AuthenticationRecoveryError('no matching recoverable authentication checkpoint')
+            session = db.execute('SELECT * FROM authentication_sessions WHERE session_id=?',
+                                 (checkpoint['login_session_id'],)).fetchone()
+            if session and session['status'] == 'in_progress':
+                return {'claimed': False, 'session_id': session['session_id'], 'status': 'in_progress'}
+            if session and session['status'] == 'succeeded':
+                return {'claimed': False, 'session_id': session['session_id'], 'status': 'succeeded'}
+            attempts = checkpoint['login_attempts']
+            if attempts >= 2:
+                raise AuthenticationRecoveryError('authentication login attempt limit reached')
+            if not session or session['status'] != 'waiting':
+                active = db.execute('''SELECT * FROM authentication_sessions WHERE provider=?
+                                    AND account_context=? AND status IN ('waiting','in_progress')''',
+                                    (provider, checkpoint['account_context'])).fetchone()
+                if active:
+                    session = active
+                else:
+                    session_id = str(uuid.uuid4())
+                    db.execute('''INSERT INTO authentication_sessions(session_id,provider,account_context,status,
+                                  owner_task_id,attempt,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)''',
+                               (session_id, provider, checkpoint['account_context'], 'waiting', task_id,
+                                attempts, now, now))
+                    session = db.execute('SELECT * FROM authentication_sessions WHERE session_id=?',
+                                         (session_id,)).fetchone()
+                db.execute('''UPDATE authentication_checkpoints SET login_session_id=?,updated_at=?
+                              WHERE checkpoint_id=?''',
+                           (session['session_id'], now, checkpoint['checkpoint_id']))
+            if session['status'] == 'in_progress':
+                return {'claimed': False, 'session_id': session['session_id'], 'status': 'in_progress'}
+            claimed = db.execute("UPDATE authentication_sessions SET status='in_progress',owner_task_id=?,"
+                                 "attempt=attempt+1,updated_at=? WHERE session_id=? AND status='waiting'",
+                                 (task_id, now, session['session_id']))
+            if claimed.rowcount != 1:
+                return {'claimed': False, 'session_id': session['session_id'], 'status': 'in_progress'}
+            db.execute('''UPDATE authentication_checkpoints SET login_attempts=login_attempts+1,
+                          updated_at=? WHERE provider=? AND account_context=? AND status='waiting' ''',
+                       (now, provider, checkpoint['account_context']))
+            self._append(db, task_id, task_id + '-authentication-login-claimed-' + session['session_id'],
+                         'authentication_login_claimed', {'provider': provider,
+                                                          'session_id': session['session_id']})
+            return {'claimed': True, 'session_id': session['session_id'], 'status': 'in_progress'}
+
+    def finish_authentication_login(self, session_id, outcome, *, auth_mode='unknown',
+                                    reason='unknown', authority=None):
+        """Record only a sanitized login outcome; raw terminal output is never accepted."""
+        self._require(authority)
+        if outcome not in ('succeeded', 'failed', 'cancelled', 'timed_out'):
+            raise AuthenticationRecoveryError('invalid login outcome')
+        if outcome == 'succeeded' and auth_mode != 'subscription':
+            raise AuthenticationRecoveryError('recovery requires verified subscription authentication')
+        if reason not in ('authenticated', 'status_unavailable', 'cli_failed', 'cancelled',
+                          'timed_out', 'not_subscription'):
+            raise AuthenticationRecoveryError('invalid sanitized login reason')
+        now = _now()
+        with self.transaction() as db:
+            session = db.execute('SELECT * FROM authentication_sessions WHERE session_id=?',
+                                 (session_id,)).fetchone()
+            if not session or session['status'] != 'in_progress':
+                raise AuthenticationRecoveryError('authentication session is not in progress')
+            db.execute('''UPDATE authentication_sessions SET status=?,auth_mode=?,result_reason=?,
+                          updated_at=? WHERE session_id=?''',
+                       (outcome, auth_mode, reason, now, session_id))
+            checkpoint_status = 'ready' if outcome == 'succeeded' else 'waiting'
+            rows = db.execute('''SELECT task_id,checkpoint_id FROM authentication_checkpoints
+                               WHERE login_session_id=? AND status='waiting' ''', (session_id,)).fetchall()
+            db.execute('''UPDATE authentication_checkpoints SET status=?,updated_at=?
+                          WHERE login_session_id=? AND status='waiting' ''',
+                       (checkpoint_status, now, session_id))
+            for row in rows:
+                self._append(db, row['task_id'], row['task_id'] + '-authentication-login-' +
+                             outcome + '-' + session_id, 'authentication_login_' + outcome,
+                             {'provider': session['provider'], 'session_id': session_id,
+                              'auth_mode': auth_mode, 'reason': reason})
+
+    def resume_after_authentication(self, task_id, *, authority=None):
+        """Restore exactly the interrupted stage after all revision/lifecycle checks pass."""
+        self._require(authority)
+        now = _now()
+        with self.transaction() as db:
+            task = db.execute('SELECT * FROM tasks WHERE task_id=?', (task_id,)).fetchone()
+            checkpoint = db.execute('SELECT * FROM authentication_checkpoints WHERE task_id=?',
+                                    (task_id,)).fetchone()
+            if not task or task['state'] != 'authentication_required' or not checkpoint:
+                raise AuthenticationRecoveryError('task is not waiting for authentication')
+            session = db.execute('SELECT * FROM authentication_sessions WHERE session_id=?',
+                                 (checkpoint['login_session_id'],)).fetchone()
+            if (checkpoint['status'] != 'ready' or not session or session['status'] != 'succeeded' or
+                    session['auth_mode'] != 'subscription'):
+                raise AuthenticationRecoveryError('subscription login has not been verified')
+            if task['head_revision'] != checkpoint['candidate_revision']:
+                raise StaleEvidence('candidate changed while authentication was pending')
+            if db.execute("SELECT 1 FROM executions WHERE task_id=? AND status IN "
+                          "('reserved','running','cancel_requested','reconciliation_required') LIMIT 1",
+                          (task_id,)).fetchone():
+                raise ReconciliationRequired('execution uncertainty must be resolved before resume')
+            execution = db.execute('SELECT status FROM executions WHERE execution_id=?',
+                                   (checkpoint['execution_id'],)).fetchone()
+            if not execution or execution['status'] not in ('failed', 'blocked'):
+                raise AuthenticationRecoveryError('interrupted execution is not durably finished')
+            for evidence_id in json.loads(checkpoint['evidence_refs_json']):
+                evidence = db.execute('''SELECT 1 FROM evidence WHERE evidence_id=? AND task_id=?
+                                      AND revision=? AND stale=0''',
+                                      (evidence_id, task_id, task['head_revision'])).fetchone()
+                if not evidence:
+                    raise StaleEvidence('checkpoint evidence became stale')
+            target = checkpoint['interrupted_state']
+            if target not in ('implementing', 'repairing', 'reviewing'):
+                raise AuthenticationRecoveryError('checkpoint stage is not resumable')
+            db.execute("UPDATE authentication_checkpoints SET status='resumed',updated_at=? WHERE task_id=?",
+                       (now, task_id))
+            db.execute('UPDATE tasks SET state=?,next_action=?,version=version+1,updated_at=? WHERE task_id=?',
+                       (target, 'resume interrupted ' + checkpoint['interrupted_role'] + ' stage', now, task_id))
+            self._append(db, task_id, task_id + '-authentication-resumed-' + checkpoint['checkpoint_id'],
+                         'authentication_resumed', {'checkpoint_id': checkpoint['checkpoint_id'],
+                                                    'provider': checkpoint['provider'],
+                                                    'state': target,
+                                                    'candidate_revision': task['head_revision']})
+        return self.task(task_id)
+
+    def authentication_checkpoint(self, task_id):
+        with self._connect() as db:
+            row = db.execute('SELECT * FROM authentication_checkpoints WHERE task_id=?',
+                             (task_id,)).fetchone()
+        if not row:
+            return None
+        result = dict(row)
+        result['evidence_refs'] = json.loads(result.pop('evidence_refs_json'))
+        return result
+
+    def recover_review_format_failure(self, task_id, execution_id, evidence_id, revision, *,
+                                      authority=None):
+        """Recover one verified provider-success review rejected only for JSON presentation."""
+        self._require(authority)
+        now = _now()
+        with self.transaction() as db:
+            task = db.execute('SELECT state,head_revision FROM tasks WHERE task_id=?',
+                              (task_id,)).fetchone()
+            execution = db.execute('SELECT * FROM executions WHERE execution_id=? AND task_id=?',
+                                   (execution_id, task_id)).fetchone()
+            evidence = db.execute('''SELECT 1 FROM evidence WHERE evidence_id=? AND task_id=?
+                                  AND revision=? AND kind='independent-review' AND status='passed'
+                                  AND stale=0''', (evidence_id, task_id, revision)).fetchone()
+            last = db.execute('''SELECT event_type,payload_json FROM events WHERE task_id=?
+                              AND event_type='transition' ORDER BY sequence DESC LIMIT 1''',
+                              (task_id,)).fetchone()
+            if not task or task['state'] != 'blocked' or task['head_revision'] != revision:
+                raise ControllerError('review format recovery requires the unchanged blocked candidate')
+            if (not execution or execution['role'] != 'reviewer' or execution['status'] != 'failed'):
+                raise ControllerError('review format recovery requires the failed reviewer execution')
+            details = json.loads(execution['result_json'] or '{}')
+            if (details.get('error_class') is not None or
+                    details.get('parse_error') != 'reviewer did not return a JSON object'):
+                raise ControllerError('review failure is not the narrow recoverable format case')
+            if not evidence:
+                raise ControllerError('validated current review evidence is required')
+            if (not last or last['event_type'] != 'transition' or
+                    json.loads(last['payload_json']).get('from') != 'reviewing' or
+                    json.loads(last['payload_json']).get('to') != 'blocked'):
+                raise ControllerError('task was not blocked by the rejected review')
+            if db.execute("SELECT 1 FROM executions WHERE task_id=? AND status IN "
+                          "('reserved','running','cancel_requested','reconciliation_required') LIMIT 1",
+                          (task_id,)).fetchone():
+                raise ReconciliationRequired('execution uncertainty prevents review recovery')
+            self._append(db, task_id, task_id + '-review-format-recovered-' + execution_id,
+                         'review_format_recovered', {'execution_id': execution_id,
+                                                     'evidence_id': evidence_id,
+                                                     'revision': revision})
+            db.execute("UPDATE tasks SET state='review_complete',next_action=?,version=version+1,"
+                       "updated_at=? WHERE task_id=?",
+                       ('prepare local approval package', now, task_id))
+        return self.task(task_id)
+
     def add_evidence(self, task_id, evidence_id, revision, kind, status, artifact_sha256,
                      details, *, authority=None):
         self._require(authority)
@@ -569,9 +851,12 @@ class ControllerStore:
             executions = db.execute('SELECT * FROM executions WHERE task_id=? ORDER BY rowid', (task_id,)).fetchall()
             evidence = db.execute('SELECT * FROM evidence WHERE task_id=? ORDER BY rowid', (task_id,)).fetchall()
             approvals = db.execute('SELECT * FROM approvals WHERE task_id=? ORDER BY rowid', (task_id,)).fetchall()
+            authentication = db.execute('''SELECT * FROM authentication_checkpoints
+                                          WHERE task_id=? ORDER BY rowid''', (task_id,)).fetchall()
         return {'task': dict(task), 'budget': dict(budget), 'events': [dict(x) for x in events],
                 'executions': [dict(x) for x in executions], 'evidence': [dict(x) for x in evidence],
-                'approvals': [dict(x) for x in approvals]}
+                'approvals': [dict(x) for x in approvals],
+                'authentication_checkpoints': [dict(x) for x in authentication]}
 
     @property
     def authority(self):

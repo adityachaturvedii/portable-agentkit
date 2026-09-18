@@ -8,7 +8,8 @@ import threading
 import unittest
 from unittest.mock import patch
 
-from agentkit.adapters import ADAPTERS, execute, normalize, persist_result, stop_on_limit
+from agentkit.adapters import (ADAPTERS, execute, normalize, persist_result,
+                               stop_on_limit, structured_json_text)
 from agentkit.doctor import auth_summary, clean_environment, detect_engine, owned_code_profile
 from agentkit.process import ProcessOutcome, run_process
 from agentkit.redaction import redact, redacted_stream
@@ -69,6 +70,13 @@ class RuntimeTests(unittest.TestCase):
                     b'{"type":"error","type":"turn.completed"}\n', b'[]\n'):
             out = ProcessOutcome(raw, b'', 0, .01, None, CancellationStatus())
             self.assertEqual(normalize(self.request(), out).error_class, 'malformed_output')
+
+    def test_single_json_fence_is_accepted_without_relaxing_json_validation(self):
+        self.assertEqual(structured_json_text('```json\n{"verdict":"no_findings","findings":[]}\n```'),
+                         {'verdict': 'no_findings', 'findings': []})
+        for value in ('before ```json\n{}\n```', '```JSON\n{}\n```', '```json\n{}\n``` after',
+                      '```json\n{"x":1,"x":2}\n```', '```json\nNaN\n```'):
+            self.assertIsNone(structured_json_text(value))
 
     def test_simulated_errors_both_providers(self):
         for engine in ADAPTERS:

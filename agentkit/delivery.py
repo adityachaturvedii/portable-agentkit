@@ -9,7 +9,7 @@ import sys
 import tempfile
 import time
 
-from .adapters import execute, execute_owned_code
+from .adapters import execute, execute_owned_code, structured_json_text
 from .controller import (ControllerError, ControllerStore, UsageRecord)
 from .doctor import clean_environment, native_sandbox_capability, verification_profile
 from .git_broker import GitBroker
@@ -220,7 +220,8 @@ class LiveImplementer:
         result = execute_owned_code(request, output, boundary, policy=policy)
         return EngineOutcome(result.status, result.elapsed_seconds, _usage_from_result(result),
                              {'error_class': result.error_class, 'artifacts': result.artifacts,
-                              'limitations': result.limitations})
+                              'limitations': result.limitations,
+                              'authentication_failure': result.provider_details.get('authentication_failure')})
 
 
 class LiveReviewer:
@@ -254,7 +255,8 @@ class LiveReviewer:
         return EngineOutcome(status, result.elapsed_seconds, _usage_from_result(result),
                              {'error_class': result.error_class, 'parse_error': parse_error,
                               'artifacts': result.artifacts, 'limitations': result.limitations,
-                              'candidate_revision': revision}, findings)
+                              'candidate_revision': revision,
+                              'authentication_failure': result.provider_details.get('authentication_failure')}, findings)
 
 
 def validate_review(value):
@@ -315,6 +317,69 @@ class DeliveryWorkflow:
                                     outcome.usage, outcome.details, authority=self.store.authority)
         return outcome, execution_id
 
+    @classmethod
+    def open(cls, root, implementer, reviewer, *, verifier=None, live_authorized=False):
+        """Open a durable workflow without recreating completed work."""
+        self = cls.__new__(cls)
+        self.root = Path(root).resolve()
+        if not self.root.is_dir():
+            raise ControllerError('workflow root does not exist')
+        self.controller_root = self.root / 'controller'
+        self.managed_root = self.root / 'managed'
+        self.evidence_root = self.root / 'evidence'
+        self.approval_root = self.root / 'approval'
+        self.store = ControllerStore(self.controller_root)
+        self.broker = GitBroker(self.managed_root)
+        self.implementer = implementer
+        self.reviewer = reviewer
+        self.verifier = verifier or ConstrainedVerifier(
+            self.broker, self.controller_root, self.approval_root, self.evidence_root)
+        self.policy = LivePolicy(live_authorized,
+            'Operator authorized a bounded Phase 3 disposable end-to-end demonstration; no auth/billing changes.')
+        return self
+
+    def _fresh_path(self, parent, stem):
+        candidate = Path(parent) / stem
+        index = 0
+        while candidate.exists() or candidate.is_symlink():
+            index += 1
+            candidate = Path(parent) / (stem + '-resume-' + str(index))
+        return candidate
+
+    def _verification_records(self, task_id):
+        records = []
+        for item in self.store.snapshot(task_id)['evidence']:
+            if item['kind'] == 'independent-check':
+                records.append({'id': item['evidence_id'], 'revision': item['revision'],
+                                'status': item['status'], 'artifact_sha256': item['artifact_sha256'],
+                                'stale': bool(item['stale'])})
+        return records
+
+    def _latest_repair_feedback(self, task_id, contract):
+        evidence = self.store.snapshot(task_id)['evidence']
+        for item in reversed(evidence):
+            if item['status'] != 'failed':
+                continue
+            details = json.loads(item['details_json'])
+            if item['kind'] == 'independent-check':
+                return {'kind': 'failed_test', 'revision': item['revision'],
+                        'acceptance': contract['acceptance'], 'failed_test': {
+                            'exit_code': details.get('exit_code'),
+                            'stop_reason': details.get('stop_reason'),
+                            'output': str(details.get('output', ''))[-8192:]}}
+            if item['kind'] == 'independent-review':
+                return {'kind': 'review_findings', 'revision': item['revision'],
+                        'findings': details.get('findings', [])}
+        return None
+
+    def _checkpoint_authentication(self, task_id, execution_id, outcome, evidence_refs=()):
+        return self.store.checkpoint_authentication(
+            task_id, execution_id, outcome.details.get('provider', None) or
+            self.store.snapshot(task_id)['executions'][-1]['engine'],
+            evidence_refs=evidence_refs,
+            auth_reason=outcome.details.get('authentication_failure') or 'missing_or_expired',
+            authority=self.store.authority)
+
     def run(self, task_id='phase3-demo'):
         contract = {
             'objective': 'Correct the disposable arithmetic defect and prepare a local PR approval package.',
@@ -323,10 +388,11 @@ class DeliveryWorkflow:
             'acceptance': [{'id': 'total', 'expected': 'all immutable unittest cases pass'}],
             'risk': 'routine', 'max_repairs': 2
         }
-        task = self.store.create_task(task_id, contract['objective'], implementer=(self.implementer.engine, self.implementer.model),
-                                      reviewer=(self.reviewer.engine, self.reviewer.model), max_calls=9,
-                                      max_elapsed_seconds=540, max_concurrency=1,
-                                      max_timeout_seconds=60, verification_reserve=2)
+        self.store.create_task(task_id, contract['objective'],
+                               implementer=(self.implementer.engine, self.implementer.model),
+                               reviewer=(self.reviewer.engine, self.reviewer.model), max_calls=9,
+                               max_elapsed_seconds=540, max_concurrency=1,
+                               max_timeout_seconds=60, verification_reserve=2)
         self.store.set_contract(task_id, contract, authority=self.store.authority)
         self._transition(task_id, 'received', 'contracted', 'contracted', 'create isolated worktree')
         repository, base = self.broker.create_repository(task_id, {
@@ -335,135 +401,240 @@ class DeliveryWorkflow:
         })
         branch, worktree, base = self.broker.create_task_worktree(repository, task_id, base)
         self.store.set_workspace(task_id, branch, str(worktree), base, authority=self.store.authority)
-        self._transition(task_id, 'contracted', 'workspace_ready', 'workspace', 'run bounded implementation')
-        attempt = 0
-        review_findings = ()
-        verification_records = []
-        repair_feedback = None
+        self._transition(task_id, 'contracted', 'workspace_ready', 'workspace',
+                         'run bounded implementation')
+        return self._drive(task_id)
+
+    def resume(self, task_id='phase3-demo'):
+        """Resume exactly the stage retained in an authentication checkpoint."""
+        self.store.resume_after_authentication(task_id, authority=self.store.authority)
+        return self._drive(task_id)
+
+    def recover_review_format(self, task_id='phase3-demo'):
+        """Revalidate an already captured successful review without another inference call."""
+        task = self.store.task(task_id)
+        if task['state'] != 'blocked':
+            raise ControllerError('review format recovery requires a blocked workflow')
+        executions = [item for item in self.store.snapshot(task_id)['executions']
+                      if item['role'] == 'reviewer']
+        if not executions:
+            raise ControllerError('no reviewer execution is available')
+        execution = executions[-1]
+        details = json.loads(execution['result_json'] or '{}')
+        matches = []
+        for directory in self.evidence_root.glob('reviewer-*'):
+            result_path = directory / 'result.json'
+            if not result_path.is_file():
+                continue
+            value = json.loads(result_path.read_text())
+            if value.get('artifacts') == details.get('artifacts'):
+                matches.append((directory, value))
+        if len(matches) != 1:
+            raise ControllerError('review artifacts are absent or ambiguous')
+        directory, saved = matches[0]
+        stdout = directory / 'stdout.redacted.jsonl'
+        if (not stdout.is_file() or hashlib.sha256(stdout.read_bytes()).hexdigest() !=
+                saved.get('artifacts', {}).get('stdout.redacted.jsonl')):
+            raise ControllerError('review stream does not match its recorded artifact hash')
+        terminal = []
+        for line in stdout.read_text().splitlines():
+            value = json.loads(line)
+            if isinstance(value, dict) and value.get('type') == 'result':
+                terminal.append(value)
+        if (len(terminal) != 1 or terminal[0].get('is_error') is not False or
+                terminal[0].get('subtype') != 'success'):
+            raise ControllerError('retained review has no single provider-success terminal')
+        review_value = structured_json_text(terminal[0].get('result'))
+        findings = validate_review(review_value)
+        if findings:
+            raise ControllerError('format recovery cannot bypass material review findings')
+        repository = self.managed_root / 'repositories' / task_id
+        worktree = Path(task['worktree'])
+        identity = self.broker.worktree_identity(repository, worktree)
+        if identity['revision'] != task['head_revision'] or not identity['clean']:
+            raise ControllerError('candidate changed before review format recovery')
+        attempt = task['repair_count']
+        original_snapshot = self.broker.review_copies / (task_id + '-' + str(attempt))
+        if not original_snapshot.is_dir():
+            raise ControllerError('original read-only review snapshot is unavailable')
+        current_snapshot = self.broker.export_snapshot(
+            repository, task['head_revision'],
+            self._fresh_path(self.broker.review_copies, task_id + '-format-recovery'), review=True)
+        if self.broker.manifest(original_snapshot) != self.broker.manifest(current_snapshot):
+            raise ControllerError('reviewed snapshot no longer matches the candidate')
+        payload = {'status': 'succeeded', 'findings': [], 'revision': task['head_revision'],
+                   'recovered_from_execution': execution['execution_id'],
+                   'recovery': 'strict single JSON fence parsed from hash-matched provider-success stream'}
+        artifact = self.store.put_artifact(json.dumps(payload, sort_keys=True))
+        evidence_id = 'review-format-recovered-' + str(attempt)
+        self.store.add_evidence(task_id, evidence_id, task['head_revision'], 'independent-review',
+                                'passed', artifact, payload, authority=self.store.authority)
+        self.store.recover_review_format_failure(
+            task_id, execution['execution_id'], evidence_id, task['head_revision'],
+            authority=self.store.authority)
+        return self._drive(task_id)
+
+    def _drive(self, task_id):
         while True:
-            state = self.store.task(task_id)['state']
-            if state == 'workspace_ready':
-                self._transition(task_id, state, 'implementing', 'implementing-' + str(attempt), 'apply worker patch')
-                implementation_from = 'implementing'
-            elif state == 'repairing':
-                implementation_from = 'repairing'
-            else:
-                raise ControllerError('unexpected implementation state: ' + state)
-            worker = self.broker.export_snapshot(repository, self.store.task(task_id)['head_revision'],
-                                                 self.broker.worker_copies / (task_id + '-' + str(attempt)))
-            denied = (str(self.controller_root), str(repository / '.git'), str(worktree), str(self.approval_root))
-            boundary = ExecutionBoundary(str(worker), denied)
-            prompt = ('Read calculator.py and test_calculator.py. Fix the arithmetic defect by editing calculator.py only. '
-                      'Run python3 -B -m unittest -v. Do not access any other path or network.')
-            if repair_feedback is not None:
-                prompt += ('\nController-generated repair feedback (JSON): ' +
-                           json.dumps(repair_feedback, sort_keys=True))
-            impl_output = self.evidence_root / ('implementer-' + str(attempt))
-            outcome, _ = self._run_engine(task_id, 'repair' if attempt else 'implementer',
-                                          self.implementer.engine, self.implementer.model, 60,
-                                          lambda: self.implementer.run(worker, impl_output, boundary, prompt, self.policy))
-            if outcome.status != 'succeeded':
-                self._transition(task_id, implementation_from, 'blocked', 'implementation-blocked-' + str(attempt),
-                                 'inspect implementation execution')
+            task = self.store.task(task_id)
+            state = task['state']
+            contract = task['contract']
+            repository = self.managed_root / 'repositories' / task_id
+            worktree = Path(task['worktree'])
+            branch = task['branch']
+            base = task['base_revision']
+            head = task['head_revision']
+            attempt = task['repair_count']
+
+            if state in ('awaiting_pr_approval', 'blocked', 'cancelled', 'authentication_required'):
                 break
-            head, changed = self.broker.apply_worker_changes(repository, worktree, worker,
-                                                              contract['scope'], 'Fix disposable arithmetic defect')
-            if changed != ['calculator.py']:
-                raise ControllerError('unexpected changed paths')
-            self.store.set_head(task_id, head, authority=self.store.authority)
-            self._transition(task_id, implementation_from, 'implemented', 'implemented-' + str(attempt),
-                             'run independent checks')
-            self._transition(task_id, 'implemented', 'verifying', 'verifying-' + str(attempt),
-                             'evaluate immutable tests')
-            verification, _ = self._run_engine(
-                task_id, 'verification', self.verifier.engine, self.verifier.model, 10,
-                lambda: self.verifier.run(repository, worktree, head, TEST_SOURCE, attempt))
-            artifact = self.store.put_artifact(json.dumps(verification.details, sort_keys=True))
-            evidence_id = 'verification-' + str(attempt)
-            evidence_status = ('passed' if verification.status == 'succeeded' else
-                               'blocked' if verification.status == 'blocked' else 'failed')
-            self.store.add_evidence(task_id, evidence_id, head, 'independent-check', evidence_status,
-                                    artifact, verification.details, authority=self.store.authority)
-            verification_records.append({'id': evidence_id, 'revision': head,
-                                         'status': evidence_status, 'artifact_sha256': artifact})
-            if verification.status == 'blocked':
-                self._transition(task_id, 'verifying', 'blocked', 'verification-blocked-' + str(attempt),
-                                 'restore the required constrained verification environment')
-                break
-            if verification.status != 'succeeded':
-                repair_feedback = {
-                    'kind': 'failed_test',
-                    'revision': head,
-                    'acceptance': contract['acceptance'],
-                    'failed_test': {
-                        'exit_code': verification.details.get('exit_code'),
-                        'stop_reason': verification.details.get('stop_reason'),
-                        'output': str(verification.details.get('output', ''))[-8192:],
-                    },
-                }
-                decision = self.store.record_failure(task_id, hashlib.sha256(artifact.encode()).hexdigest(),
-                                                     str(verification.details.get('output', '')),
-                                                     authority=self.store.authority)
-                if decision == 'repair_allowed':
-                    self._transition(task_id, 'verifying', 'repairing', 'repair-check-' + str(attempt),
-                                     'repair concrete verification failure')
-                    attempt += 1
+
+            if state in ('workspace_ready', 'implementing', 'repairing'):
+                if state == 'workspace_ready':
+                    self._transition(task_id, state, 'implementing', 'implementing-' + str(attempt),
+                                     'apply worker patch')
+                    state = 'implementing'
+                implementation_from = state
+                worker = self.broker.export_snapshot(
+                    repository, head,
+                    self._fresh_path(self.broker.worker_copies, task_id + '-' + str(attempt)))
+                denied = (str(self.controller_root), str(repository / '.git'), str(worktree),
+                          str(self.approval_root))
+                boundary = ExecutionBoundary(str(worker), denied)
+                prompt = ('Read calculator.py and test_calculator.py. Fix the arithmetic defect by editing '
+                          'calculator.py only. Run python3 -B -m unittest -v. Do not access any other path or network.')
+                if state == 'repairing':
+                    feedback = self._latest_repair_feedback(task_id, contract)
+                    if feedback is None:
+                        raise ControllerError('repair stage has no durable failure feedback')
+                    prompt += '\nController-generated repair feedback (JSON): ' + json.dumps(feedback, sort_keys=True)
+                impl_output = self._fresh_path(self.evidence_root, 'implementer-' + str(attempt))
+                outcome, execution_id = self._run_engine(
+                    task_id, 'repair' if state == 'repairing' else 'implementer',
+                    self.implementer.engine, self.implementer.model, 60,
+                    lambda: self.implementer.run(worker, impl_output, boundary, prompt, self.policy))
+                if outcome.details.get('error_class') == 'authentication':
+                    self._checkpoint_authentication(task_id, execution_id, outcome)
                     continue
-                break
-            self._transition(task_id, 'verifying', 'verified', 'verified-' + str(attempt), 'run independent review')
-            self._transition(task_id, 'verified', 'reviewing', 'reviewing-' + str(attempt), 'evaluate review findings')
-            snapshot = self.broker.export_snapshot(repository, head,
-                                                   self.broker.review_copies / (task_id + '-' + str(attempt)), review=True)
-            review_manifest = self.broker.manifest(snapshot)
-            review_output = self.evidence_root / ('reviewer-' + str(attempt))
-            review_prompt = ('Independently review this candidate against the requirement that total returns arithmetic sum '
-                             'and tests cover positive and negative inputs. Identify only concrete material defects.')
-            review, _ = self._run_engine(task_id, 'reviewer', self.reviewer.engine, self.reviewer.model, 60,
-                                         lambda: self.reviewer.run(snapshot, head, review_output,
-                                                                   review_prompt, self.policy))
-            if self.broker.manifest(snapshot) != review_manifest:
-                review = EngineOutcome('failed', review.elapsed_seconds, review.usage,
-                                       {**review.details, 'boundary_error': 'reviewer modified read-only snapshot'},
-                                       review.findings)
-            review_findings = review.findings
-            review_payload = {'status': review.status, 'findings': list(review.findings),
-                              'details': review.details, 'revision': head}
-            review_artifact = self.store.put_artifact(json.dumps(review_payload, sort_keys=True))
-            self.store.add_evidence(task_id, 'review-' + str(attempt), head, 'independent-review',
-                                    'passed' if review.status == 'succeeded' and not review.findings else 'failed',
-                                    review_artifact, review_payload, authority=self.store.authority)
-            if review.status != 'succeeded':
-                self._transition(task_id, 'reviewing', 'blocked', 'review-blocked-' + str(attempt),
-                                 'inspect invalid or failed review')
-                break
-            if review.findings:
-                repair_feedback = {
-                    'kind': 'review_findings',
-                    'revision': head,
-                    'findings': list(review.findings),
-                }
-                signature = hashlib.sha256(json.dumps(review.findings, sort_keys=True).encode()).hexdigest()
-                decision = self.store.record_failure(task_id, signature, json.dumps(review.findings),
-                                                     authority=self.store.authority)
-                if decision == 'repair_allowed':
-                    self._transition(task_id, 'reviewing', 'repairing', 'repair-review-' + str(attempt),
-                                     'repair concrete review finding')
-                    attempt += 1
+                if outcome.status != 'succeeded':
+                    self._transition(task_id, implementation_from, 'blocked',
+                                     'implementation-blocked-' + str(attempt),
+                                     'inspect implementation execution')
                     continue
-                break
-            self._transition(task_id, 'reviewing', 'review_complete', 'reviewed-' + str(attempt),
-                             'prepare local approval package')
-            self._transition(task_id, 'review_complete', 'packaging', 'packaging', 'bind package to current head')
-            package = self._package(task_id, repository, branch, base, head, verification_records, review_findings)
-            digest = self.store.put_artifact(json.dumps(package, sort_keys=True))
-            self.store.add_evidence(task_id, 'approval-package', head, 'approval-package', 'passed',
-                                    digest, {'base_revision': base, 'head_revision': head},
-                                    authority=self.store.authority)
-            package['artifact_sha256'] = digest
-            self._write_package(package)
-            self._transition(task_id, 'packaging', 'awaiting_pr_approval', 'awaiting-pr-approval',
-                             'await explicit user approval bound to this head')
-            break
+                head, changed = self.broker.apply_worker_changes(
+                    repository, worktree, worker, contract['scope'], 'Fix disposable arithmetic defect')
+                if changed != ['calculator.py']:
+                    raise ControllerError('unexpected changed paths')
+                self.store.set_head(task_id, head, authority=self.store.authority)
+                self._transition(task_id, implementation_from, 'implemented',
+                                 'implemented-' + str(attempt), 'run independent checks')
+                continue
+
+            if state == 'implemented':
+                self._transition(task_id, 'implemented', 'verifying', 'verifying-' + str(attempt),
+                                 'evaluate immutable tests')
+                continue
+
+            if state == 'verifying':
+                verification, _ = self._run_engine(
+                    task_id, 'verification', self.verifier.engine, self.verifier.model, 10,
+                    lambda: self.verifier.run(repository, worktree, head, TEST_SOURCE, attempt))
+                artifact = self.store.put_artifact(json.dumps(verification.details, sort_keys=True))
+                evidence_id = 'verification-' + str(attempt)
+                evidence_status = ('passed' if verification.status == 'succeeded' else
+                                   'blocked' if verification.status == 'blocked' else 'failed')
+                self.store.add_evidence(task_id, evidence_id, head, 'independent-check', evidence_status,
+                                        artifact, verification.details, authority=self.store.authority)
+                if verification.status == 'blocked':
+                    self._transition(task_id, 'verifying', 'blocked',
+                                     'verification-blocked-' + str(attempt),
+                                     'restore the required constrained verification environment')
+                    continue
+                if verification.status != 'succeeded':
+                    decision = self.store.record_failure(
+                        task_id, hashlib.sha256(artifact.encode()).hexdigest(),
+                        str(verification.details.get('output', '')), authority=self.store.authority)
+                    if decision == 'repair_allowed':
+                        self._transition(task_id, 'verifying', 'repairing',
+                                         'repair-check-' + str(attempt),
+                                         'repair concrete verification failure')
+                    continue
+                self._transition(task_id, 'verifying', 'verified', 'verified-' + str(attempt),
+                                 'run independent review')
+                continue
+
+            if state == 'verified':
+                self._transition(task_id, 'verified', 'reviewing', 'reviewing-' + str(attempt),
+                                 'evaluate review findings')
+                continue
+
+            if state == 'reviewing':
+                snapshot = self.broker.export_snapshot(
+                    repository, head,
+                    self._fresh_path(self.broker.review_copies, task_id + '-' + str(attempt)), review=True)
+                review_manifest = self.broker.manifest(snapshot)
+                review_output = self._fresh_path(self.evidence_root, 'reviewer-' + str(attempt))
+                review_prompt = ('Independently review this candidate against the requirement that total returns '
+                                 'arithmetic sum and tests cover positive and negative inputs. Identify only concrete '
+                                 'material defects.')
+                review, execution_id = self._run_engine(
+                    task_id, 'reviewer', self.reviewer.engine, self.reviewer.model, 60,
+                    lambda: self.reviewer.run(snapshot, head, review_output, review_prompt, self.policy))
+                if review.details.get('error_class') == 'authentication':
+                    checks = [item['evidence_id'] for item in self.store.snapshot(task_id)['evidence']
+                              if item['kind'] == 'independent-check' and item['revision'] == head and
+                              item['status'] == 'passed' and not item['stale']]
+                    self._checkpoint_authentication(task_id, execution_id, review, checks)
+                    continue
+                if self.broker.manifest(snapshot) != review_manifest:
+                    review = EngineOutcome('failed', review.elapsed_seconds, review.usage,
+                                           {**review.details,
+                                            'boundary_error': 'reviewer modified read-only snapshot'},
+                                           review.findings)
+                review_payload = {'status': review.status, 'findings': list(review.findings),
+                                  'details': review.details, 'revision': head}
+                review_artifact = self.store.put_artifact(json.dumps(review_payload, sort_keys=True))
+                self.store.add_evidence(task_id, 'review-' + str(attempt), head, 'independent-review',
+                                        'passed' if review.status == 'succeeded' and not review.findings else 'failed',
+                                        review_artifact, review_payload, authority=self.store.authority)
+                if review.status != 'succeeded':
+                    self._transition(task_id, 'reviewing', 'blocked',
+                                     'review-blocked-' + str(attempt), 'inspect invalid or failed review')
+                    continue
+                if review.findings:
+                    signature = hashlib.sha256(json.dumps(review.findings, sort_keys=True).encode()).hexdigest()
+                    decision = self.store.record_failure(task_id, signature, json.dumps(review.findings),
+                                                         authority=self.store.authority)
+                    if decision == 'repair_allowed':
+                        self._transition(task_id, 'reviewing', 'repairing',
+                                         'repair-review-' + str(attempt),
+                                         'repair concrete review finding')
+                    continue
+                self._transition(task_id, 'reviewing', 'review_complete', 'reviewed-' + str(attempt),
+                                 'prepare local approval package')
+                continue
+
+            if state == 'review_complete':
+                self._transition(task_id, 'review_complete', 'packaging', 'packaging',
+                                 'bind package to current head')
+                continue
+
+            if state == 'packaging':
+                review_findings = ()
+                package = self._package(task_id, repository, branch, base, head,
+                                        self._verification_records(task_id), review_findings)
+                digest = self.store.put_artifact(json.dumps(package, sort_keys=True))
+                self.store.add_evidence(task_id, 'approval-package', head, 'approval-package', 'passed',
+                                        digest, {'base_revision': base, 'head_revision': head},
+                                        authority=self.store.authority)
+                package['artifact_sha256'] = digest
+                self._write_package(package)
+                self._transition(task_id, 'packaging', 'awaiting_pr_approval', 'awaiting-pr-approval',
+                                 'await explicit user approval bound to this head')
+                continue
+
+            raise ControllerError('unexpected workflow state: ' + state)
+
         snapshot = self.store.snapshot(task_id)
         self._write_state(snapshot)
         return {'task': self.store.task(task_id), 'snapshot': snapshot,
@@ -475,7 +646,8 @@ class DeliveryWorkflow:
         usage = []
         for record in snapshot['executions']:
             usage.append({'execution_id': record['execution_id'], 'role': record['role'],
-                          'engine': record['engine'], 'elapsed_seconds': record['elapsed_seconds'],
+                          'engine': record['engine'], 'status': record['status'],
+                          'elapsed_seconds': record['elapsed_seconds'],
                           'usage': json.loads(record['usage_json']) if record['usage_json'] else None})
         return {
             'schema_version': 1, 'task_id': task_id, 'status': 'awaiting_pr_approval',
@@ -513,7 +685,7 @@ class DeliveryWorkflow:
         (self.root / 'controller-state.json').write_text(json.dumps(safe, indent=2, allow_nan=False) + '\n')
 
 
-def run_demo(directory, live=False, authorized=False, implementer_engine='codex'):
+def run_demo(directory, live=False, authorized=False, implementer_engine='codex', resume=False):
     if live and not authorized:
         raise ControllerError('live demonstration requires explicit existing-subscription authorization')
     if implementer_engine not in ('codex', 'claude'):
@@ -521,5 +693,8 @@ def run_demo(directory, live=False, authorized=False, implementer_engine='codex'
     reviewer_engine = 'claude' if implementer_engine == 'codex' else 'codex'
     implementer = LiveImplementer(implementer_engine) if live else FakeImplementer()
     reviewer = LiveReviewer(reviewer_engine) if live else FakeReviewer()
+    if resume:
+        workflow = DeliveryWorkflow.open(directory, implementer, reviewer, live_authorized=authorized)
+        return workflow.resume()
     workflow = DeliveryWorkflow(directory, implementer, reviewer, live_authorized=authorized)
     return workflow.run()

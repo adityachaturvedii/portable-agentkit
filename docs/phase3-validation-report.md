@@ -66,3 +66,26 @@ The expected terminal state is `awaiting_pr_approval`. Inspect `/tmp/agentkit-ph
 The deterministic local workflow is ready for continued controller development on trusted disposable repositories. Phase 3 has enough evidence for local task, Git, verification, review, repair, budget, restart and approval-package semantics.
 
 Full Phase 4 orchestration should not begin yet. First restore Claude subscription authentication outside this toolkit and complete one bounded cross-provider review through `awaiting_pr_approval`. That does not expand the security scope: broad repositories, hostile inputs, other platforms, detached-process containment, remote cancellation and tool-network or comprehensive credential isolation remain blocked until separately validated.
+
+## Authentication-recovery follow-up — 2026-09-19
+
+This follow-up supersedes the recommendation immediately above.
+
+The follow-up starts from `b7ce31826803f640330bd21f879523508d32c0ff`. It adds official Codex browser/device login and Claude subscription browser/manual-code handoff, secret-free durable authentication checkpoints, provider/account login coordination, bounded attempts and exact-stage resume. Login is a separate attached terminal operation: its streams are never captured or persisted. See [authentication recovery](authentication-recovery.md).
+
+The earlier partial run could not be resumed because only exported redacted evidence survived and its task was terminal `blocked`; no controller database or authentication checkpoint was available. One fresh live disposable run was therefore required. Codex implemented the same fixture, the constrained independent test passed, and Claude produced a provider-success no-findings review under existing first-party subscription authentication. No interactive login was needed.
+
+Claude returned the valid review object inside one exact `json` Markdown fence. The strict adapter originally rejected it and moved the task to `blocked`. A regression-tested parser now accepts either a bare object or one exact JSON fence while continuing to reject prefixes, suffixes, wrong fence labels, duplicate keys, nonfinite values and non-objects. The retained live result was recovered offline without another inference call: the recovery verified the saved stream hash, a single provider-success terminal, the unchanged candidate revision, a snapshot identical to the reviewed copy and the concrete review schema before recording passing review evidence. The task then reached `awaiting_pr_approval`; no approval was recorded.
+
+Observed live resources were:
+
+| Execution | Controller result | Elapsed | Provider observation |
+|---|---|---:|---|
+| Codex implementer | succeeded | 25.945640 s | 37,016 input; 27,008 cached input; 203 output; 0 reasoning |
+| Constrained local verification | succeeded | 0.243396 s | token usage unavailable |
+| Claude reviewer | provider succeeded; controller format classification recovered offline | 3.231806 s | 2 input; 0 cached input; 2,831 cache creation; 139 output; reasoning unavailable; CLI estimate USD 0.031795 |
+| Controller total | `awaiting_pr_approval` after 3 allocations | 29.420842 s | billed cost unknown |
+
+The Claude dollar field is the CLI's estimate, not a billing measurement. Cached and cache-creation categories remain separate and are not added to input totals. Evidence is archived under [phase3-auth-recovery](../evidence/phase3-auth-recovery/manifest.json).
+
+The bounded cross-provider gate for trusted controller-created disposable macOS workspaces is now satisfied. Phase 3 authentication recovery is ready for this same scope. Phase 4 may begin only within that scope; other platforms, untrusted repositories, remote login, detached-process containment, remote cancellation, tool-network separation and comprehensive credential isolation remain unsupported or unverified.

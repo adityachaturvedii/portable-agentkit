@@ -80,6 +80,20 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [x] Namespace repair/failure event IDs by task and test two tasks with the same signature.
 - [ ] Complete a new live cross-provider workflow: **still blocked/unverified because the retained Claude attempt ended with expired OAuth; no authentication change or live rerun was performed in this corrective pass**.
 
+## Phase 3 authentication recovery
+
+- [x] Start from exact `b7ce31826803f640330bd21f879523508d32c0ff` on `implementation/phase-3-auth-recovery` in a dedicated worktree.
+- [x] Verify installed Codex and Claude Code login/status help against official provider documentation.
+- [x] Support Codex browser/device login and Claude subscription browser login with its official manual code handoff.
+- [x] Keep official login in an attached controller-side terminal; never capture its input, output, authorization codes or transcript.
+- [x] Reuse working subscription auth and exclude API-key/provider override variables without logging out, moving or reading credential contents.
+- [x] Persist a secret-free authentication checkpoint bound to provider, interrupted stage, failed execution, candidate revision and evidence references.
+- [x] Coordinate one login per provider/account context, allow two attempts, and keep waiting outside model execution and repair accounting.
+- [x] Resume only implementer, repair or reviewer state after subscription status, execution finality, candidate, evidence and reconciliation checks pass.
+- [x] Test existing/missing/expired auth, successful stage resume, cancelled/failed/timed-out login, duplicate login, restart, uncertainty, stale evidence, non-auth failures, secret exclusion and accounting preservation.
+- [x] Complete the bounded live Codex implementation → constrained verification → Claude review → local approval package demonstration without repeating a successful inference for evidence.
+- [ ] Other platforms, remote terminal handoff, custom credential stores and complete login-process credential isolation: **unverified/unsupported**.
+
 ## Later phases (planned, not implemented)
 
 - [ ] Phase 4: cross-provider roles and measured routing.
@@ -94,5 +108,7 @@ Phase 0 complete. Phase 1 offline foundation complete on the observed macOS/Pyth
 Phase 2 implementation and authorized feasibility experiments are recorded. Both engines now pass the trusted disposable-workspace coding fixture on the tested macOS host. No merge, push, PR, global CLI edit, plugin installation, GPU connection, API-key introduction or billing change occurred in the follow-up. Phase 3 may begin only for that narrow mode; untrusted or broad local execution remains blocked.
 
 Phase 3 now implements the minimum local delivery graph for that narrow mode. After the corrective review, the deterministic workflow reaches a revision-bound `awaiting_pr_approval` package and 91 tests cover controller, Git, repair feedback, constrained verification, budget, numeric, lifecycle, restart and evidence invariants. The bounded live attempt validated Codex implementation plus an independent test, then blocked when Claude reported an expired OAuth token. No reauthentication was attempted, no billing fact was inferred, and no live approval package was created. Phase 4 should wait for a successful cross-provider live review and remains limited to trusted controller-created disposable repositories.
+
+The authentication-recovery follow-up supersedes that live gate: guided first-party subscription recovery is implemented and 107 tests pass, including the host macOS boundary test. One fresh bounded live workflow reached `awaiting_pr_approval` with Codex implementation, constrained local verification and Claude review. Existing authentication worked, so no interactive login was launched. A strict offline correction accepted Claude's single fenced JSON result after verifying its archived stream hash, provider-success terminal, candidate and snapshot, avoiding any repeat inference. Phase 4 may begin only for the same trusted disposable macOS mode; all broader limitations remain.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).

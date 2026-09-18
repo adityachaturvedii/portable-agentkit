@@ -31,6 +31,17 @@ def error_class(text):
     return "provider_error"
 
 
+def authentication_reason(text):
+    """Return a bounded category; never retain the provider's authentication message."""
+    lowered = text.lower()
+    if any(value in lowered for value in ('expired oauth', 'oauth token has expired',
+                                           'token expired', 'reauthenticationrequired')):
+        return 'expired'
+    if any(value in lowered for value in ('not logged in', 'login required', 'unauthorized', '401')):
+        return 'missing'
+    return 'missing_or_expired'
+
+
 def _count(value):
     return value if type(value) is int and value >= 0 else None
 
@@ -43,6 +54,22 @@ def _usage(data, source, final=True):
                             cache_creation_tokens=_count(data.get("cache_creation_input_tokens")),
                             reasoning_tokens=_count(data.get("reasoning_output_tokens")),
                             source=source, final=final, provider_details=redact(data))
+
+
+def structured_json_text(value):
+    """Parse one JSON object, allowing only a single exact Markdown JSON fence."""
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if candidate.startswith('```json\n') and candidate.endswith('\n```'):
+        candidate = candidate[8:-4].strip()
+    try:
+        parsed = json.loads(candidate, object_pairs_hook=_pairs,
+                            parse_constant=lambda _: (_ for _ in ()).throw(ValueError('nonfinite')))
+        _depth(parsed)
+    except (ValueError, RecursionError):
+        return None
+    return parsed if isinstance(parsed, dict) else None
 
 
 class IncompleteStream(ValueError):
@@ -218,17 +245,14 @@ def normalize(request, outcome):
         result.error_class = error_class(outcome.stderr.decode('utf-8', 'replace') + '\n' + text)
     if result.error_class and result.status == 'succeeded':
         result.status = 'failed'
+    if result.error_class == 'authentication':
+        diagnostic = outcome.stderr.decode('utf-8', 'replace') + '\n' + text
+        result.provider_details['authentication_failure'] = authentication_reason(diagnostic)
     if result.final_text is not None and not isinstance(result.final_text, str):
         result.status, result.error_class = 'failed', 'malformed_output'
         result.final_text = None
     if result.structured_output is None and result.final_text:
-        try:
-            value = json.loads(result.final_text, object_pairs_hook=_pairs)
-            _depth(value)
-            if isinstance(value, dict):
-                result.structured_output = value
-        except (ValueError, RecursionError):
-            pass
+        result.structured_output = structured_json_text(result.final_text)
     result.limitations = ['Provider events and final text are claims; fixture acceptance is independently computed.',
                           'Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.',
                           'Process groups cannot prove detached-descendant or remote cancellation.']
