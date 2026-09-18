@@ -8,7 +8,7 @@ macOS, Apple-provided Python 3.9.6, Git 2.54.0. Runtime uses only the Python sta
 
 ## Automated checks
 
-`python3 -m unittest discover -s tests -v`: 27 tests passed after adding archived-evidence integrity and a common independent acceptance oracle for both agent fixes. The final run is recorded in the local receipt. Tests exercise 18 explicit intent/domain cases, six buggy/corrected disposable CPU project families, malformed JSON, unsupported kinds/versions, duplicate evidence, stale revisions, self-reports, self-review, missing browser and incorrect optimization outcomes. A relocation test copies the entire toolkit to a path containing spaces and runs checks with an empty HOME; HOME remains empty.
+`python3 -m unittest discover -s tests -v`: 29 tests passed after adding archive integrity, a common independent acceptance oracle and review-driven regression cases. The final run is recorded in the local receipt. Tests exercise 18 explicit intent/domain cases, six buggy/corrected disposable CPU project families, malformed JSON, unsupported kinds/versions, duplicate evidence, stale revisions, self-reports, self-review, missing browser and incorrect optimization outcomes. A relocation test copies the entire toolkit to a path containing spaces and runs checks with an empty HOME; HOME remains empty.
 
 The six CPU families cover invoice arithmetic, split leakage, a scalar gradient, inference cache identity, stable softmax and SQLite idempotency. Each planted defect fails its independent expectations and its corrected counterpart passes. Scalar/CPU examples do not validate a training framework, CUDA, mixed precision or a real serving system. The 18 selection cases exercise explicit intent mapping, not learned or natural-language routing.
 
@@ -38,6 +38,14 @@ Original artifacts and file hashes are retained under [audit/evaluations](../aud
 - Limited database/transaction requirements to relevant backend behavior.
 - Documented file-only validation, environment digest construction and current budget representation.
 - Documented that cross-document acceptance coverage is manually reconciled; no controller claim is made.
+
+## Independent review and optimisation exercise
+
+A reviewer who did not author the toolkit examined immutable candidate `dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c` from a Git archive. It found two consistency defects: a complete optimisation could retain an incomplete decision with no observed experiment, and a findings verdict could carry an empty list. Both are fixed in `45f487b227400acfd336f4558df2652f260ee876` with regression coverage. The reviewer independently reran its reproductions: both now reject with exit 2, while a valid rejected optimisation remains accepted. Original findings remain unchanged in the archive; this paragraph records their resolved disposition.
+
+The reviewer also applied measured-optimisation to a fixed CPU summation protocol. A purported faster constant-time candidate failed an independent expected-value gate; the procedure rejected it before candidate timing. No speedup is claimed. Together with the invoice task, this exercises all ten skill procedures, including honest browser blocking. It is not evidence of production GPU/browser capability.
+
+See [original review](../audit/evaluations/review/review-report.md), [post-fix results](../audit/evaluations/review/fix-recheck.json), and [optimisation handoff](../audit/evaluations/review/measured-optimisation-rejected.json). The post-fix record includes the validator file hash; final delivery receipt identifies the complete final commit. Review was bounded and does not certify absence of defects.
 
 ## Not verified / planned
 

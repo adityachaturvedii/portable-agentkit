@@ -1,0 +1,17 @@
+{
+  "workloads": [
+    100,
+    10000
+  ],
+  "final_workload": [
+    7
+  ],
+  "warmup": 2,
+  "repetitions": 7,
+  "statistic": "median perf_counter_ns",
+  "noise_threshold": "20%; no claimed win below threshold",
+  "correctness_tolerance": 0,
+  "hardware": "arm64",
+  "synchronization": "synchronous CPU",
+  "contention": "uncontrolled host contention; no speed acceptance"
+}

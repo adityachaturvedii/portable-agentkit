@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "task_id": "toolkit-independent-review-probe",
+  "kind": "independent-review",
+  "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+  "status": "complete",
+  "summary": "Deliberately contradictory findings verdict without any findings",
+  "payload": {
+    "reviewer": "/root/forward_evaluation",
+    "implementation_authors": [
+      "/root"
+    ],
+    "findings": [],
+    "coverage": [],
+    "verdict": "findings"
+  },
+  "evidence": [],
+  "limitations": [],
+  "next_actions": []
+}

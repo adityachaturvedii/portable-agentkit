@@ -1,0 +1,54 @@
+[
+  {
+    "name": "probe-complete-optimisation-incomplete",
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/probe-complete-optimisation-incomplete.json"
+    ],
+    "exit_code": 0,
+    "output": "{\"valid\": true, \"kind\": \"measured-optimisation\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "name": "probe-findings-verdict-empty",
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/probe-findings-verdict-empty.json"
+    ],
+    "exit_code": 0,
+    "output": "{\"valid\": true, \"kind\": \"independent-review\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "name": "measured-optimisation-rejected",
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/measured-optimisation-rejected.json"
+    ],
+    "exit_code": 0,
+    "output": "{\"valid\": true, \"kind\": \"measured-optimisation\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "name": "probe-incorrect-optimisation-accepted",
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/probe-incorrect-optimisation-accepted.json"
+    ],
+    "exit_code": 2,
+    "output": "agentkit: accepted optimization requires completed correctness\n"
+  }
+]

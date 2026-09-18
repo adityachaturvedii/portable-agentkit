@@ -1,0 +1,67 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/independent-review.json"
+    ],
+    "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"independent-review\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/measured-optimisation-rejected.json"
+    ],
+    "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"measured-optimisation\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/probe-complete-optimisation-incomplete.json"
+    ],
+    "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"measured-optimisation\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/probe-findings-verdict-empty.json"
+    ],
+    "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"independent-review\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-toolkit-review/probe-incorrect-optimisation-accepted.json"
+    ],
+    "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+    "returncode": 2,
+    "output": "agentkit: accepted optimization requires completed correctness\n"
+  }
+]

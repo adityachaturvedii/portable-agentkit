@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "task_id": "synthetic-incorrect-optimisation",
+  "kind": "measured-optimisation",
+  "revision": "534e629ddebecef680d83900187bd89d14e01d4b3e9f54ba78ae1e4337cc01a9",
+  "status": "complete",
+  "summary": "Rejected proposed faster O(1) candidate before timing because independent correctness failed.",
+  "payload": {
+    "protocol": "{\"workloads\": [100, 10000], \"final_workload\": [7], \"warmup\": 2, \"repetitions\": 7, \"statistic\": \"median perf_counter_ns\", \"noise_threshold\": \"20%; no claimed win below threshold\", \"correctness_tolerance\": 0, \"hardware\": \"arm64\", \"synchronization\": \"synchronous CPU\", \"contention\": \"uncontrolled host contention; no speed acceptance\"}",
+    "baseline": "Reference loop matches six explicit expected sums; repeated raw samples distinguish n=100 and n=10000 workloads.",
+    "experiments": [
+      "Constant-time candidate excludes last term; n=2 returns 0 instead of 1, n=7 returns 15 instead of 21. Correctness failed before candidate timing."
+    ],
+    "correctness": "failed",
+    "decision": "rejected",
+    "final_evaluation": "No winner selected; protected final speed evaluation not run."
+  },
+  "evidence": [
+    {
+      "id": "correctness-gate",
+      "revision": "534e629ddebecef680d83900187bd89d14e01d4b3e9f54ba78ae1e4337cc01a9",
+      "method": "command",
+      "status": "failed",
+      "command": [
+        "python3",
+        "-B",
+        "/private/tmp/agentkit-toolkit-review/candidate_gate.py"
+      ],
+      "environment_digest": "417921852ec5ba29212c89f3801eb1fbf13ec33161718c5f80cb7dc44c0058b9",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-toolkit-review/candidate-gate.txt",
+          "sha256": "962669711b162c9b0eb1a9066dafdbc1a3be605e6935ebc694eac8f579689da2"
+        },
+        {
+          "path": "/private/tmp/agentkit-toolkit-review/optimisation-raw.json",
+          "sha256": "145619cebc88b843f7c91416f2855bcfddb4f4aa515926c9eb0b91c828935ea8"
+        }
+      ],
+      "observation": "Independent correctness gate exited 1: candidate(2) returns 0, expected 1."
+    }
+  ],
+  "limitations": [
+    "Candidate speed claim is unmeasured because correctness gate failed.",
+    "Baseline timing is local CPU only with uncontrolled contention."
+  ],
+  "next_actions": []
+}

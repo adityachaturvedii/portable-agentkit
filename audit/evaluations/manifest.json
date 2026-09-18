@@ -1,5 +1,5 @@
 {
-  "note": "Original artifacts retained byte-for-byte; absolute temporary paths describe the observed run. Resolve archived evidence under skills/evidence by basename; original Git objects remain only in disposable repositories. This archive is data, not executable approval.",
+  "note": "Original artifacts retained byte-for-byte; absolute temporary paths describe the observed run. Resolve archived evidence under skills/evidence by basename; original Git objects remain only in disposable repositories. This archive is data, not executable approval. Review artifacts map historical temporary basenames to review/. Probe JSON files intentionally represent rejected inputs and are not format examples.",
   "files": [
     {
       "path": "baseline/evaluation.md",
@@ -28,6 +28,70 @@
     {
       "path": "baseline/test_invoice.py",
       "sha256": "5763bb7f38e4def078745266c220cb64fd9f8618e3af32c895609f1396a4be4d"
+    },
+    {
+      "path": "review/candidate-gate.txt",
+      "sha256": "962669711b162c9b0eb1a9066dafdbc1a3be605e6935ebc694eac8f579689da2"
+    },
+    {
+      "path": "review/candidate_gate.py",
+      "sha256": "97d3b56c6d675efe88f32c877c9007d9398580283c57c8da7bfbb40c68ce2e2f"
+    },
+    {
+      "path": "review/fix-recheck.json",
+      "sha256": "4620e9b012f79e31164e54c5611ff62a2c1be9b8571832fc265e2a9dab65de92"
+    },
+    {
+      "path": "review/immutable-validation.json",
+      "sha256": "5dee297b668fdfd4b3f81a7cac99317712d66a687a8bc039be1930a1e4d44337"
+    },
+    {
+      "path": "review/independent-review.json",
+      "sha256": "fb343e2fe9dc59b5aa260327729cafcfe6fcba8aa61a76490eb389b99fc04fea"
+    },
+    {
+      "path": "review/measured-optimisation-rejected.json",
+      "sha256": "b7eea4bbfd0a2eae66addfd478beba1a700d49c53f5586ccd3c4a067ea4d84c9"
+    },
+    {
+      "path": "review/optimisation-protocol.json",
+      "sha256": "d711256dee29b56bb62259c5185f2f08cfaeb1d7c572399f64a79ea9a79d45c4"
+    },
+    {
+      "path": "review/optimisation-raw.json",
+      "sha256": "145619cebc88b843f7c91416f2855bcfddb4f4aa515926c9eb0b91c828935ea8"
+    },
+    {
+      "path": "review/pack-check.txt",
+      "sha256": "edc4e3f7dd676ee52eebdb738fd3b99fdf80cc7384234f48adff2b8112320e4b"
+    },
+    {
+      "path": "review/probe-complete-optimisation-incomplete.json",
+      "sha256": "b586454ff233e0c5bc068b756fc3980f11e95c41c0df72d8c62436c833a8716c"
+    },
+    {
+      "path": "review/probe-findings-verdict-empty.json",
+      "sha256": "3997d7a5b87a690c95870f233494fa66f149979dccb65179530a72303d070681"
+    },
+    {
+      "path": "review/probe-incorrect-optimisation-accepted.json",
+      "sha256": "bc7d82c0ff89390aa6a7c25e2fb555b24d39924b83b853e92c9048b14466e4db"
+    },
+    {
+      "path": "review/probe-results.json",
+      "sha256": "b3d646c2134b4661eee8d24d158a242779dae8f32d9bd59e1fddff7ae0f3d308"
+    },
+    {
+      "path": "review/review-environment.json",
+      "sha256": "04ff4b39a41b52f64719c43a72d62bdeb4b1ffac1c84ab8b320ac1acd8029b5e"
+    },
+    {
+      "path": "review/review-report.md",
+      "sha256": "f34483ba1c35d00e4178c0e44d9c828732da331d626f7cdec0a18498ee70e35f"
+    },
+    {
+      "path": "review/unittest.txt",
+      "sha256": "1e72d881420943d9a1fa3e546213c560d61f37e7e9a0468f19614fa13ca4dbe6"
     },
     {
       "path": "skills/evidence/diff.txt",

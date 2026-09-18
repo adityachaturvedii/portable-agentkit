@@ -1,0 +1,9 @@
+{"argv": ["python3", "-m", "agentkit", "check"], "returncode": 0}
+{
+  "status": "passed",
+  "skills": 10,
+  "domains": 7,
+  "examples": 10,
+  "sources": 3,
+  "limits": "Offline structural checks only; no live source fetch, sandbox or provider verification."
+}

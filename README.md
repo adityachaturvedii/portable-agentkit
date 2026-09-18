@@ -24,7 +24,7 @@ Run these commands from this directory. To move machines, copy the entire direct
 | Capability | Status |
 |---|---|
 | Pinned source inventory, adaptations, MIT notices, dependency exclusions | Implemented; hashes checked against downloaded snapshots |
-| Ten core skills, seven initial domain procedures | Implemented; eight skills exercised in a synthetic forward task |
+| Ten core skills, seven initial domain procedures | Implemented; all ten exercised across synthetic task, review and optimisation cases |
 | Offline discovery, rendering, strict JSON handoff validation | Implemented and tested on macOS / Python 3.9.6 |
 | CPU defect fixtures and native-baseline comparison | Tested development cases; no general quality improvement established |
 | Claude/Codex adapters, doctor, sandbox, cancellation, credential isolation | Planned Phase 2; unavailable |

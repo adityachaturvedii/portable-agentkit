@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "task_id": "independent-toolkit-review-dfe59c5",
+  "kind": "independent-review",
+  "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+  "status": "complete",
+  "summary": "Two reproducible status-consistency omissions; offline tests pass and authority boundary claims match implementation.",
+  "payload": {
+    "reviewer": "/root/forward_evaluation (assigned reviewer; did not author toolkit)",
+    "implementation_authors": [
+      "/root (toolkit implementation agent)"
+    ],
+    "findings": [
+      {
+        "id": "R1",
+        "location": "agentkit/validation.py:203",
+        "severity": "medium",
+        "rationale": "Only accepted optimisation decisions receive lifecycle consistency checks. A complete handoff with decision incomplete and correctness not_run is accepted despite explicitly reporting unresolved work. This can prematurely mark a procedure complete in downstream status displays; no authority escalation is alleged.",
+        "reproduction": "python3 -m agentkit validate /private/tmp/agentkit-toolkit-review/probe-complete-optimisation-incomplete.json returns 0 and status complete. Require complete optimisation to use a terminal decision; preserve valid completed rejection with failed correctness.",
+        "disposition": "open",
+        "evidence_ids": [
+          "probes"
+        ]
+      },
+      {
+        "id": "R2",
+        "location": "agentkit/validation.py:188",
+        "severity": "low",
+        "rationale": "A complete review with verdict findings and an empty findings array validates. The reverse contradiction is rejected, but this direction is omitted, leaving no actionable finding for a reported findings verdict.",
+        "reproduction": "python3 -m agentkit validate /private/tmp/agentkit-toolkit-review/probe-findings-verdict-empty.json returns 0. Require a findings verdict to contain at least one finding.",
+        "disposition": "open",
+        "evidence_ids": [
+          "probes"
+        ]
+      }
+    ],
+    "coverage": [
+      "Read validator, package/CLI source and relevant tests at dfe59c5",
+      "Read independent-review and measured-optimisation procedures and shared contract",
+      "25 offline tests and package check passed",
+      "Probed complete optimisation with incomplete decision and review findings with empty findings",
+      "Exercised actual synthetic correctness rejection before candidate timing"
+    ],
+    "verdict": "findings"
+  },
+  "evidence": [
+    {
+      "id": "probes",
+      "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-B",
+        "/private/tmp/agentkit-toolkit-review/probe.py"
+      ],
+      "environment_digest": "04ff4b39a41b52f64719c43a72d62bdeb4b1ffac1c84ab8b320ac1acd8029b5e",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-toolkit-review/probe-results.json",
+          "sha256": "b3d646c2134b4661eee8d24d158a242779dae8f32d9bd59e1fddff7ae0f3d308"
+        }
+      ],
+      "observation": "Both contradictory fixtures accepted; explicit incorrect accepted optimisation rejected."
+    },
+    {
+      "id": "tests",
+      "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "environment_digest": "04ff4b39a41b52f64719c43a72d62bdeb4b1ffac1c84ab8b320ac1acd8029b5e",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-toolkit-review/unittest.txt",
+          "sha256": "1e72d881420943d9a1fa3e546213c560d61f37e7e9a0468f19614fa13ca4dbe6"
+        }
+      ],
+      "observation": "25 tests pass at initial clean dfe59c5 checkout."
+    },
+    {
+      "id": "pack",
+      "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-m",
+        "agentkit",
+        "check"
+      ],
+      "environment_digest": "04ff4b39a41b52f64719c43a72d62bdeb4b1ffac1c84ab8b320ac1acd8029b5e",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-toolkit-review/pack-check.txt",
+          "sha256": "edc4e3f7dd676ee52eebdb738fd3b99fdf80cc7384234f48adff2b8112320e4b"
+        }
+      ],
+      "observation": "10 skills, 7 domains, 10 examples, 3 sources pass offline package checks."
+    }
+  ],
+  "limitations": [
+    "No Linux/WSL runtime or hostile-execution sandbox was tested; none is claimed.",
+    "Reviewer identity and evidence hashes remain unauthenticated declarations, as toolkit documentation states.",
+    "No network, providers, GPU, plugins or global settings used.",
+    "Parent added later docs/tests while review was running; those changes are excluded. Final validation uses git archive of exact reviewed commit.",
+    "Purported constant-time candidate speed was not measured because its independent correctness gate failed; no measured improvement is claimed."
+  ],
+  "next_actions": [
+    "Resolve R1 and R2 with focused negative tests; rerun relevant checks at the new candidate."
+  ]
+}
