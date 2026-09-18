@@ -1,0 +1,90 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/behavioral-testing.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"behavioral-testing\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/browser-verification.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"browser-verification\", \"status\": \"blocked\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/change-impact.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"change-impact\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/delivery-evidence.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"delivery-evidence\", \"status\": \"incomplete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/fault-diagnosis.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"fault-diagnosis\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/interface-design.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"interface-design\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/system-investigation.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"system-investigation\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-m",
+      "agentkit",
+      "validate",
+      "/private/tmp/agentkit-forward-test/handoffs/task-contract.json"
+    ],
+    "returncode": 0,
+    "output": "{\"valid\": true, \"kind\": \"task-contract\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+  }
+]

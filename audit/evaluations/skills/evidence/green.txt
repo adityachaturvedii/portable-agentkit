@@ -1,0 +1,12 @@
+{"argv": ["python3", "-m", "unittest", "-v"], "cwd": "/private/tmp/agentkit-forward-test/invoice-worktree", "returncode": 0}
+test_boundaries (test_invoice.InvoiceBehavior) ... ok
+test_input_is_not_mutated (test_invoice.InvoiceBehavior) ... ok
+test_invalid_inputs (test_invoice.InvoiceBehavior) ... ok
+test_merchandise_fraction_rounds_down (test_invoice.InvoiceBehavior) ... ok
+test_shipping_not_discounted (test_invoice.InvoiceBehavior) ... ok
+test_shipping_only_is_undiscounted (test_invoice.InvoiceBehavior) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.000s
+
+OK

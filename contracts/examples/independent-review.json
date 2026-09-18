@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "task_id": "example-independent-review",
+  "kind": "independent-review",
+  "revision": "0000000000000000000000000000000000000000",
+  "status": "blocked",
+  "summary": "Example shape only; no verification has run.",
+  "payload": {
+    "reviewer": "Example only; replace with task evidence.",
+    "implementation_authors": [],
+    "findings": [],
+    "coverage": [],
+    "verdict": "blocked"
+  },
+  "evidence": [],
+  "limitations": [
+    "Template only; no capability or evidence supplied."
+  ],
+  "next_actions": [
+    "Supply task-specific observations and validate."
+  ]
+}

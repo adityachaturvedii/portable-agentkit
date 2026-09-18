@@ -1,0 +1,95 @@
+test_promotion_leaves_shipping_unchanged (test_invoice.InvoiceTests) ... FAIL
+test_rounds_aggregate_merchandise_down_once (test_invoice.InvoiceTests) ... FAIL
+test_invalid_inputs (test_invoice.InvoiceTests) ... 
+======================================================================
+FAIL: test_promotion_leaves_shipping_unchanged (test_invoice.InvoiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 7, in test_promotion_leaves_shipping_unchanged
+    self.assertEqual(invoice_total([(1000, 1)], 200, 10), 1100)
+AssertionError: 1080 != 1100
+
+======================================================================
+FAIL: test_rounds_aggregate_merchandise_down_once (test_invoice.InvoiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 11, in test_rounds_aggregate_merchandise_down_once
+    self.assertEqual(invoice_total([(1, 1), (1, 1)], 7, 50), 8)
+AssertionError: 4 != 8
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(-1, 1)], 0, 0))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(10, 0)], 0, 0))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(10, -1)], 0, 0))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(10, 1)], -1, 0))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(10, 1)], 0, -1))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(10, 1)], 0, 101))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(100, 1), (-1, 1)], 0, 100))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([(0, 0)], 0, 0))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_invalid_inputs (test_invoice.InvoiceTests) (args=([], -1, 50))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-baseline-test/project/test_invoice.py", line 39, in test_invalid_inputs
+    invoice_total(*args)
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=11)

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "task_id": "example-behavioral-testing",
+  "kind": "behavioral-testing",
+  "revision": "0000000000000000000000000000000000000000",
+  "status": "blocked",
+  "summary": "Example shape only; no verification has run.",
+  "payload": {
+    "seams": [],
+    "expected_results": [],
+    "cases": [],
+    "red_evidence": [],
+    "green_evidence": []
+  },
+  "evidence": [],
+  "limitations": [
+    "Template only; no capability or evidence supplied."
+  ],
+  "next_actions": [
+    "Supply task-specific observations and validate."
+  ]
+}

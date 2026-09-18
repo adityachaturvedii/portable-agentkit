@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "task_id": "synthetic-invoice-promotion",
+  "kind": "task-contract",
+  "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+  "status": "complete",
+  "summary": "Preserve merchandise-only percentage discount, floor cents, range rejection, and honest blocked checkout check.",
+  "payload": {
+    "objective": "Correct invoice promotions and input ranges; assess checkout verification honestly.",
+    "scope": [
+      "invoice.py public invoice_total and local tests",
+      "Local handoff artifacts and evidence"
+    ],
+    "non_goals": [
+      "Publication",
+      "External calls",
+      "Performance optimisation",
+      "Production data",
+      "Changing undocumented type coercion semantics"
+    ],
+    "acceptance": [
+      {
+        "id": "AC1",
+        "behavior": "Merchandise only discount",
+        "expected": "[(1000,2)], shipping 500, discount 10 produces 2300",
+        "verification": "Public unittest seam"
+      },
+      {
+        "id": "AC2",
+        "behavior": "Floor fractional merchandise cents",
+        "expected": "[(101,1)], shipping 0, discount 50 produces 50",
+        "verification": "Public unittest seam"
+      },
+      {
+        "id": "AC3",
+        "behavior": "Reject invalid ranges",
+        "expected": "ValueError for negative price/shipping, zero/negative quantity, discount -1/101",
+        "verification": "Public unittest seam"
+      },
+      {
+        "id": "AC4",
+        "behavior": "Preserve endpoint and empty basket behavior",
+        "expected": "0% yields 2500; 100% yields shipping 500; empty merchandise with shipping 500 yields 500",
+        "verification": "Public unittest seam"
+      },
+      {
+        "id": "AC5",
+        "behavior": "Confirm checkout browser flow",
+        "expected": "Checkout displays API total with supplied synthetic input",
+        "verification": "Approved disposable browser and immutable build"
+      }
+    ],
+    "interfaces": [
+      "invoice_total(items, shipping_cents=0, discount_percent=0) -> integer cents for integer inputs"
+    ],
+    "risk": "routine",
+    "budget": {
+      "max_attempts": 8,
+      "max_wall_seconds": 300,
+      "paid_usage_authorized": false
+    },
+    "dependencies": [
+      "Python standard library",
+      "Dedicated branch fix/invoice-promotion and worktree supplied before edits"
+    ],
+    "unknowns": [
+      "No browser, checkout origin or build supplied",
+      "Model call accounting and subscription quota unavailable",
+      "Runtime type policy beyond integer-cent documented inputs is unspecified"
+    ]
+  },
+  "evidence": [
+    {
+      "id": "red",
+      "revision": "340549c566b6e70b5cf1516d0f5b088ef97c1221",
+      "method": "command",
+      "status": "failed",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/red.txt",
+          "sha256": "1a9d0f0abef08bf72b00de65cae28c6e599fa16b409664745a10e5891047f8b1"
+        }
+      ],
+      "observation": "Six test methods run; promotion returned 2250 instead of 2300; boundary and input-validation assertions also failed."
+    },
+    {
+      "id": "probe",
+      "revision": "340549c566b6e70b5cf1516d0f5b088ef97c1221",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-c",
+        "from invoice import invoice_total; print([(s, invoice_total([(1000,2)],s,10)) for s in [0,500]])"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/probe.txt",
+          "sha256": "c4f4561450e0735eb19eaa49d4612f15a7b3c9dfdf26e879f22ab6cd40934a40"
+        }
+      ],
+      "observation": "Changing shipping alone from 0 to 500 changes total from 1800 to 2250; only 450 added."
+    },
+    {
+      "id": "green",
+      "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/green.txt",
+          "sha256": "7cd064b7eb67086f377376471b38b4f6e47c69344fad07a419de01fca786d916"
+        }
+      ],
+      "observation": "Six test methods pass on immutable candidate."
+    },
+    {
+      "id": "diff",
+      "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "git",
+        "diff",
+        "43f9607c1830fb374886bbbdbb00188b0a41e50c",
+        "0f2fd97567a2840c3698a17186ccebb0c3360703"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/diff.txt",
+          "sha256": "2bfde36ab6609bcb23f8276c5c6d933d59e826486c1f143a5b712b9ccd827678"
+        }
+      ],
+      "observation": "Candidate diff contains invoice.py and public behavior tests only."
+    }
+  ],
+  "limitations": [],
+  "next_actions": []
+}

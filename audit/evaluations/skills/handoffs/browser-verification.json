@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "synthetic-invoice-promotion",
+  "kind": "browser-verification",
+  "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+  "status": "blocked",
+  "summary": "Checkout flow cannot be confirmed with supplied fixture.",
+  "payload": {
+    "target": "Requested synthetic checkout; origin/build unavailable",
+    "browser": "Unavailable; no browser was invoked",
+    "verifier": "Unassigned; forward evaluator is also invoice implementer",
+    "implementation_authors": [
+      "forward evaluator"
+    ],
+    "flows": [
+      {
+        "id": "AC5",
+        "expected": "Checkout displays API total with supplied synthetic input",
+        "actual": "Not run: browser/build prerequisites absent.",
+        "status": "blocked",
+        "evidence_ids": []
+      }
+    ],
+    "viewports": [],
+    "observations": [
+      "No browser observations or screenshots exist; source tests do not establish checkout behavior."
+    ]
+  },
+  "evidence": [],
+  "limitations": [
+    "No approved disposable browser, target origin, immutable checkout build or separate verifier has been supplied."
+  ],
+  "next_actions": [
+    "Supply approved disposable browser, checkout build/origin and independent verifier."
+  ]
+}

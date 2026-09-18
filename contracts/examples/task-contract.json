@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "task_id": "example-task-contract",
+  "kind": "task-contract",
+  "revision": "0000000000000000000000000000000000000000",
+  "status": "blocked",
+  "summary": "Example shape only; no verification has run.",
+  "payload": {
+    "objective": "Example only; replace with task evidence.",
+    "scope": [],
+    "non_goals": [],
+    "acceptance": [],
+    "interfaces": [],
+    "risk": "routine",
+    "budget": {
+      "max_attempts": 1,
+      "max_wall_seconds": 1,
+      "paid_usage_authorized": false
+    },
+    "dependencies": [],
+    "unknowns": []
+  },
+  "evidence": [],
+  "limitations": [
+    "Template only; no capability or evidence supplied."
+  ],
+  "next_actions": [
+    "Supply task-specific observations and validate."
+  ]
+}

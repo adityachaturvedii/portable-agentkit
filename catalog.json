@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "skills": [
+    {
+      "id": "task-contract",
+      "intent": "contract",
+      "description": "Turn an authorized engineering request into a scoped technical contract with observable acceptance checks.",
+      "path": "skills/task-contract/SKILL.md",
+      "output_kind": "task-contract"
+    },
+    {
+      "id": "system-investigation",
+      "intent": "investigate",
+      "description": "Explain how an existing subsystem works or why it has its present shape using scoped source evidence.",
+      "path": "skills/system-investigation/SKILL.md",
+      "output_kind": "system-investigation"
+    },
+    {
+      "id": "interface-design",
+      "intent": "design",
+      "description": "Design caller contracts and state ownership before an interface, schema or tensor change locks in the wrong behavior.",
+      "path": "skills/interface-design/SKILL.md",
+      "output_kind": "interface-design"
+    },
+    {
+      "id": "change-impact",
+      "intent": "impact",
+      "description": "Identify downstream consumers and invariants at risk from a proposed change and choose concrete verification targets.",
+      "path": "skills/change-impact/SKILL.md",
+      "output_kind": "change-impact"
+    },
+    {
+      "id": "behavioral-testing",
+      "intent": "test",
+      "description": "Build behavior tests at public seams with expected results independent of the implementation, using small vertical changes.",
+      "path": "skills/behavioral-testing/SKILL.md",
+      "output_kind": "behavioral-testing"
+    },
+    {
+      "id": "fault-diagnosis",
+      "intent": "diagnose",
+      "description": "Diagnose a reproducible defect or regression through competing hypotheses and discriminating experiments.",
+      "path": "skills/fault-diagnosis/SKILL.md",
+      "output_kind": "fault-diagnosis"
+    },
+    {
+      "id": "measured-optimisation",
+      "intent": "optimise",
+      "description": "Evaluate performance hypotheses using a frozen representative benchmark and correctness gates before accepting an improvement.",
+      "path": "skills/measured-optimisation/SKILL.md",
+      "output_kind": "measured-optimisation"
+    },
+    {
+      "id": "independent-review",
+      "intent": "review",
+      "description": "Review an immutable candidate against intent and public contracts, producing evidence-backed findings without editing it.",
+      "path": "skills/independent-review/SKILL.md",
+      "output_kind": "independent-review"
+    },
+    {
+      "id": "browser-verification",
+      "intent": "browser",
+      "description": "Verify specified user flows in a browser independently of implementation and report observed behavior and artifacts.",
+      "path": "skills/browser-verification/SKILL.md",
+      "output_kind": "browser-verification"
+    },
+    {
+      "id": "delivery-evidence",
+      "intent": "deliver",
+      "description": "Assemble revision-bound local delivery evidence and a proposed PR without publishing or merging.",
+      "path": "skills/delivery-evidence/SKILL.md",
+      "output_kind": "delivery-evidence"
+    }
+  ],
+  "domains": [
+    "ml-experiments",
+    "training-correctness",
+    "cuda-kernels",
+    "inference",
+    "backend-database",
+    "enterprise-llm-graphs",
+    "frontend"
+  ]
+}
