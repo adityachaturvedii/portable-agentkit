@@ -1,0 +1,12 @@
+# Decision log
+
+| ID | Decision | Reason and consequence |
+|---|---|---|
+| D001 | Create a new local repository at `portable-agentkit`, develop in sibling `portable-agentkit-phase01` on `implementation/phase-0-1`. | No existing project repository is needed or inspected. Git identity is command-local `Agentkit Builder <agentkit@localhost>`; hooks and global Git config are disabled for bootstrap operations. No remote configured. |
+| D002 | Phase 1 uses Python 3.9+ standard library only, invoked from the checkout. | Works with the observed interpreter, no package downloads, plugin installation or global CLI edits. A distributable installer remains Phase 6. |
+| D003 | Adapt selected prose; exclude every upstream executable and integration. | Preserve techniques and MIT attribution without inheriting host settings, paid SDKs, telemetry, cookie imports or publication. Full upstream bundles are not approved dependencies. |
+| D004 | Handoffs are untrusted proposals. Validation checks shape and selected consistency invariants only. | A valid JSON document cannot confer authority, attest execution, establish independent review or unlock a PR. Trusted persistence/enforcement is Phase 3. |
+| D005 | Skills use explicit intent selection and progressive domain loading. | No keyword-based autonomous router, fixed model IDs, sticky routing or hidden delegation. These are deterministic discovery aids, not a model router. |
+| D006 | No software license selected for new original code in this local phase. | Upstream MIT notices are retained. User choice of an outbound toolkit license is deferred to distribution; no need to interrupt local implementation. |
+| D007 | Browser and GPU capability absence produces blocked evidence. | Static HTML or CPU numerical tests cannot claim browser or CUDA verification. No CLI, GPU or paid API probe in Phase 1. |
+| D008 | Credential-isolation feasibility is a release gate carried into Phase 2. | The specification calls this a phase-one feasibility gate in section 10 but schedules executable probes in Phase 2 in section 13. Follow the explicit phase sequence; unattended untrusted execution remains unsupported until verified. |
