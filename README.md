@@ -53,4 +53,4 @@ See [adapter contracts](docs/runtime-contracts.md), [Phase 2 report](docs/phase2
 - [Phase 2 validation](docs/phase2-validation-report.md), [sandbox matrix](docs/sandbox-matrix.md), [CLI source/compatibility review](docs/cli-source-review.md)
 - [Original implementation specification](docs/implementation-spec.md)
 
-Changes remain local. There is no configured repository remote, push, PR or merge. Upstream MIT notices cover adapted material; an outbound license for original toolkit code will be chosen before distribution.
+The user authorized private GitHub publication on 2026-09-19: [adityachaturvedii/portable-agentkit](https://github.com/adityachaturvedii/portable-agentkit). All three phase branches are preserved; `implementation/phase-2` is the default branch for the latest work. No PR or merge is authorized by that publication request. Earlier validation records describe the local-only state at their recorded dates. Upstream MIT notices cover adapted material; an outbound license for original toolkit code will be chosen before broader distribution.
