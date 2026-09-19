@@ -8,12 +8,13 @@ import threading
 import unittest
 from unittest.mock import patch
 
-from agentkit.adapters import (ADAPTERS, execute, normalize, persist_result,
+from agentkit.adapters import (ADAPTERS, execute, execute_owned_code, normalize, persist_result,
                                stop_on_limit, structured_json_text)
 from agentkit.doctor import auth_summary, clean_environment, detect_engine, owned_code_profile
 from agentkit.process import ProcessOutcome, run_process
 from agentkit.redaction import redact, redacted_stream
-from agentkit.runtime_contracts import Capability, CancellationStatus, ExecutionRequest, LivePolicy, EngineCapabilities
+from agentkit.runtime_contracts import (Capability, CancellationStatus, EngineCapabilities,
+                                        ExecutionBoundary, ExecutionRequest, LivePolicy)
 from agentkit.smoke import acceptance
 from agentkit.execution_check import _provider_test_evidence
 
@@ -203,8 +204,43 @@ class RuntimeTests(unittest.TestCase):
         self.assertIn('(deny file-write*)', profile)
         self.assertIn('(subpath ' + json.dumps(str(workspace)) + ')', profile)
         self.assertIn('(literal ' + json.dumps(str(lock)) + ')', profile)
+        self.assertIn('(allow file-write* (literal "/dev/null"))', profile)
         self.assertIn('(deny file-read*', profile)
         self.assertNotIn('(allow file-write* (subpath ' + json.dumps(str(self.root)) + '))', profile)
+
+    def test_owned_execution_routes_shell_temporary_files_into_runtime(self):
+        from agentkit.doctor import COMPATIBLE, REQUIRED
+        workspace = self.root / 'workspace-owned'
+        output = self.root / 'owned-result'
+        protected = self.root / 'protected-owned'
+        home = self.root / 'home'
+        workspace.mkdir()
+        protected.mkdir()
+        (home / '.codex').mkdir(parents=True)
+        (home / '.codex/installation_id').write_text('fixture-installation-id')
+        request = ExecutionRequest('codex', 'owned-temp', 'fixture task', str(workspace),
+                                   mode='owned-code')
+        boundary = ExecutionBoundary(str(workspace), (str(protected),))
+        cap = EngineCapabilities(
+            'codex', '/fake/codex', COMPATIBLE['codex'], 'fixture-hash',
+            {flag: Capability('verified', 'fixture') for flag in REQUIRED['codex']},
+            Capability('verified', 'fixture subscription'), authentication_mode='subscription')
+
+        def launch(argv, **kwargs):
+            self.assertEqual(argv[0], '/usr/bin/sandbox-exec')
+            self.assertIn('(allow file-write* (literal "/dev/null"))', argv[2])
+            self.assertTrue(kwargs['env']['TMPPREFIX'].startswith(kwargs['env']['TMPDIR'] + '/'))
+            event = b'{"type":"turn.completed","usage":{}}\n'
+            return ProcessOutcome(event, b'', 0, .01, None, CancellationStatus())
+
+        with patch('agentkit.adapters.native_sandbox_capability',
+                   return_value=Capability('verified', 'fixture')), \
+             patch('agentkit.adapters.detect_engine', return_value=cap), \
+             patch('agentkit.adapters.run_process', side_effect=launch), \
+             patch.object(Path, 'home', return_value=home):
+            result = execute_owned_code(request, output, boundary,
+                                        policy=LivePolicy(True, 'fixture only'))
+        self.assertEqual(result.status, 'succeeded')
 
     def test_request_rejects_policy_injection_and_invalid_bounds(self):
         args = dict(engine='codex', task_id='fixture', prompt='test', cwd=str(self.root))

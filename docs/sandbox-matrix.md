@@ -37,6 +37,8 @@ The table above is the original `6bfb981` record. The [execution follow-up](phas
 
 The independent [boundary probe](../evidence/phase2-followup/boundary/boundary.json) directly attempted reads and writes; every protected operation returned `PermissionError`, the workspace write succeeded and all canary hashes stayed unchanged. The [lifecycle probe](../evidence/phase2-followup/lifecycle/lifecycle.json) verifies timeout/cancellation only for same-group local processes.
 
+The bounded concurrent Phase 4 attempt exposed two shell-runtime compatibility requirements inside this same narrow profile. zsh uses `TMPPREFIX` for heredoc temporary files, so the adapter now places that prefix inside the already allowed per-execution runtime directory. Git also opens the configured `GIT_CONFIG_GLOBAL=/dev/null` sink for writing, so the profile permits writes to that literal character device only. A disposable host canary verified a heredoc and `git status` while a protected-file write remained denied. This is an offline validation of the correction after the failed `b22020c` inference attempt; it does not turn that attempt into a completed live workflow or widen durable write access.
+
 ## Phase 3 application — 2026-09-19
 
 | Workflow role | Candidate access | Controller / Git access | Network and credentials | Effective status |
