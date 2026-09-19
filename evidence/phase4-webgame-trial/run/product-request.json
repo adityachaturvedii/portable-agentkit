@@ -1,0 +1,113 @@
+{
+  "acceptance": [
+    {
+      "expected": "The dependency-free application passes the documented Node syntax build, loads from the loopback preview, and reaches a startable ready state.",
+      "id": "build-start"
+    },
+    {
+      "expected": "Arrow keys or A/D move the paddle, Space or Enter starts and pauses or resumes as documented, with browser focus behavior that does not trap the user.",
+      "id": "keyboard-controls"
+    },
+    {
+      "expected": "Visible touch controls or direct touch/pointer input move the paddle and expose start/pause/restart on a mobile viewport.",
+      "id": "touch-controls"
+    },
+    {
+      "expected": "The protected pure mechanics API demonstrates wall, paddle and brick collisions, score gain after breaking a brick, and one-life loss when the ball leaves the playfield.",
+      "id": "collisions-scoring-life"
+    },
+    {
+      "expected": "Pausing freezes mechanics progression and resuming continues from the preserved state in both the protected API and visible UI.",
+      "id": "pause-resume"
+    },
+    {
+      "expected": "Restart consistently restores ready status, score zero, three lives, the initial ball and paddle, and all bricks.",
+      "id": "restart"
+    },
+    {
+      "expected": "Breaking the last live brick reaches a clear won state; losing the last life reaches a clear lost state; both visible states offer restart.",
+      "id": "win-lose"
+    },
+    {
+      "expected": "The game, status, instructions and controls remain usable without horizontal overflow at desktop and 390x844 mobile viewports.",
+      "id": "responsive-layout"
+    },
+    {
+      "expected": "Instructions are concise and readable; interactive controls have accessible names, visible focus, adequate target size and sensible keyboard order.",
+      "id": "accessible-controls"
+    },
+    {
+      "expected": "Primary start, play, pause/resume, life-loss, win/lose and restart flows produce no unexplained browser errors.",
+      "id": "no-console-errors"
+    }
+  ],
+  "brief": "Build a polished browser-based Breakout game. It should support keyboard and touch controls, responsive desktop and mobile layouts, scoring, lives, start, pause/resume, restart, and clear win/lose states. Include concise instructions and readable, accessible controls. Make it visually cohesive and enjoyable to play. Run locally with no account, backend, external service, or deployment.\n\nUse only the controller-provided dependency-free static project. Keep the game deterministic enough for the protected mechanics contract. Expose the same test-only API as `module.exports` in Node and `globalThis.BreakoutTest` in a browser: `createState(options)`, `start(state)`, `togglePause(state)`, `restart(state)`, and `step(state, deltaSeconds, input)`. State must expose `width`, `height`, `status`, `score`, `lives`, `paddle`, `ball`, and `bricks`; bricks expose geometry, `alive`, and `points`. The visible game must use the same mechanics API. This interface exists for independent acceptance and must not bypass the playable UI.",
+  "inventory": {
+    "files": [
+      {
+        "bytes": 40,
+        "path": "README.md",
+        "sha256": "e4c505f6d23e31e455e273d9f2248907689aae80dc29ba1650dcde4ec2fae027"
+      },
+      {
+        "bytes": 0,
+        "path": "game.js",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 140,
+        "path": "index.html",
+        "sha256": "6db128e49c6ede8764eaa0904c2ddea8390072f59638660abd81ae4a633076eb"
+      },
+      {
+        "bytes": 147,
+        "path": "package.json",
+        "sha256": "4c7660f7507320074f193509ec05541324ff23634995b82926fc59c3d7032359"
+      },
+      {
+        "bytes": 0,
+        "path": "styles.css",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "interfaces": [],
+    "project": "product-static-web-seed",
+    "sha256": "0d9529dbc6d39cbe01636b79678b3b673c6c40d185a7493f25aafdf8d3abeb35"
+  },
+  "limits": {
+    "concurrent_workers_max": 2,
+    "dependency_install": "unsupported; use the dependency-free static stack",
+    "implementation_assignments_max": 2,
+    "overall_seconds": 1200.0,
+    "per_provider_timeout_seconds": 180,
+    "planning_calls": 1,
+    "provider_invocations_total": 8,
+    "publication": "unsupported",
+    "repair_calls_max": 2
+  },
+  "planning_context": [
+    {
+      "path": "skills/task-contract/SKILL.md",
+      "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d"
+    },
+    {
+      "path": "skills/interface-design/SKILL.md",
+      "sha256": "e36d9bdd041d457436cec6e9fb78af595db07f5e0ba77aeaa9c12214ea0e80a9"
+    },
+    {
+      "path": "domains/frontend.md",
+      "sha256": "c38f4d65595cf03c4f21c4f1839299ea511f355ab4ef219a347918b4cf8a7e17"
+    }
+  ],
+  "planning_route": {
+    "effort": null,
+    "model": null,
+    "node_id": "product-plan",
+    "profile_id": "claude-account-default",
+    "provider": "claude",
+    "reason": "Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+    "relative_cost": "unknown",
+    "role": "tech_lead"
+  },
+  "schema_version": 1
+}

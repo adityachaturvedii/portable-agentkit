@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "task_id": "breakout-live",
+  "tested_executable_revision": "70070e293c890a5c47bbb448b99a9b7cf34f8237",
+  "result": "blocked_during_planning",
+  "task_state": "blocked",
+  "accepted_plan": false,
+  "candidate_revision": null,
+  "approval_package": null,
+  "publication_approval_recorded": false,
+  "declared_budget": {
+    "total_provider_invocations": 8,
+    "maximum_concurrent_provider_workers": 2,
+    "maximum_repairs": 2,
+    "provider_timeout_seconds": 180,
+    "verification_timeout_seconds": 10,
+    "overall_seconds": 1200
+  },
+  "observed": {
+    "provider_invocations": 1,
+    "planning_invocations": 1,
+    "implementation_invocations": 0,
+    "review_invocations": 0,
+    "repair_invocations": 0,
+    "local_verification_invocations": 0,
+    "browser_invocations": 0,
+    "elapsed_seconds": 29.313421,
+    "input_tokens": 8,
+    "output_tokens": 2048,
+    "cached_input_tokens": 25570,
+    "cache_creation_tokens": 9678,
+    "reasoning_tokens": null,
+    "estimated_cost_usd": 0.160805,
+    "billed_cost_usd": null
+  },
+  "requested_configuration": {
+    "provider": "claude",
+    "model": null,
+    "effort": null,
+    "meaning": "installed subscription account default"
+  },
+  "provider_reported_configuration": {
+    "model": "claude-opus-5[1m]",
+    "effort": null
+  },
+  "diagnosis": {
+    "controller_error_class": "rate_limit",
+    "provider_terminal": "api_error",
+    "provider_message_category": "generated_output_limit",
+    "specific_failure": "Claude Code rejected the planner response after it exceeded the adapter's configured 512 generated-output-token maximum.",
+    "classification_gap": "The adapter saw an allowed rate-limit metadata event and classified the combined failed stream as rate_limit; the terminal error was an output allocation failure, not an observed subscription quota exhaustion.",
+    "retry_performed": false,
+    "provider_substitution_performed": false
+  },
+  "unreached_stages": [
+    "validated task graph",
+    "Codex implementation",
+    "controller-owned mechanics verification",
+    "Claude independent review",
+    "bounded repair",
+    "loopback preview",
+    "browser acceptance",
+    "local approval package"
+  ],
+  "billing_note": "The USD value is provider-reported estimated cost. Billed cost and account billing impact are unknown."
+}

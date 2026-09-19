@@ -142,8 +142,12 @@ class Phase4Tests(unittest.TestCase):
 
     def workflow(self, name, fixture='calculator', **kwargs):
         target = self.root / name
-        return Phase4Workflow.submit(target, name, 'Repair the selected disposable fixture.',
-                                     fixture, **kwargs)
+        requests = {
+            'calculator': 'Correct total arithmetic.',
+            'text-metrics': 'Repair word and line metrics.',
+            'inventory': 'Repair pricing and stock calculations.',
+        }
+        return Phase4Workflow.submit(target, name, requests[fixture], fixture, **kwargs)
 
     def test_simple_task_uses_minimum_workflow_and_binds_package(self):
         workflow = self.workflow('simple', max_calls=5)
@@ -186,7 +190,7 @@ class Phase4Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             GraphNode('bad', 'implementer', 'implementation', 'bad',
                       allowed_paths=('/tmp/outside',), provider='codex')
-        contract = build_contract('graph', 'repair fixture', CALCULATOR)
+        contract = build_contract('graph', 'Correct total arithmetic.', CALCULATOR)
         plan = build_plan(contract, CALCULATOR, ModelRegistry.account_defaults(), ROOT)
         implementation = next(node for node in plan.nodes if node.kind == 'implementation')
         verify = next(node for node in plan.nodes if node.kind == 'verification')

@@ -19,6 +19,7 @@ from .validation import _pairs, _depth
 def error_class(text):
     text = text.lower()
     for label, needles in [
+        ("output_limit", ("output token maximum", "max_output_tokens", "generated output limit")),
         ("usage_limit", ("usage limit", "quota exceeded", "insufficient_quota", "credit balance", "payment required", "additional payment", "extra usage", "out of credits")),
         ("authentication", ("unauthorized", "authentication", "invalid api key", "not logged in", "login required", "401")),
         ("rate_limit", ("rate limit", "rate_limit", "429", "overloaded")),
@@ -377,7 +378,8 @@ def execute(request, directory, *, policy=LivePolicy(), cancel_event=None):
         env['TMPDIR'] = tmp
         if request.engine == 'claude':
             env.update(CLAUDE_CODE_MAX_RETRIES='0', CLAUDE_CODE_MAX_TURNS='1',
-                       CLAUDE_CODE_MAX_OUTPUT_TOKENS='512')
+                       CLAUDE_CODE_MAX_OUTPUT_TOKENS=str(
+                           request.max_generated_output_tokens or 512))
         # Whole CLI: deny global writes. Native tools disabled; this does NOT isolate
         # the authenticated process from credentials it must read for its own login.
         startup_write = ()
@@ -485,7 +487,8 @@ def execute_owned_code(request, directory, boundary, *, policy=LivePolicy(), can
         else:
             env.update(CLAUDE_CODE_TMPDIR=str(runtime), CLAUDE_TMPDIR=str(runtime),
                        CLAUDE_CODE_MAX_RETRIES='0', CLAUDE_CODE_MAX_TURNS='8',
-                       CLAUDE_CODE_MAX_OUTPUT_TOKENS='2048')
+                       CLAUDE_CODE_MAX_OUTPUT_TOKENS=str(
+                           request.max_generated_output_tokens or 2048))
         profile = owned_code_profile(runtime, workspace, denied, write_exceptions, network=True)
         predicate = lambda stdout, stderr: stop_on_limit(stdout, stderr, allow_tools=True)
         outcome = run_process(['/usr/bin/sandbox-exec', '-p', profile] + argv,

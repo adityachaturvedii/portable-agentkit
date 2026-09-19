@@ -266,6 +266,20 @@ class RuntimeTests(unittest.TestCase):
             self.request('codex', effort='high')
         with self.assertRaisesRegex(ValueError, 'unsupported Claude effort'):
             self.request('claude', effort='ultra')
+        self.assertEqual(self.request('claude', max_generated_output_tokens=8192).
+                         max_generated_output_tokens, 8192)
+        for value in (True, 0, 255, 8193, float('inf')):
+            with self.assertRaisesRegex(ValueError, 'generated-output token allocation'):
+                self.request('claude', max_generated_output_tokens=value)
+        with self.assertRaisesRegex(ValueError, 'generated-output token allocation'):
+            self.request('codex', max_generated_output_tokens=512)
+
+    def test_generated_output_limit_is_not_misclassified_as_rate_or_usage_limit(self):
+        text = ('rate_limit_event status allowed overageDisabledReason out_of_credits\n'
+                "API Error: response exceeded the 512 output token maximum. "
+                'Set CLAUDE_CODE_MAX_OUTPUT_TOKENS.')
+        from agentkit.adapters import error_class
+        self.assertEqual(error_class(text), 'output_limit')
 
     def test_live_is_default_denied_without_even_doctor(self):
         with patch('agentkit.adapters.native_sandbox_capability', side_effect=AssertionError('must not probe')):
@@ -374,7 +388,9 @@ class RuntimeTests(unittest.TestCase):
         for engine in ADAPTERS:
             cwd = self.root / engine
             cwd.mkdir()
-            request = ExecutionRequest(engine, 'managed-fixture', 'synthetic', str(cwd))
+            request = ExecutionRequest(
+                engine, 'managed-fixture', 'synthetic', str(cwd),
+                max_generated_output_tokens=8192 if engine == 'claude' else None)
             cap = EngineCapabilities(engine, '/fake/cli', COMPATIBLE[engine], 'fixture-hash',
                   {flag: Capability('verified', 'fixture') for flag in REQUIRED[engine]},
                   Capability('verified', 'fixture subscription'), authentication_mode='subscription')
@@ -385,6 +401,7 @@ class RuntimeTests(unittest.TestCase):
                 self.assertNotIn('OPENAI_API_KEY', kw['env'])
                 if engine == 'claude':
                     self.assertEqual(kw['env']['CLAUDE_CODE_MAX_RETRIES'], '0')
+                    self.assertEqual(kw['env']['CLAUDE_CODE_MAX_OUTPUT_TOKENS'], '8192')
                 return actual_transport([sys.executable, FIXTURE, engine, 'success'], **kw)
             with patch('agentkit.adapters.native_sandbox_capability', return_value=Capability('verified', 'fixture')), \
                  patch('agentkit.adapters.detect_engine', return_value=cap), \

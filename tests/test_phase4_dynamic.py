@@ -14,7 +14,8 @@ from agentkit.orchestration import (DeterministicReviewer, Phase4FixtureVerifier
                                     Phase4Workflow, build_contract, build_plan)
 from agentkit.phase4_contracts import ModelProfile, ModelRegistry
 from agentkit.phase4_fixtures import CALCULATOR, TEXT_METRICS, TEXT_PIPELINE
-from agentkit.planning import ClarificationRequired, bounded_inventory, propose
+from agentkit.planning import (ClarificationRequired, UnsupportedRequest, bounded_inventory,
+                               propose)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,6 +62,52 @@ class RecordingSpecialist:
             Path(workspace, relative).write_text(self.fixture.final_files[relative])
         with self.lock:
             self.events.append(('finish', assignment['node_id']))
+        return EngineOutcome('succeeded', .01, UsageRecord(source='fake'), {'simulated': True})
+
+
+class DependencyReadingSpecialist:
+    engine = 'codex'
+    model = None
+
+    def __init__(self):
+        self.produced_marker = None
+        self.downstream_observed = None
+
+    def run_assignment(self, workspace, assignment, output, boundary, prompt, policy):
+        if assignment['node_id'] == 'implement-normalize':
+            self.produced_marker = 'runtime-predecessor-' + str(time.monotonic_ns())
+            Path(workspace, 'normalize.py').write_text(
+                'PREDECESSOR_MARKER = ' + repr(self.produced_marker) + '\n\n'
+                'def normalize(text):\n    return " ".join(text.lower().split())\n')
+        else:
+            source = Path(workspace, 'normalize.py').read_text()
+            marker_line = next((line for line in source.splitlines()
+                                if line.startswith('PREDECESSOR_MARKER = ')), None)
+            if marker_line is None:
+                return EngineOutcome('failed', .01, UsageRecord(source='fake'),
+                                     {'missing_dependency_content': True})
+            self.downstream_observed = marker_line.split('=', 1)[1].strip().strip("'")
+            Path(workspace, 'report.py').write_text(
+                'from normalize import normalize\n\n'
+                'def report(text):\n'
+                '    value = normalize(text)\n'
+                '    return {"normalized": value, "length": len(value)}\n'
+                '# observed ' + self.downstream_observed + '\n')
+        return EngineOutcome('succeeded', .01, UsageRecord(source='fake'), {'simulated': True})
+
+
+class CountingSpecialist:
+    engine = 'codex'
+    model = None
+
+    def __init__(self):
+        self.calls = 0
+        self.lock = threading.Lock()
+
+    def run_assignment(self, workspace, assignment, output, boundary, prompt, policy):
+        with self.lock:
+            self.calls += 1
+        Path(workspace, 'calculator.py').write_text(CALCULATOR.final_files['calculator.py'])
         return EngineOutcome('succeeded', .01, UsageRecord(source='fake'), {'simulated': True})
 
 
@@ -168,6 +215,18 @@ class DynamicPhase4Tests(unittest.TestCase):
             propose('Lowercase the result and preserve case exactly.',
                     __import__('agentkit.phase4_fixtures', fromlist=['CASE_POLICY']).CASE_POLICY)
 
+    def test_unmatched_negated_and_contradictory_requests_do_not_fall_back(self):
+        supported = propose('Correct total arithmetic.', CALCULATOR)
+        self.assertEqual([item['id'] for item in supported['assignments']],
+                         ['implement-calculator-core'])
+        with self.assertRaisesRegex(UnsupportedRequest, 'unsupported request'):
+            propose('Add a CSV export endpoint.', CALCULATOR)
+        with self.assertRaisesRegex(ClarificationRequired, 'Clarify which matched capability'):
+            propose('Do not change the calculator total.', CALCULATOR)
+        case = __import__('agentkit.phase4_fixtures', fromlist=['CASE_POLICY']).CASE_POLICY
+        with self.assertRaisesRegex(ClarificationRequired, 'Choose one output case policy'):
+            propose('Lowercase and uppercase the result.', case)
+
     def test_adversarial_planner_output_is_rejected_before_worker_execution(self):
         proposal = propose('Repair word and line metrics.', TEXT_METRICS)
         proposal['assignments'][0]['allowed_paths'] = ['../controller/state']
@@ -198,6 +257,30 @@ class DynamicPhase4Tests(unittest.TestCase):
         self.assertEqual(result['task']['state'], 'awaiting_pr_approval')
         self.assertLess(specialist.events.index(('finish', 'implement-normalize')),
                         specialist.events.index(('start', 'implement-report')))
+
+    def test_downstream_worker_receives_runtime_predecessor_content_and_records_provenance(self):
+        specialist = DependencyReadingSpecialist()
+        workflow = self.submit('dependency-content', fixture='text-pipeline',
+                               request='Normalize text, then build the report.')
+        workflow.specialist_factory = lambda provider, fixture: specialist
+        result = workflow.start('dependency-content')
+        self.assertEqual(result['task']['state'], 'awaiting_pr_approval')
+        self.assertEqual(specialist.downstream_observed, specialist.produced_marker)
+        predecessor = workflow.state.node('dependency-content', 'implement-normalize')
+        downstream = workflow.state.node('dependency-content', 'implement-report')
+        self.assertNotEqual(downstream['result']['starting_revision'],
+                            result['task']['base_revision'])
+        self.assertEqual(downstream['result']['dependency_contributions'], [{
+            'node_id': 'implement-normalize',
+            'starting_revision': predecessor['result']['starting_revision'],
+            'revision': predecessor['result']['revision'],
+            'changed_paths': ['normalize.py'],
+        }])
+        self.assertEqual(downstream['result']['changed_paths'], ['report.py'])
+        diff = workflow.broker.changed_paths(
+            workflow.broker.repositories / 'dependency-content',
+            result['task']['base_revision'], result['task']['head_revision'])
+        self.assertEqual(diff, ('normalize.py', 'report.py'))
 
     def test_concurrent_scheduler_uses_real_adapter_request_boundary(self):
         registry = ModelRegistry((
@@ -268,6 +351,48 @@ class DynamicPhase4Tests(unittest.TestCase):
         thread.join(8)
         self.assertFalse(thread.is_alive())
         self.assertEqual(results[0]['task']['state'], 'awaiting_pr_approval')
+
+    def test_stale_scheduler_selection_cannot_rerun_completed_assignment(self):
+        specialist = CountingSpecialist()
+        workflow = self.submit('stale-selection', fixture='calculator',
+                               request='Correct total arithmetic.')
+        workflow.specialist_factory = lambda provider, fixture: specialist
+        store = workflow.store
+        workflow.state.activate_plan('stale-selection', authority=store.authority)
+        repository, base = workflow.broker.create_repository('stale-selection', CALCULATOR.files)
+        branch, worktree, base = workflow.broker.create_task_worktree(
+            repository, 'stale-selection', base)
+        store.set_workspace('stale-selection', branch, str(worktree), base,
+                            authority=store.authority)
+        workflow._transition('stale-selection', 'contracted', 'workspace_ready', 'workspace',
+                             'implement')
+        workflow._transition('stale-selection', 'workspace_ready', 'implementing', 'implement',
+                             'implement')
+        stale = workflow.state.node('stale-selection', 'implement-calculator-core')
+        winner_done = threading.Event()
+        stale_result = []
+
+        def stale_contender():
+            self.assertTrue(winner_done.wait(5))
+            stale_result.append(workflow._execute_implementation(
+                'stale-selection', CALCULATOR, repository, Path(worktree), stale,
+                coordinated=True))
+
+        contender = threading.Thread(target=stale_contender)
+        contender.start()
+        self.assertTrue(workflow._execute_implementation(
+            'stale-selection', CALCULATOR, repository, Path(worktree), stale,
+            coordinated=True))
+        successful = workflow.state.node('stale-selection', 'implement-calculator-core')
+        winner_done.set()
+        contender.join(5)
+        self.assertFalse(contender.is_alive())
+        self.assertEqual(stale_result, [True])
+        self.assertEqual(specialist.calls, 1)
+        preserved = workflow.state.node('stale-selection', 'implement-calculator-core')
+        self.assertEqual(preserved['status'], 'succeeded')
+        self.assertEqual(preserved['result'], successful['result'])
+        self.assertEqual(preserved['attempts'], 1)
 
     def test_integration_failure_preserves_both_contributions_and_blocks(self):
         workflow = self.submit('conflict')

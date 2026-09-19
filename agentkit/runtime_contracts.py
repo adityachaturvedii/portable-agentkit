@@ -45,6 +45,7 @@ class ExecutionRequest:
     model: Optional[str] = None
     effort: Optional[str] = None
     mode: str = "model-only"
+    max_generated_output_tokens: Optional[int] = None
     schema_version: int = SCHEMA_VERSION
 
     def __post_init__(self):
@@ -71,6 +72,10 @@ class ExecutionRequest:
                 raise ValueError("effort is unsupported by the tested Codex CLI contract")
             if self.effort not in ("low", "medium", "high", "xhigh", "max"):
                 raise ValueError("unsupported Claude effort level")
+        if self.max_generated_output_tokens is not None:
+            if (self.engine != 'claude' or type(self.max_generated_output_tokens) is not int or
+                    not 256 <= self.max_generated_output_tokens <= 8192):
+                raise ValueError('generated-output token allocation is supported only for Claude at 256..8192')
 
     @classmethod
     def from_dict(cls, value):
