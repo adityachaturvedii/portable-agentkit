@@ -1,0 +1,24 @@
+{
+  "implementer": {
+    "actual": {
+      "bytes": 4959,
+      "sha256": "b81024a2caaf2c469d9302d379504e5e3f8ebbb351878b1af21145308fd8f613"
+    },
+    "match": true,
+    "request_record": {
+      "bytes": 4959,
+      "sha256": "b81024a2caaf2c469d9302d379504e5e3f8ebbb351878b1af21145308fd8f613"
+    }
+  },
+  "reviewer": {
+    "actual": {
+      "bytes": 5873,
+      "sha256": "14c2c50d2e55a3c06e6a1fd463b351d18eebbaef644f6b0b9353ef75d26a055a"
+    },
+    "match": true,
+    "request_record": {
+      "bytes": 5873,
+      "sha256": "14c2c50d2e55a3c06e6a1fd463b351d18eebbaef644f6b0b9353ef75d26a055a"
+    }
+  }
+}

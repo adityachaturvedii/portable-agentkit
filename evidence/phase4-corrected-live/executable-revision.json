@@ -1,0 +1,28 @@
+{
+  "branch": "validation/phase-4-corrected-live",
+  "code_files": {
+    "agentkit/__init__.py": "64af582677a2967741d59f2916384e2318647e070b26215774cd74c8dd0cfeba",
+    "agentkit/__main__.py": "71b4bf0aff6433d9455506a99760be1a53962b26c297ef6308d03546062068b5",
+    "agentkit/adapters.py": "cf676fd3e15ce134bb8f38dd536f63fe12f9d4ce5b2a98f47ff13117f9b16965",
+    "agentkit/auth.py": "363140137ebc8f0a02aa38966ee46eaa25b4f21a23f9353f2cc8b1a7d41432b0",
+    "agentkit/controller.py": "5cd54a00c9719a5d9dd6a6b3d325e4254432484b8b27c806aa1cdd4e4ecc135e",
+    "agentkit/delivery.py": "bb05298ee7a31c5690d2dd27c02f83c026be39f2cfc648cb923adb1f376a7bf3",
+    "agentkit/doctor.py": "c9a7e819f0f48d0a6dcc2a5416bb893b39a1fb1c8f5997c2b3f473116019af8c",
+    "agentkit/execution_check.py": "466b4f6c0b46e6ddce365a3d20ee823a34f2d4926a57af2ce33e06ebce11feb1",
+    "agentkit/git_broker.py": "d36c01c657fd91d83f7cea341a7fde98e662b1b50dff0ce9953b2c755f536144",
+    "agentkit/orchestration.py": "bdc3e1655f2dd66bee6831d5dae0e010e2b35e481d358430d4206e8968cf8554",
+    "agentkit/pack.py": "bda05a2b1b2b3c287e4d275445a489bd7e18b1b4687cc6599afd164e48634c32",
+    "agentkit/phase4_contracts.py": "22df052d1303ea7bdff9a64e164f9635861b2abd54dcabb8db64330214dd4cd6",
+    "agentkit/phase4_fixtures.py": "bab58ad5e6b00804bef373306edd25607684e075ff7f6ebee0477e0cc92bf825",
+    "agentkit/phase4_state.py": "9f8022844ce4d84ee351cd5fbbf3c592b71cb2e1d6ca83f0c661742d1f043fe8",
+    "agentkit/process.py": "e6c500a543566677618ce3217ac48675264739669e316e78f29b645d8c973cf2",
+    "agentkit/redaction.py": "5829c43f8716b570c22773a19df0106e215c947f47c92af62fe34171c33b2fb1",
+    "agentkit/runtime_contracts.py": "d926b22e18f7725225e3a0d6749429b3537e73e6268d4f02745e3959f9c6d5bc",
+    "agentkit/sandbox_probe.py": "1e0b876a6598c9b0c6b9ca08f74abd363432922eac2a6f0c0d1ab566f7801504",
+    "agentkit/smoke.py": "b73e6a4d82a58ca8c8e7d11b01f8b97c9708ca3833131816a810e689411662a9",
+    "agentkit/validation.py": "88b3bc57f6fcf68723ae11e50a90ba8b55ebc09d2d25e7adf511e7358d3c824a"
+  },
+  "commit": "342423ea27700e7d46a977d47e3307bd8fa58c23",
+  "tree": "da47e4394f1d4716112e011232156a3d64c14240",
+  "worktree_clean_during_run": true
+}

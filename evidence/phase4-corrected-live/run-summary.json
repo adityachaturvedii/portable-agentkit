@@ -1,0 +1,178 @@
+{
+  "authentication": {
+    "claude": "verified subscription",
+    "codex": "verified subscription",
+    "interactive_login_used": false
+  },
+  "changed_paths": [
+    "calculator.py"
+  ],
+  "cli_versions": {
+    "claude": "2.1.220",
+    "codex": "0.154.0"
+  },
+  "distinction": {
+    "historical_archive_revision": "af807914dc39ef3f9527461ef97e888b860b494d",
+    "statement": "This is a new bounded validation of the corrected Phase 4 revision, not reuse of the historical archive.",
+    "tested_executable_revision": "342423ea27700e7d46a977d47e3307bd8fa58c23"
+  },
+  "executions": [
+    {
+      "elapsed_seconds": 52.578902,
+      "engine": "codex",
+      "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+      "provider_reported_configuration": {
+        "effort": null,
+        "model": null
+      },
+      "requested_configuration": {
+        "effort": null,
+        "model": null
+      },
+      "role": "implementer",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": null,
+        "cached_input_tokens": 63360,
+        "estimated_cost_usd": null,
+        "input_tokens": 76320,
+        "output_tokens": 900,
+        "reasoning_tokens": 0,
+        "source": "codex.turn.completed"
+      }
+    },
+    {
+      "elapsed_seconds": 0.34943483299999656,
+      "engine": "local",
+      "execution_id": "80d6512f-c59c-4103-ae61-f18ffbba64d8",
+      "provider_reported_configuration": {
+        "effort": null,
+        "model": null
+      },
+      "requested_configuration": {
+        "effort": null,
+        "model": "python-unittest-seatbelt-v1"
+      },
+      "role": "verification",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": null,
+        "cached_input_tokens": null,
+        "estimated_cost_usd": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null,
+        "source": "local-command"
+      }
+    },
+    {
+      "elapsed_seconds": 3.740203,
+      "engine": "claude",
+      "execution_id": "fd5878a1-8326-441a-94ea-6a9df894a9ef",
+      "provider_reported_configuration": {
+        "effort": null,
+        "model": "claude-opus-5[1m]"
+      },
+      "requested_configuration": {
+        "effort": null,
+        "model": null
+      },
+      "role": "reviewer",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": 4644,
+        "cached_input_tokens": 0,
+        "estimated_cost_usd": 0.05084999999999999,
+        "input_tokens": 2,
+        "output_tokens": 176,
+        "reasoning_tokens": null,
+        "source": "claude.result"
+      }
+    }
+  ],
+  "host": {
+    "build": "25G83",
+    "machine": "arm64",
+    "python": "3.9.6",
+    "system": "macOS",
+    "version": "26.6.2"
+  },
+  "limitations": [
+    "Trusted controller-created disposable macOS fixture only.",
+    "Provider token and model metadata are provider-reported; missing fields remain unknown.",
+    "Claude estimated cost is not billed cost; billed cost remained unknown.",
+    "Comprehensive credential isolation, tool-network separation, detached-process containment, remote execution and publication remain unsupported."
+  ],
+  "limits": {
+    "implementation_timeout_seconds": 60,
+    "inference_attempts": 2,
+    "local_verification_executions": 1,
+    "max_calls": 3,
+    "max_concurrency": 1,
+    "max_elapsed_seconds": 130,
+    "repair_inference_capacity": 0,
+    "review_timeout_seconds": 60,
+    "verification_timeout_seconds": 10
+  },
+  "observed": {
+    "approval_recorded": false,
+    "approval_rows": 0,
+    "authentication_checkpoints": 0,
+    "candidate_revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+    "controller_elapsed_seconds": 56.668539833,
+    "inference_attempts": 2,
+    "local_verification_executions": 1,
+    "repair_cycles": 0,
+    "review_findings": [],
+    "task_state": "awaiting_pr_approval",
+    "verification": [
+      {
+        "id": "phase4-verification-0",
+        "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+        "stale": false,
+        "status": "passed"
+      }
+    ]
+  },
+  "prompt_verification": {
+    "implementer": {
+      "actual": {
+        "bytes": 4959,
+        "sha256": "b81024a2caaf2c469d9302d379504e5e3f8ebbb351878b1af21145308fd8f613"
+      },
+      "match": true,
+      "request_record": {
+        "bytes": 4959,
+        "sha256": "b81024a2caaf2c469d9302d379504e5e3f8ebbb351878b1af21145308fd8f613"
+      }
+    },
+    "reviewer": {
+      "actual": {
+        "bytes": 5873,
+        "sha256": "14c2c50d2e55a3c06e6a1fd463b351d18eebbaef644f6b0b9353ef75d26a055a"
+      },
+      "match": true,
+      "request_record": {
+        "bytes": 5873,
+        "sha256": "14c2c50d2e55a3c06e6a1fd463b351d18eebbaef644f6b0b9353ef75d26a055a"
+      }
+    }
+  },
+  "requested_configuration": {
+    "implementer": {
+      "effort": null,
+      "model": null,
+      "provider": "codex"
+    },
+    "reviewer": {
+      "effort": null,
+      "model": null,
+      "provider": "claude"
+    }
+  },
+  "result": "passed",
+  "schema_version": 1
+}

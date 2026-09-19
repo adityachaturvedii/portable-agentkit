@@ -135,7 +135,8 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [x] Correct scope claims: decomposition is fixture-defined, execution is sequential, management roles are deterministic and routing is not calibrated optimization.
 - [x] Preserve the prior live archive unchanged and label it historical evidence for `af80791` rather than validation of the corrected revision.
 - [x] Complete the 137-test repository suite with status `OK` and one expected nested-Seatbelt skip, pass that boundary regression separately at host level and pass `agentkit check`.
-- [ ] Run a new bounded live workflow for the corrected revision only under separate authorization; no live inference is spent in this corrective pass.
+- [x] Validate exact executable revision `342423ea27700e7d46a977d47e3307bd8fa58c23` in one fresh bounded live calculator workflow: one Codex implementation, one constrained verification and one Claude review reached a candidate-bound local package with no repair or approval.
+- [x] Archive sanitized prompts, redacted provider records, controller state, verification, candidate identity/diff, usage and package in a 28-file SHA-256 manifest distinct from the historical `af80791` archive.
 
 ## Later phases (planned, not implemented)
 
@@ -156,5 +157,7 @@ The authentication-recovery follow-up supersedes that live gate: guided first-pa
 Phase 4 now provides fixture-only natural-language intake, a reviewable plan, selective persisted role graphs, configurable account-default provider routing, separate verification/review reserves, active cancellation and a terminal status/package experience. The final suite passed 131 tests with one nested-sandbox skip, and the host boundary regression passed separately. One live two-inference-call workflow reached a clean revision-bound local package. General repositories, additional platforms, GPU/remote workers, dashboards and publication remain future gates.
 
 The Phase 4 corrective review fixes the live cancellation interface, decomposed authentication resume, requested model/effort propagation and verified worker skill context. The corrected revision completes its 137-test repository suite with status `OK` and one expected nested-Seatbelt skip; the skipped boundary test passes separately at host level. The earlier live package remains historical evidence for `af80791`. No live inference was used for the correction, so the corrected live implementation → verification → review path still needs one future bounded validation.
+
+The corrected Phase 4 live gate is now complete for exact executable revision `342423ea27700e7d46a977d47e3307bd8fa58c23`. Under a three-call/130-second controller budget, one Codex implementation, one constrained verification and one Claude review reached `awaiting_pr_approval` at disposable candidate `ee3f6ffc260f6cf1ee5537db1913debb0f4168ff`. Only `calculator.py` changed, both prompt hashes matched the recorded role-specific contexts, verification and review passed, no repair/login/publication ran and no approval was recorded. Broader platforms, repositories and isolation claims remain unchanged.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).
