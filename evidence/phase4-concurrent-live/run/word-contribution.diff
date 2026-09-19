@@ -1,0 +1,8 @@
+diff --git a/words.py b/words.py
+index f80c830..a0ae1cb 100644
+--- a/words.py
++++ b/words.py
+@@ -1,2 +1,2 @@
+ def word_count(text):
+-    return len(text)
++    return len(text.split())

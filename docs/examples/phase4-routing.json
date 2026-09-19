@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "profile_id": "codex-account-default",
+      "provider": "codex",
+      "model": null,
+      "effort": null,
+      "roles": ["implementer", "repair", "reviewer"],
+      "capabilities": ["owned-code", "model-only"],
+      "relative_cost": "unknown",
+      "evidence": "Installed CLI account default; exact model, relative cost and relative quality are unknown.",
+      "enabled": true,
+      "availability": "verified",
+      "evidence_source": "read-only installed CLI capability check",
+      "evidence_date": "2026-09-19",
+      "relative_quality": "unknown"
+    },
+    {
+      "profile_id": "claude-account-default",
+      "provider": "claude",
+      "model": null,
+      "effort": null,
+      "roles": ["implementer", "repair", "reviewer"],
+      "capabilities": ["owned-code", "model-only"],
+      "relative_cost": "unknown",
+      "evidence": "Installed CLI account default; exact model, relative cost and relative quality are unknown.",
+      "enabled": true,
+      "availability": "verified",
+      "evidence_source": "read-only installed CLI capability check",
+      "evidence_date": "2026-09-19",
+      "relative_quality": "unknown"
+    }
+  ],
+  "defaults": {
+    "implementer": "codex-account-default",
+    "repair": "codex-account-default",
+    "reviewer": "claude-account-default"
+  },
+  "policies": [
+    {
+      "role": "implementer",
+      "profile_id": "codex-account-default",
+      "difficulty": "any",
+      "risk": "any",
+      "required_capability": "owned-code"
+    },
+    {
+      "role": "reviewer",
+      "profile_id": "claude-account-default",
+      "difficulty": "any",
+      "risk": "any",
+      "required_capability": "model-only"
+    }
+  ]
+}

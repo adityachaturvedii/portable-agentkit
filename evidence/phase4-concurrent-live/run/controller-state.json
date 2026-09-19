@@ -1,0 +1,1108 @@
+{
+  "controller": {
+    "approvals": [],
+    "authentication_checkpoints": [],
+    "budget": {
+      "active_calls": 0,
+      "completed_calls": 2,
+      "elapsed_seconds": 98.052993,
+      "max_calls": 4,
+      "max_concurrency": 2,
+      "max_elapsed_seconds": 190.0,
+      "max_planning_calls": 0,
+      "max_provider_calls": 3,
+      "max_timeout_seconds": 60.0,
+      "planning_completed_calls": 0,
+      "planning_reserved_calls": 0,
+      "provider_completed_calls": 2,
+      "provider_reserved_calls": 0,
+      "reserved_calls": 0,
+      "reserved_elapsed_seconds": 0.0,
+      "review_reserve": 1,
+      "task_id": "concurrent-live",
+      "verification_reserve": 1
+    },
+    "events": [
+      {
+        "created_at": "2026-09-19T03:21:30.269433+00:00",
+        "event_id": "task-created-concurrent-live",
+        "event_type": "task_created",
+        "payload_json": "{\"dependencies\":[],\"objective\":\"Repair word and line metrics\"}",
+        "sequence": 1,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:30.276110+00:00",
+        "event_id": "concurrent-live-phase4-intake-2c227cdb-de9b-4645-bf86-22583629ab30",
+        "event_type": "phase4_intake_recorded",
+        "payload_json": "{\"execution_profile\":\"trusted-disposable-macos\",\"fixture_id\":\"text-metrics\"}",
+        "sequence": 2,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:30.283304+00:00",
+        "event_id": "concurrent-live-phase4-contracted",
+        "event_type": "transition",
+        "payload_json": "{\"from\":\"received\",\"to\":\"contracted\"}",
+        "sequence": 3,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:30.289448+00:00",
+        "event_id": "concurrent-live-phase4-plan-f40963fc-5df7-4d09-a47c-d36294d06d72",
+        "event_type": "phase4_plan_recorded",
+        "payload_json": "{\"implementation_nodes\":2,\"management_calls\":0,\"mode\":\"decomposed\",\"nodes\":10,\"plan_sha256\":\"f9f7824ce11523195c3acd3cab8b81ee3ff477d42813419ed463a4847cf6ef4c\"}",
+        "sequence": 4,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:41.436966+00:00",
+        "event_id": "concurrent-live-phase4-workspace-1789788101436102000",
+        "event_type": "transition",
+        "payload_json": "{\"from\":\"contracted\",\"to\":\"workspace_ready\"}",
+        "sequence": 5,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:41.447417+00:00",
+        "event_id": "concurrent-live-phase4-implementing-1789788101446609000",
+        "event_type": "transition",
+        "payload_json": "{\"from\":\"workspace_ready\",\"to\":\"implementing\"}",
+        "sequence": 6,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:41.460462+00:00",
+        "event_id": "concurrent-live-node-implement-word-metric-running-ea70d49d-dbc7-4cd5-98bd-3e48c0ec246a",
+        "event_type": "phase4_node_transition",
+        "payload_json": "{\"attempt\":1,\"execution_id\":null,\"from\":\"pending\",\"node_id\":\"implement-word-metric\",\"to\":\"running\"}",
+        "sequence": 7,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:41.465540+00:00",
+        "event_id": "concurrent-live-node-implement-line-metric-running-bb749cbf-76bc-41bd-b5f7-1bb1756d1000",
+        "event_type": "phase4_node_transition",
+        "payload_json": "{\"attempt\":1,\"execution_id\":null,\"from\":\"pending\",\"node_id\":\"implement-line-metric\",\"to\":\"running\"}",
+        "sequence": 8,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:41.679193+00:00",
+        "event_id": "concurrent-live-assignment-identity-implement-word-metric-35ccb25a-5327-4ee0-b9eb-d51280329dd7",
+        "event_type": "phase4_assignment_identity_recorded",
+        "payload_json": "{\"branch\":\"agentkit/concurrent-live-implement-word-metric\",\"manifest_sha256\":\"22d64d1393d29b1c6f3ecf5887aeb32b131fee839ff75b29c0c13741514b5c30\",\"node_id\":\"implement-word-metric\",\"revision\":\"dd2b246a1136c412b6ff59f698e8468b4c87b389\"}",
+        "sequence": 9,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:41.791527+00:00",
+        "event_id": "concurrent-live-assignment-identity-implement-line-metric-fe9463af-3a8e-4c27-ac2d-90f472364264",
+        "event_type": "phase4_assignment_identity_recorded",
+        "payload_json": "{\"branch\":\"agentkit/concurrent-live-implement-line-metric\",\"manifest_sha256\":\"22d64d1393d29b1c6f3ecf5887aeb32b131fee839ff75b29c0c13741514b5c30\",\"node_id\":\"implement-line-metric\",\"revision\":\"dd2b246a1136c412b6ff59f698e8468b4c87b389\"}",
+        "sequence": 10,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:42.153230+00:00",
+        "event_id": "reserve-a99bf2a4-f401-4087-9351-dc06a8cfe76e",
+        "event_type": "execution_reserved",
+        "payload_json": "{\"execution_id\":\"a99bf2a4-f401-4087-9351-dc06a8cfe76e\",\"requested_configuration\":{\"effort\":null,\"model\":null},\"role\":\"implementer\",\"timeout_seconds\":60.0}",
+        "sequence": 11,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:42.158299+00:00",
+        "event_id": "start-a99bf2a4-f401-4087-9351-dc06a8cfe76e",
+        "event_type": "execution_started",
+        "payload_json": "{\"execution_id\":\"a99bf2a4-f401-4087-9351-dc06a8cfe76e\",\"pid\":43178}",
+        "sequence": 12,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:42.235635+00:00",
+        "event_id": "reserve-b9dce324-3a3a-4451-b496-97d5ec7cc836",
+        "event_type": "execution_reserved",
+        "payload_json": "{\"execution_id\":\"b9dce324-3a3a-4451-b496-97d5ec7cc836\",\"requested_configuration\":{\"effort\":null,\"model\":null},\"role\":\"implementer\",\"timeout_seconds\":60.0}",
+        "sequence": 13,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:21:42.240578+00:00",
+        "event_id": "start-b9dce324-3a3a-4451-b496-97d5ec7cc836",
+        "event_type": "execution_started",
+        "payload_json": "{\"execution_id\":\"b9dce324-3a3a-4451-b496-97d5ec7cc836\",\"pid\":43178}",
+        "sequence": 14,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:22:25.607905+00:00",
+        "event_id": "finish-b9dce324-3a3a-4451-b496-97d5ec7cc836",
+        "event_type": "execution_finished",
+        "payload_json": "{\"elapsed_seconds\":43.012412,\"execution_id\":\"b9dce324-3a3a-4451-b496-97d5ec7cc836\",\"status\":\"succeeded\"}",
+        "sequence": 15,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:22:25.690190+00:00",
+        "event_id": "concurrent-live-node-implement-line-metric-failed-56d6b0ad-221e-4682-a292-765cdd56465a",
+        "event_type": "phase4_node_transition",
+        "payload_json": "{\"attempt\":1,\"execution_id\":\"b9dce324-3a3a-4451-b496-97d5ec7cc836\",\"from\":\"running\",\"node_id\":\"implement-line-metric\",\"to\":\"failed\"}",
+        "sequence": 16,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:22:37.546282+00:00",
+        "event_id": "finish-a99bf2a4-f401-4087-9351-dc06a8cfe76e",
+        "event_type": "execution_finished",
+        "payload_json": "{\"elapsed_seconds\":55.040581,\"execution_id\":\"a99bf2a4-f401-4087-9351-dc06a8cfe76e\",\"status\":\"succeeded\"}",
+        "sequence": 17,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:22:37.824268+00:00",
+        "event_id": "concurrent-live-node-implement-word-metric-succeeded-6085e410-bd37-45ac-9e4d-7ef44ab20a57",
+        "event_type": "phase4_node_transition",
+        "payload_json": "{\"attempt\":1,\"execution_id\":\"a99bf2a4-f401-4087-9351-dc06a8cfe76e\",\"from\":\"running\",\"node_id\":\"implement-word-metric\",\"to\":\"succeeded\"}",
+        "sequence": 18,
+        "task_id": "concurrent-live"
+      },
+      {
+        "created_at": "2026-09-19T03:22:37.834703+00:00",
+        "event_id": "concurrent-live-phase4-assignment-batch-blocked-1789788157833969000",
+        "event_type": "transition",
+        "payload_json": "{\"from\":\"implementing\",\"to\":\"blocked\"}",
+        "sequence": 19,
+        "task_id": "concurrent-live"
+      }
+    ],
+    "evidence": [],
+    "executions": [
+      {
+        "allocation_seconds": 60.0,
+        "effort": null,
+        "elapsed_seconds": 55.040581,
+        "engine": "codex",
+        "execution_id": "a99bf2a4-f401-4087-9351-dc06a8cfe76e",
+        "finished_at": "2026-09-19T03:22:37.546126+00:00",
+        "model": null,
+        "pid": 43178,
+        "process_token": "phase4-controller-supervised:43178:72d641a8f79d46b9a1ed07e7e372a5dc",
+        "reconciliation_note": null,
+        "result_json": "{\"artifacts\":{\"request.json\":\"12a6a56f2571d17798db156ab188465c64001a22d5012394bbbb56a40d42c309\",\"stderr.redacted.txt\":\"14f8b88df3611cff00860896956285adfebdaaa7fc4fcac26b54fb9c64586c9e\",\"stdout.redacted.jsonl\":\"bc8e903164513ca24d46df8c234ff1213f031b0816add5076a490dddfb258e7a\"},\"authentication_failure\":null,\"error_class\":null,\"limitations\":[\"Provider events and final text are claims; fixture acceptance is independently computed.\",\"Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.\",\"Process groups cannot prove detached-descendant or remote cancellation.\",\"Whole-process guard permits writes only in the disposable workspace/runtime plus the literal Codex startup lock file.\",\"Explicit disposable read canaries are denied; comprehensive parent credential isolation is not established.\",\"Provider and tool traffic share the parent network boundary; tool network isolation is unsupported in this mode.\",\"No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.\",\"Codex built-in transport retries cannot be configured to zero with its built-in subscription provider; reported reconnects stop the run and wall time bounds it. Hidden attempts remain unknown.\"],\"provider_reported_configuration\":{\"effort\":null,\"model\":null},\"requested_configuration\":{\"effort\":null,\"model\":null}}",
+        "role": "implementer",
+        "started_at": "2026-09-19T03:21:42.158250+00:00",
+        "status": "succeeded",
+        "task_id": "concurrent-live",
+        "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":51712,\"estimated_cost_usd\":null,\"input_tokens\":57048,\"output_tokens\":1138,\"reasoning_tokens\":118,\"source\":\"codex.turn.completed\"}"
+      },
+      {
+        "allocation_seconds": 60.0,
+        "effort": null,
+        "elapsed_seconds": 43.012412,
+        "engine": "codex",
+        "execution_id": "b9dce324-3a3a-4451-b496-97d5ec7cc836",
+        "finished_at": "2026-09-19T03:22:25.607736+00:00",
+        "model": null,
+        "pid": 43178,
+        "process_token": "phase4-controller-supervised:43178:72d641a8f79d46b9a1ed07e7e372a5dc",
+        "reconciliation_note": null,
+        "result_json": "{\"artifacts\":{\"request.json\":\"febcd59e7ddd3a34d033ef1619232df58360b844b698038daba1de9cbce1611f\",\"stderr.redacted.txt\":\"6799353ea8a4294314ad3bd61e80f326bba732e13e09df55c2adfcc09191ac74\",\"stdout.redacted.jsonl\":\"978f6e2b7d457792b5eae65a45634b5c4df9559e229900bb40b38b57c8c4a3f5\"},\"authentication_failure\":null,\"error_class\":null,\"limitations\":[\"Provider events and final text are claims; fixture acceptance is independently computed.\",\"Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.\",\"Process groups cannot prove detached-descendant or remote cancellation.\",\"Whole-process guard permits writes only in the disposable workspace/runtime plus the literal Codex startup lock file.\",\"Explicit disposable read canaries are denied; comprehensive parent credential isolation is not established.\",\"Provider and tool traffic share the parent network boundary; tool network isolation is unsupported in this mode.\",\"No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.\",\"Codex built-in transport retries cannot be configured to zero with its built-in subscription provider; reported reconnects stop the run and wall time bounds it. Hidden attempts remain unknown.\"],\"provider_reported_configuration\":{\"effort\":null,\"model\":null},\"requested_configuration\":{\"effort\":null,\"model\":null}}",
+        "role": "implementer",
+        "started_at": "2026-09-19T03:21:42.240522+00:00",
+        "status": "succeeded",
+        "task_id": "concurrent-live",
+        "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":null,\"cached_input_tokens\":32640,\"estimated_cost_usd\":null,\"input_tokens\":44948,\"output_tokens\":782,\"reasoning_tokens\":31,\"source\":\"codex.turn.completed\"}"
+      }
+    ],
+    "task": {
+      "base_revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+      "branch": "agentkit/concurrent-live",
+      "contract_json": "{\"acceptance\":[{\"expected\":\"word_count counts whitespace-separated words\",\"id\":\"word-count\"},{\"expected\":\"line_count follows splitlines semantics\",\"id\":\"line-count\"},{\"expected\":\"summarize returns both independently corrected metrics\",\"id\":\"integration\"}],\"assumptions\":[\"The request targets only the selected controller-created fixture.\",\"Public interfaces and controller-owned acceptance criteria remain unchanged.\",\"No network, dependency installation, publication, deployment, or external repository access is authorized.\",\"Provider model and relative price use account defaults and remain unknown unless reported by the CLI.\"],\"execution_profile\":\"trusted-disposable-macos\",\"non_goals\":[\"personal repositories\",\"dependency installation\",\"publication\",\"merge\",\"deployment\",\"GPU or remote execution\"],\"objective\":\"Repair word and line metrics\",\"requirements\":{\"user_request\":\"Repair word and line metrics\"},\"risk\":\"routine\",\"scope\":[\"lines.py\",\"words.py\"]}",
+      "created_at": "2026-09-19T03:21:30.268152+00:00",
+      "dependencies_json": "[]",
+      "head_revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+      "implementer_engine": "codex",
+      "implementer_model": null,
+      "max_repairs": 0,
+      "next_action": "inspect failed assignment",
+      "objective": "Repair word and line metrics",
+      "repair_count": 0,
+      "reviewer_engine": "claude",
+      "reviewer_model": null,
+      "state": "blocked",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:22:37.834750+00:00",
+      "version": 4,
+      "worktree": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worktrees/concurrent-live"
+    }
+  },
+  "controls": {
+    "cancel_requested": 0,
+    "cancellation_reason": null,
+    "task_id": "concurrent-live",
+    "updated_at": "2026-09-19T03:21:30.275190+00:00"
+  },
+  "edges": [
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "intake",
+      "target_node": "plan",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "plan",
+      "target_node": "schedule",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "schedule",
+      "target_node": "implement-word-metric",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "schedule",
+      "target_node": "implement-line-metric",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "implement-word-metric",
+      "target_node": "integrate",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "implement-line-metric",
+      "target_node": "integrate",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "integrate",
+      "target_node": "verify",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "verify",
+      "target_node": "review",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "bounded_repair",
+      "max_iterations": 2,
+      "source_node": "verify",
+      "target_node": "repair",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "bounded_repair",
+      "max_iterations": 2,
+      "source_node": "review",
+      "target_node": "repair",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "bounded_repair",
+      "max_iterations": 2,
+      "source_node": "repair",
+      "target_node": "verify",
+      "task_id": "concurrent-live"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source_node": "review",
+      "target_node": "package",
+      "task_id": "concurrent-live"
+    }
+  ],
+  "intake": {
+    "assumptions_json": "[\"The request targets only the selected controller-created fixture.\",\"Public interfaces and controller-owned acceptance criteria remain unchanged.\",\"No network, dependency installation, publication, deployment, or external repository access is authorized.\",\"Provider model and relative price use account defaults and remain unknown unless reported by the CLI.\"]",
+    "created_at": "2026-09-19T03:21:30.275190+00:00",
+    "execution_profile": "trusted-disposable-macos",
+    "fixture_id": "text-metrics",
+    "request_text": "Repair word and line metrics",
+    "requirements_json": "{\"user_request\":\"Repair word and line metrics\"}",
+    "task_id": "concurrent-live"
+  },
+  "nodes": [
+    {
+      "allowed_paths": [],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [],
+      "effort": null,
+      "execution_id": null,
+      "kind": "intake",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "intake",
+      "objective": "Normalize user intent without expanding authority.",
+      "provider": null,
+      "result": null,
+      "result_json": null,
+      "role": "chief_of_staff",
+      "routing_reason": null,
+      "status": "succeeded",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    },
+    {
+      "allowed_paths": [],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "intake"
+      ],
+      "effort": null,
+      "execution_id": null,
+      "kind": "plan",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "plan",
+      "objective": "Define interfaces, decomposition, and immutable acceptance.",
+      "provider": null,
+      "result": null,
+      "result_json": null,
+      "role": "tech_lead",
+      "routing_reason": null,
+      "status": "succeeded",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    },
+    {
+      "allowed_paths": [],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "plan"
+      ],
+      "effort": null,
+      "execution_id": null,
+      "kind": "schedule",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "schedule",
+      "objective": "Allocate two isolated subtasks within the parent budget.",
+      "provider": null,
+      "result": null,
+      "result_json": null,
+      "role": "manager",
+      "routing_reason": null,
+      "status": "succeeded",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    },
+    {
+      "allowed_paths": [
+        "words.py"
+      ],
+      "attempts": 1,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "schedule"
+      ],
+      "effort": null,
+      "execution_id": "a99bf2a4-f401-4087-9351-dc06a8cfe76e",
+      "kind": "implementation",
+      "max_attempts": 2,
+      "model": null,
+      "node_id": "implement-word-metric",
+      "objective": "Correct word_count semantics.",
+      "provider": "codex",
+      "result": {
+        "assignment_identity": {
+          "branch": "agentkit/concurrent-live-implement-word-metric",
+          "clean": true,
+          "manifest_sha256": "22d64d1393d29b1c6f3ecf5887aeb32b131fee839ff75b29c0c13741514b5c30",
+          "repository": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/repositories/concurrent-live",
+          "revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+          "worktree": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worktrees/concurrent-live-implement-word-metric"
+        },
+        "changed_paths": [
+          "words.py"
+        ],
+        "execution_id": "a99bf2a4-f401-4087-9351-dc06a8cfe76e",
+        "revision": "ff44028cbf39740671a845224a8e6d8b55f69b85",
+        "worktree": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worktrees/concurrent-live-implement-word-metric"
+      },
+      "role": "implementer",
+      "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+      "status": "succeeded",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:22:37.816669+00:00"
+    },
+    {
+      "allowed_paths": [
+        "lines.py"
+      ],
+      "attempts": 1,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "schedule"
+      ],
+      "effort": null,
+      "execution_id": "b9dce324-3a3a-4451-b496-97d5ec7cc836",
+      "kind": "implementation",
+      "max_attempts": 2,
+      "model": null,
+      "node_id": "implement-line-metric",
+      "objective": "Correct line_count semantics.",
+      "provider": "codex",
+      "result": {
+        "authority_violation": "worker produced no changes"
+      },
+      "role": "implementer",
+      "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+      "status": "failed",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:22:25.688312+00:00"
+    },
+    {
+      "allowed_paths": [],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "implement-word-metric",
+        "implement-line-metric"
+      ],
+      "effort": null,
+      "execution_id": null,
+      "kind": "integration",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "integrate",
+      "objective": "Integrate disjoint broker-validated subtask revisions.",
+      "provider": null,
+      "result": null,
+      "result_json": null,
+      "role": "tech_lead",
+      "routing_reason": null,
+      "status": "pending",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    },
+    {
+      "allowed_paths": [],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "integrate"
+      ],
+      "effort": null,
+      "execution_id": null,
+      "kind": "verification",
+      "max_attempts": 3,
+      "model": null,
+      "node_id": "verify",
+      "objective": "Run controller-owned acceptance under the tested execution profile.",
+      "provider": null,
+      "result": null,
+      "result_json": null,
+      "role": "verifier",
+      "routing_reason": null,
+      "status": "pending",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    },
+    {
+      "allowed_paths": [],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "verify"
+      ],
+      "effort": null,
+      "execution_id": null,
+      "kind": "review",
+      "max_attempts": 3,
+      "model": null,
+      "node_id": "review",
+      "objective": "Independently review the integrated candidate against the contract.",
+      "provider": "claude",
+      "result": null,
+      "result_json": null,
+      "role": "reviewer",
+      "routing_reason": "Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added. Provider differs from every implementation contributor for independent review.",
+      "status": "pending",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    },
+    {
+      "allowed_paths": [
+        "lines.py",
+        "words.py"
+      ],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [],
+      "effort": null,
+      "execution_id": null,
+      "kind": "repair",
+      "max_attempts": 2,
+      "model": null,
+      "node_id": "repair",
+      "objective": "Apply only controller-supplied failed-check or review feedback.",
+      "provider": "codex",
+      "result": null,
+      "result_json": null,
+      "role": "implementer",
+      "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+      "status": "dormant",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    },
+    {
+      "allowed_paths": [],
+      "attempts": 0,
+      "created_at": "2026-09-19T03:21:30.288361+00:00",
+      "dependencies": [
+        "review"
+      ],
+      "effort": null,
+      "execution_id": null,
+      "kind": "package",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "package",
+      "objective": "Prepare a revision-bound local approval package.",
+      "provider": null,
+      "result": null,
+      "result_json": null,
+      "role": "chief_of_staff",
+      "routing_reason": null,
+      "status": "pending",
+      "task_id": "concurrent-live",
+      "updated_at": "2026-09-19T03:21:30.288361+00:00"
+    }
+  ],
+  "plan": {
+    "created_at": "2026-09-19T03:21:30.288361+00:00",
+    "plan": {
+      "edges": [
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "intake",
+          "target": "plan"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "plan",
+          "target": "schedule"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "schedule",
+          "target": "implement-word-metric"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "schedule",
+          "target": "implement-line-metric"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "implement-word-metric",
+          "target": "integrate"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "implement-line-metric",
+          "target": "integrate"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "integrate",
+          "target": "verify"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "verify",
+          "target": "review"
+        },
+        {
+          "edge_type": "bounded_repair",
+          "max_iterations": 2,
+          "source": "verify",
+          "target": "repair"
+        },
+        {
+          "edge_type": "bounded_repair",
+          "max_iterations": 2,
+          "source": "review",
+          "target": "repair"
+        },
+        {
+          "edge_type": "bounded_repair",
+          "max_iterations": 2,
+          "source": "repair",
+          "target": "verify"
+        },
+        {
+          "edge_type": "dependency",
+          "max_iterations": 0,
+          "source": "review",
+          "target": "package"
+        }
+      ],
+      "management_calls": 0,
+      "mode": "decomposed",
+      "nodes": [
+        {
+          "allowed_paths": [],
+          "dependencies": [],
+          "effort": null,
+          "initial_status": "succeeded",
+          "kind": "intake",
+          "max_attempts": 1,
+          "model": null,
+          "node_id": "intake",
+          "objective": "Normalize user intent without expanding authority.",
+          "provider": null,
+          "role": "chief_of_staff",
+          "routing_reason": null
+        },
+        {
+          "allowed_paths": [],
+          "dependencies": [
+            "intake"
+          ],
+          "effort": null,
+          "initial_status": "succeeded",
+          "kind": "plan",
+          "max_attempts": 1,
+          "model": null,
+          "node_id": "plan",
+          "objective": "Define interfaces, decomposition, and immutable acceptance.",
+          "provider": null,
+          "role": "tech_lead",
+          "routing_reason": null
+        },
+        {
+          "allowed_paths": [],
+          "dependencies": [
+            "plan"
+          ],
+          "effort": null,
+          "initial_status": "succeeded",
+          "kind": "schedule",
+          "max_attempts": 1,
+          "model": null,
+          "node_id": "schedule",
+          "objective": "Allocate two isolated subtasks within the parent budget.",
+          "provider": null,
+          "role": "manager",
+          "routing_reason": null
+        },
+        {
+          "allowed_paths": [
+            "words.py"
+          ],
+          "dependencies": [
+            "schedule"
+          ],
+          "effort": null,
+          "initial_status": "pending",
+          "kind": "implementation",
+          "max_attempts": 2,
+          "model": null,
+          "node_id": "implement-word-metric",
+          "objective": "Correct word_count semantics.",
+          "provider": "codex",
+          "role": "implementer",
+          "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added."
+        },
+        {
+          "allowed_paths": [
+            "lines.py"
+          ],
+          "dependencies": [
+            "schedule"
+          ],
+          "effort": null,
+          "initial_status": "pending",
+          "kind": "implementation",
+          "max_attempts": 2,
+          "model": null,
+          "node_id": "implement-line-metric",
+          "objective": "Correct line_count semantics.",
+          "provider": "codex",
+          "role": "implementer",
+          "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added."
+        },
+        {
+          "allowed_paths": [],
+          "dependencies": [
+            "implement-word-metric",
+            "implement-line-metric"
+          ],
+          "effort": null,
+          "initial_status": "pending",
+          "kind": "integration",
+          "max_attempts": 1,
+          "model": null,
+          "node_id": "integrate",
+          "objective": "Integrate disjoint broker-validated subtask revisions.",
+          "provider": null,
+          "role": "tech_lead",
+          "routing_reason": null
+        },
+        {
+          "allowed_paths": [],
+          "dependencies": [
+            "integrate"
+          ],
+          "effort": null,
+          "initial_status": "pending",
+          "kind": "verification",
+          "max_attempts": 3,
+          "model": null,
+          "node_id": "verify",
+          "objective": "Run controller-owned acceptance under the tested execution profile.",
+          "provider": null,
+          "role": "verifier",
+          "routing_reason": null
+        },
+        {
+          "allowed_paths": [],
+          "dependencies": [
+            "verify"
+          ],
+          "effort": null,
+          "initial_status": "pending",
+          "kind": "review",
+          "max_attempts": 3,
+          "model": null,
+          "node_id": "review",
+          "objective": "Independently review the integrated candidate against the contract.",
+          "provider": "claude",
+          "role": "reviewer",
+          "routing_reason": "Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added. Provider differs from every implementation contributor for independent review."
+        },
+        {
+          "allowed_paths": [
+            "lines.py",
+            "words.py"
+          ],
+          "dependencies": [],
+          "effort": null,
+          "initial_status": "dormant",
+          "kind": "repair",
+          "max_attempts": 2,
+          "model": null,
+          "node_id": "repair",
+          "objective": "Apply only controller-supplied failed-check or review feedback.",
+          "provider": "codex",
+          "role": "implementer",
+          "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added."
+        },
+        {
+          "allowed_paths": [],
+          "dependencies": [
+            "review"
+          ],
+          "effort": null,
+          "initial_status": "pending",
+          "kind": "package",
+          "max_attempts": 1,
+          "model": null,
+          "node_id": "package",
+          "objective": "Prepare a revision-bound local approval package.",
+          "provider": null,
+          "role": "chief_of_staff",
+          "routing_reason": null
+        }
+      ],
+      "proposal": {
+        "acceptance": [
+          {
+            "expected": "word_count counts whitespace-separated words",
+            "id": "word-count"
+          },
+          {
+            "expected": "line_count follows splitlines semantics",
+            "id": "line-count"
+          },
+          {
+            "expected": "summarize returns both independently corrected metrics",
+            "id": "integration"
+          }
+        ],
+        "assignments": [
+          {
+            "allowed_paths": [
+              "words.py"
+            ],
+            "dependencies": [],
+            "id": "implement-word-metric",
+            "interfaces": [
+              "word_count(text) -> int"
+            ],
+            "objective": "Correct word_count semantics."
+          },
+          {
+            "allowed_paths": [
+              "lines.py"
+            ],
+            "dependencies": [],
+            "id": "implement-line-metric",
+            "interfaces": [
+              "line_count(text) -> int"
+            ],
+            "objective": "Correct line_count semantics."
+          }
+        ],
+        "assumptions": [
+          "The target is the named controller-created disposable project.",
+          "Only declared tracked source paths may change.",
+          "No network, dependency installation, publication, deployment, or external repository access is authorized.",
+          "Configured account-default models have unknown comparative price and quality unless evidence says otherwise."
+        ],
+        "dependencies": [],
+        "integration_strategy": "integrate declared non-overlapping contributions after dependencies succeed",
+        "interfaces": [
+          {
+            "assignment": "implement-word-metric",
+            "contract": "word_count(text) -> int"
+          },
+          {
+            "assignment": "implement-line-metric",
+            "contract": "line_count(text) -> int"
+          }
+        ],
+        "inventory_sha256": "6dedf82a960ee7dd05f56e814b061511ef7bbbdf2bfe970ccbdbf10dcacaf28c",
+        "model_profiles": {
+          "implementer": "selected by validated routing registry",
+          "repair": "selected separately and used only after concrete failure",
+          "reviewer": "independent provider required for material work"
+        },
+        "objective": "Repair word and line metrics",
+        "planner": {
+          "kind": "deterministic-controller",
+          "model_call": false
+        },
+        "requirements": [
+          {
+            "source": "user",
+            "text": "Repair word and line metrics"
+          }
+        ],
+        "resource_allocations": {
+          "implementation_calls": 2,
+          "maximum_concurrent_implementers": 2,
+          "review_calls": 1,
+          "verification_calls": 1
+        },
+        "review_requirements": [
+          "independent read-only review of the verified revision"
+        ],
+        "roles": [
+          "chief_of_staff",
+          "tech_lead",
+          "manager",
+          "implementer",
+          "verifier",
+          "reviewer"
+        ],
+        "verification_requirements": [
+          "controller-owned acceptance on the exact integrated revision",
+          "candidate unchanged by verification"
+        ]
+      },
+      "routes": [
+        {
+          "effort": null,
+          "model": null,
+          "node_id": "implement-word-metric",
+          "profile_id": "codex-account-default",
+          "provider": "codex",
+          "reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+          "relative_cost": "unknown",
+          "role": "implementer"
+        },
+        {
+          "effort": null,
+          "model": null,
+          "node_id": "implement-line-metric",
+          "profile_id": "codex-account-default",
+          "provider": "codex",
+          "reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+          "relative_cost": "unknown",
+          "role": "implementer"
+        },
+        {
+          "effort": null,
+          "model": null,
+          "node_id": "review",
+          "profile_id": "claude-account-default",
+          "provider": "claude",
+          "reason": "Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added. Provider differs from every implementation contributor for independent review.",
+          "relative_cost": "unknown",
+          "role": "reviewer"
+        },
+        {
+          "effort": null,
+          "model": null,
+          "node_id": "repair",
+          "profile_id": "codex-account-default",
+          "provider": "codex",
+          "reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+          "relative_cost": "unknown",
+          "role": "repair"
+        }
+      ],
+      "schema_version": 1,
+      "selected_skills": [
+        {
+          "id": "task-contract",
+          "path": "skills/task-contract/SKILL.md",
+          "reason": "Selected for text-metrics substantial workflow.",
+          "roles": [
+            "chief_of_staff",
+            "tech_lead"
+          ],
+          "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d"
+        },
+        {
+          "id": "interface-design",
+          "path": "skills/interface-design/SKILL.md",
+          "reason": "Selected for text-metrics substantial workflow.",
+          "roles": [
+            "tech_lead",
+            "implementer"
+          ],
+          "sha256": "e36d9bdd041d457436cec6e9fb78af595db07f5e0ba77aeaa9c12214ea0e80a9"
+        },
+        {
+          "id": "behavioral-testing",
+          "path": "skills/behavioral-testing/SKILL.md",
+          "reason": "Selected for text-metrics substantial workflow.",
+          "roles": [
+            "implementer"
+          ],
+          "sha256": "f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473"
+        },
+        {
+          "id": "independent-review",
+          "path": "skills/independent-review/SKILL.md",
+          "reason": "Selected for text-metrics substantial workflow.",
+          "roles": [
+            "reviewer"
+          ],
+          "sha256": "5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb"
+        },
+        {
+          "id": "delivery-evidence",
+          "path": "skills/delivery-evidence/SKILL.md",
+          "reason": "Selected for text-metrics substantial workflow.",
+          "roles": [
+            "chief_of_staff"
+          ],
+          "sha256": "c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0"
+        },
+        {
+          "id": "domain:backend-database",
+          "path": "domains/backend-database.md",
+          "reason": "Fixture domain context only.",
+          "roles": [
+            "implementer",
+            "reviewer"
+          ],
+          "sha256": "758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e"
+        }
+      ],
+      "task_id": "concurrent-live"
+    },
+    "plan_json": "{\"edges\":[{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"intake\",\"target\":\"plan\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"plan\",\"target\":\"schedule\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"schedule\",\"target\":\"implement-word-metric\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"schedule\",\"target\":\"implement-line-metric\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"implement-word-metric\",\"target\":\"integrate\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"implement-line-metric\",\"target\":\"integrate\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"integrate\",\"target\":\"verify\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"verify\",\"target\":\"review\"},{\"edge_type\":\"bounded_repair\",\"max_iterations\":2,\"source\":\"verify\",\"target\":\"repair\"},{\"edge_type\":\"bounded_repair\",\"max_iterations\":2,\"source\":\"review\",\"target\":\"repair\"},{\"edge_type\":\"bounded_repair\",\"max_iterations\":2,\"source\":\"repair\",\"target\":\"verify\"},{\"edge_type\":\"dependency\",\"max_iterations\":0,\"source\":\"review\",\"target\":\"package\"}],\"management_calls\":0,\"mode\":\"decomposed\",\"nodes\":[{\"allowed_paths\":[],\"dependencies\":[],\"effort\":null,\"initial_status\":\"succeeded\",\"kind\":\"intake\",\"max_attempts\":1,\"model\":null,\"node_id\":\"intake\",\"objective\":\"Normalize user intent without expanding authority.\",\"provider\":null,\"role\":\"chief_of_staff\",\"routing_reason\":null},{\"allowed_paths\":[],\"dependencies\":[\"intake\"],\"effort\":null,\"initial_status\":\"succeeded\",\"kind\":\"plan\",\"max_attempts\":1,\"model\":null,\"node_id\":\"plan\",\"objective\":\"Define interfaces, decomposition, and immutable acceptance.\",\"provider\":null,\"role\":\"tech_lead\",\"routing_reason\":null},{\"allowed_paths\":[],\"dependencies\":[\"plan\"],\"effort\":null,\"initial_status\":\"succeeded\",\"kind\":\"schedule\",\"max_attempts\":1,\"model\":null,\"node_id\":\"schedule\",\"objective\":\"Allocate two isolated subtasks within the parent budget.\",\"provider\":null,\"role\":\"manager\",\"routing_reason\":null},{\"allowed_paths\":[\"words.py\"],\"dependencies\":[\"schedule\"],\"effort\":null,\"initial_status\":\"pending\",\"kind\":\"implementation\",\"max_attempts\":2,\"model\":null,\"node_id\":\"implement-word-metric\",\"objective\":\"Correct word_count semantics.\",\"provider\":\"codex\",\"role\":\"implementer\",\"routing_reason\":\"Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.\"},{\"allowed_paths\":[\"lines.py\"],\"dependencies\":[\"schedule\"],\"effort\":null,\"initial_status\":\"pending\",\"kind\":\"implementation\",\"max_attempts\":2,\"model\":null,\"node_id\":\"implement-line-metric\",\"objective\":\"Correct line_count semantics.\",\"provider\":\"codex\",\"role\":\"implementer\",\"routing_reason\":\"Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.\"},{\"allowed_paths\":[],\"dependencies\":[\"implement-word-metric\",\"implement-line-metric\"],\"effort\":null,\"initial_status\":\"pending\",\"kind\":\"integration\",\"max_attempts\":1,\"model\":null,\"node_id\":\"integrate\",\"objective\":\"Integrate disjoint broker-validated subtask revisions.\",\"provider\":null,\"role\":\"tech_lead\",\"routing_reason\":null},{\"allowed_paths\":[],\"dependencies\":[\"integrate\"],\"effort\":null,\"initial_status\":\"pending\",\"kind\":\"verification\",\"max_attempts\":3,\"model\":null,\"node_id\":\"verify\",\"objective\":\"Run controller-owned acceptance under the tested execution profile.\",\"provider\":null,\"role\":\"verifier\",\"routing_reason\":null},{\"allowed_paths\":[],\"dependencies\":[\"verify\"],\"effort\":null,\"initial_status\":\"pending\",\"kind\":\"review\",\"max_attempts\":3,\"model\":null,\"node_id\":\"review\",\"objective\":\"Independently review the integrated candidate against the contract.\",\"provider\":\"claude\",\"role\":\"reviewer\",\"routing_reason\":\"Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added. Provider differs from every implementation contributor for independent review.\"},{\"allowed_paths\":[\"lines.py\",\"words.py\"],\"dependencies\":[],\"effort\":null,\"initial_status\":\"dormant\",\"kind\":\"repair\",\"max_attempts\":2,\"model\":null,\"node_id\":\"repair\",\"objective\":\"Apply only controller-supplied failed-check or review feedback.\",\"provider\":\"codex\",\"role\":\"implementer\",\"routing_reason\":\"Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.\"},{\"allowed_paths\":[],\"dependencies\":[\"review\"],\"effort\":null,\"initial_status\":\"pending\",\"kind\":\"package\",\"max_attempts\":1,\"model\":null,\"node_id\":\"package\",\"objective\":\"Prepare a revision-bound local approval package.\",\"provider\":null,\"role\":\"chief_of_staff\",\"routing_reason\":null}],\"proposal\":{\"acceptance\":[{\"expected\":\"word_count counts whitespace-separated words\",\"id\":\"word-count\"},{\"expected\":\"line_count follows splitlines semantics\",\"id\":\"line-count\"},{\"expected\":\"summarize returns both independently corrected metrics\",\"id\":\"integration\"}],\"assignments\":[{\"allowed_paths\":[\"words.py\"],\"dependencies\":[],\"id\":\"implement-word-metric\",\"interfaces\":[\"word_count(text) -> int\"],\"objective\":\"Correct word_count semantics.\"},{\"allowed_paths\":[\"lines.py\"],\"dependencies\":[],\"id\":\"implement-line-metric\",\"interfaces\":[\"line_count(text) -> int\"],\"objective\":\"Correct line_count semantics.\"}],\"assumptions\":[\"The target is the named controller-created disposable project.\",\"Only declared tracked source paths may change.\",\"No network, dependency installation, publication, deployment, or external repository access is authorized.\",\"Configured account-default models have unknown comparative price and quality unless evidence says otherwise.\"],\"dependencies\":[],\"integration_strategy\":\"integrate declared non-overlapping contributions after dependencies succeed\",\"interfaces\":[{\"assignment\":\"implement-word-metric\",\"contract\":\"word_count(text) -> int\"},{\"assignment\":\"implement-line-metric\",\"contract\":\"line_count(text) -> int\"}],\"inventory_sha256\":\"6dedf82a960ee7dd05f56e814b061511ef7bbbdf2bfe970ccbdbf10dcacaf28c\",\"model_profiles\":{\"implementer\":\"selected by validated routing registry\",\"repair\":\"selected separately and used only after concrete failure\",\"reviewer\":\"independent provider required for material work\"},\"objective\":\"Repair word and line metrics\",\"planner\":{\"kind\":\"deterministic-controller\",\"model_call\":false},\"requirements\":[{\"source\":\"user\",\"text\":\"Repair word and line metrics\"}],\"resource_allocations\":{\"implementation_calls\":2,\"maximum_concurrent_implementers\":2,\"review_calls\":1,\"verification_calls\":1},\"review_requirements\":[\"independent read-only review of the verified revision\"],\"roles\":[\"chief_of_staff\",\"tech_lead\",\"manager\",\"implementer\",\"verifier\",\"reviewer\"],\"verification_requirements\":[\"controller-owned acceptance on the exact integrated revision\",\"candidate unchanged by verification\"]},\"routes\":[{\"effort\":null,\"model\":null,\"node_id\":\"implement-word-metric\",\"profile_id\":\"codex-account-default\",\"provider\":\"codex\",\"reason\":\"Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.\",\"relative_cost\":\"unknown\",\"role\":\"implementer\"},{\"effort\":null,\"model\":null,\"node_id\":\"implement-line-metric\",\"profile_id\":\"codex-account-default\",\"provider\":\"codex\",\"reason\":\"Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.\",\"relative_cost\":\"unknown\",\"role\":\"implementer\"},{\"effort\":null,\"model\":null,\"node_id\":\"review\",\"profile_id\":\"claude-account-default\",\"provider\":\"claude\",\"reason\":\"Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added. Provider differs from every implementation contributor for independent review.\",\"relative_cost\":\"unknown\",\"role\":\"reviewer\"},{\"effort\":null,\"model\":null,\"node_id\":\"repair\",\"profile_id\":\"codex-account-default\",\"provider\":\"codex\",\"reason\":\"Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.\",\"relative_cost\":\"unknown\",\"role\":\"repair\"}],\"schema_version\":1,\"selected_skills\":[{\"id\":\"task-contract\",\"path\":\"skills/task-contract/SKILL.md\",\"reason\":\"Selected for text-metrics substantial workflow.\",\"roles\":[\"chief_of_staff\",\"tech_lead\"],\"sha256\":\"fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d\"},{\"id\":\"interface-design\",\"path\":\"skills/interface-design/SKILL.md\",\"reason\":\"Selected for text-metrics substantial workflow.\",\"roles\":[\"tech_lead\",\"implementer\"],\"sha256\":\"e36d9bdd041d457436cec6e9fb78af595db07f5e0ba77aeaa9c12214ea0e80a9\"},{\"id\":\"behavioral-testing\",\"path\":\"skills/behavioral-testing/SKILL.md\",\"reason\":\"Selected for text-metrics substantial workflow.\",\"roles\":[\"implementer\"],\"sha256\":\"f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473\"},{\"id\":\"independent-review\",\"path\":\"skills/independent-review/SKILL.md\",\"reason\":\"Selected for text-metrics substantial workflow.\",\"roles\":[\"reviewer\"],\"sha256\":\"5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb\"},{\"id\":\"delivery-evidence\",\"path\":\"skills/delivery-evidence/SKILL.md\",\"reason\":\"Selected for text-metrics substantial workflow.\",\"roles\":[\"chief_of_staff\"],\"sha256\":\"c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0\"},{\"id\":\"domain:backend-database\",\"path\":\"domains/backend-database.md\",\"reason\":\"Fixture domain context only.\",\"roles\":[\"implementer\",\"reviewer\"],\"sha256\":\"758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e\"}],\"task_id\":\"concurrent-live\"}",
+    "plan_sha256": "f9f7824ce11523195c3acd3cab8b81ee3ff477d42813419ed463a4847cf6ef4c",
+    "status": "active",
+    "task_id": "concurrent-live",
+    "updated_at": "2026-09-19T03:21:41.108142+00:00"
+  },
+  "skills": [
+    {
+      "reason": "Selected for text-metrics substantial workflow.",
+      "relative_path": "skills/behavioral-testing/SKILL.md",
+      "roles": [
+        "implementer"
+      ],
+      "sha256": "f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473",
+      "skill_id": "behavioral-testing",
+      "task_id": "concurrent-live"
+    },
+    {
+      "reason": "Selected for text-metrics substantial workflow.",
+      "relative_path": "skills/delivery-evidence/SKILL.md",
+      "roles": [
+        "chief_of_staff"
+      ],
+      "sha256": "c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0",
+      "skill_id": "delivery-evidence",
+      "task_id": "concurrent-live"
+    },
+    {
+      "reason": "Fixture domain context only.",
+      "relative_path": "domains/backend-database.md",
+      "roles": [
+        "implementer",
+        "reviewer"
+      ],
+      "sha256": "758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e",
+      "skill_id": "domain:backend-database",
+      "task_id": "concurrent-live"
+    },
+    {
+      "reason": "Selected for text-metrics substantial workflow.",
+      "relative_path": "skills/independent-review/SKILL.md",
+      "roles": [
+        "reviewer"
+      ],
+      "sha256": "5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb",
+      "skill_id": "independent-review",
+      "task_id": "concurrent-live"
+    },
+    {
+      "reason": "Selected for text-metrics substantial workflow.",
+      "relative_path": "skills/interface-design/SKILL.md",
+      "roles": [
+        "tech_lead",
+        "implementer"
+      ],
+      "sha256": "e36d9bdd041d457436cec6e9fb78af595db07f5e0ba77aeaa9c12214ea0e80a9",
+      "skill_id": "interface-design",
+      "task_id": "concurrent-live"
+    },
+    {
+      "reason": "Selected for text-metrics substantial workflow.",
+      "relative_path": "skills/task-contract/SKILL.md",
+      "roles": [
+        "chief_of_staff",
+        "tech_lead"
+      ],
+      "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d",
+      "skill_id": "task-contract",
+      "task_id": "concurrent-live"
+    }
+  ]
+}

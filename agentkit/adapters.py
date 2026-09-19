@@ -478,7 +478,8 @@ def execute_owned_code(request, directory, boundary, *, policy=LivePolicy(), can
         argv = ADAPTERS[request.engine].argv(cap.executable, request, runtime, boundary,
                                              session_id=session_id if request.engine == 'claude' else None)
         env = clean_environment()
-        env.update(TMPDIR=str(runtime), PYTHONDONTWRITEBYTECODE='1')
+        env.update(TMPDIR=str(runtime), TMPPREFIX=str(runtime / 'zsh-tmp-'),
+                   PYTHONDONTWRITEBYTECODE='1')
         if request.engine == 'codex':
             env['CODEX_INSTALL_DIR'] = str(runtime / 'install')
         else:

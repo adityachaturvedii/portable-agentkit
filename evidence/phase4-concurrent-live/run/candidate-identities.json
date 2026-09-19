@@ -1,0 +1,20 @@
+{
+  "integrated_candidate": {
+    "branch": "agentkit/concurrent-live",
+    "clean": true,
+    "revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+    "worktree": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worktrees/concurrent-live"
+  },
+  "line_assignment": {
+    "branch": "agentkit/concurrent-live-implement-line-metric",
+    "clean": true,
+    "revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+    "worktree": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worktrees/concurrent-live-implement-line-metric"
+  },
+  "word_assignment": {
+    "branch": "agentkit/concurrent-live-implement-word-metric",
+    "clean": true,
+    "revision": "ff44028cbf39740671a845224a8e6d8b55f69b85",
+    "worktree": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worktrees/concurrent-live-implement-word-metric"
+  }
+}

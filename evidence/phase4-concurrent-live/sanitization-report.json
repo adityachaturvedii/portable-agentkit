@@ -1,0 +1,20 @@
+{
+  "benign_exclusions": [
+    {
+      "file": "run/controller-state.json",
+      "pattern": "openai_key",
+      "reason": "substring of controller phrase task-created-concurrent-live"
+    }
+  ],
+  "excluded_by_design": [
+    "controller SQLite/WAL/SHM",
+    "credential contents",
+    "authorization codes",
+    "raw login transcripts",
+    "environment values"
+  ],
+  "files_scanned": 23,
+  "note": "Provider streams were captured by the existing redacting adapter; this scan is a secondary check.",
+  "schema_version": 1,
+  "sensitive_pattern_hits": []
+}

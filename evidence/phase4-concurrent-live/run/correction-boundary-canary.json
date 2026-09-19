@@ -1,0 +1,22 @@
+{
+  "claim_limit": "This canary validates the narrow shell runtime correction without provider inference; it is not a completed live workflow.",
+  "corrected_revision": "b9df1ad8af93f9d62124859b30246d971f273e83",
+  "host_context": {
+    "dev_null_exception": "literal /dev/null only",
+    "git_status_with_dev_null_global_config": "passed",
+    "heredoc_workspace_write": "passed",
+    "operation_not_permitted_mentions_before_protected_write": 0,
+    "protected_file_unchanged": true,
+    "shell_exit_code": 1,
+    "shell_exit_expected_reason": "final protected-file write was denied",
+    "status": "passed",
+    "tmp_prefix_within_runtime": true
+  },
+  "inference_used": false,
+  "nested_managed_context": {
+    "exit_code": 71,
+    "reason": "sandbox_apply operation not permitted",
+    "status": "unavailable"
+  },
+  "schema_version": 1
+}

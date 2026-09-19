@@ -67,15 +67,29 @@ def main(argv=None):
     task = commands.add_parser("task", help="Phase 4 disposable task intake and orchestration")
     task_commands = task.add_subparsers(dest="task_command", required=True)
     task_commands.add_parser("fixtures", help="list supported controller-created disposable targets")
+    task_propose = task_commands.add_parser(
+        "propose", help="inspect request-driven planning without creating a workflow")
+    task_propose.add_argument("--project", required=True)
+    task_propose.add_argument("--request", required=True)
     task_submit = task_commands.add_parser("submit", help="normalize a request and propose a bounded plan")
     task_submit.add_argument("--root", required=True, help="fresh workflow directory")
     task_submit.add_argument("--task-id", required=True)
-    task_submit.add_argument("--fixture", required=True)
+    target = task_submit.add_mutually_exclusive_group(required=True)
+    target.add_argument("--project", help="controller-created disposable project scenario")
+    target.add_argument("--fixture", help="backward-compatible alias for --project")
     task_submit.add_argument("--request", required=True)
     task_submit.add_argument("--risk", choices=("routine", "material"))
     task_submit.add_argument("--max-calls", type=int)
     task_submit.add_argument("--max-elapsed-seconds", type=float)
     task_submit.add_argument("--max-concurrency", type=int, choices=(1, 2))
+    task_submit.add_argument("--max-provider-calls", type=int)
+    task_submit.add_argument("--max-planning-calls", type=int, default=0)
+    task_submit.add_argument("--max-repairs", type=int, choices=(0, 1, 2), default=2)
+    task_submit.add_argument("--max-escalations", type=int, choices=(0, 1, 2))
+    task_submit.add_argument("--implementation-timeout", type=float, default=60)
+    task_submit.add_argument("--review-timeout", type=float, default=60)
+    task_submit.add_argument("--verification-timeout", type=float, default=10)
+    task_submit.add_argument("--routing-config", help="validated portable model registry JSON")
     task_submit.add_argument("--implementer-provider", choices=("codex", "claude"), default="codex",
                              help="account-default provider for implementation and bounded repair")
     task_submit.add_argument("--reviewer-provider", choices=("codex", "claude"), default="claude",
@@ -232,14 +246,29 @@ def main(argv=None):
                 print(json.dumps({'execution_profile': 'trusted-disposable-macos',
                                   'fixtures': phase4_fixture_catalog()}, indent=2))
                 return 0
+            if args.task_command == 'propose':
+                from .phase4_fixtures import get_fixture
+                from .planning import bounded_inventory, propose
+                fixture = get_fixture(args.project)
+                print(json.dumps({'inventory': bounded_inventory(fixture),
+                                  'proposal': propose(args.request, fixture)}, indent=2))
+                return 0
             if args.task_command == 'submit':
                 from .phase4_contracts import ModelRegistry
-                registry = ModelRegistry.account_defaults(args.implementer_provider,
-                                                          args.reviewer_provider)
+                registry = (ModelRegistry.from_dict(read_json(args.routing_config))
+                            if args.routing_config else
+                            ModelRegistry.account_defaults(args.implementer_provider,
+                                                           args.reviewer_provider))
                 workflow = Phase4Workflow.submit(
-                    args.root, args.task_id, args.request, args.fixture, risk=args.risk,
+                    args.root, args.task_id, args.request, args.project or args.fixture, risk=args.risk,
                     max_calls=args.max_calls, max_elapsed_seconds=args.max_elapsed_seconds,
-                    max_concurrency=args.max_concurrency, registry=registry)
+                    max_concurrency=args.max_concurrency, registry=registry,
+                    max_provider_calls=args.max_provider_calls,
+                    max_planning_calls=args.max_planning_calls, max_repairs=args.max_repairs,
+                    max_escalations=args.max_escalations,
+                    implementation_timeout_seconds=args.implementation_timeout,
+                    review_timeout_seconds=args.review_timeout,
+                    verification_timeout_seconds=args.verification_timeout)
                 print(json.dumps({'contract': json.loads((workflow.root / 'contract.json').read_text()),
                                   'plan': json.loads((workflow.root / 'plan.json').read_text()),
                                   'status': workflow.status(args.task_id)}, indent=2))

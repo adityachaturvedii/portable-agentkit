@@ -13,7 +13,7 @@ import threading
 import uuid
 
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 TRANSITIONS = {
     'received': {'contracted', 'blocked', 'cancelled'},
     'contracted': {'workspace_ready', 'blocked', 'cancelled'},
@@ -161,6 +161,12 @@ class ControllerStore:
               max_elapsed_seconds REAL NOT NULL, max_concurrency INTEGER NOT NULL,
               max_timeout_seconds REAL NOT NULL, verification_reserve INTEGER NOT NULL,
               review_reserve INTEGER NOT NULL DEFAULT 0,
+              max_provider_calls INTEGER NOT NULL DEFAULT 1000,
+              max_planning_calls INTEGER NOT NULL DEFAULT 0,
+              provider_reserved_calls INTEGER NOT NULL DEFAULT 0,
+              provider_completed_calls INTEGER NOT NULL DEFAULT 0,
+              planning_reserved_calls INTEGER NOT NULL DEFAULT 0,
+              planning_completed_calls INTEGER NOT NULL DEFAULT 0,
               reserved_calls INTEGER NOT NULL DEFAULT 0, completed_calls INTEGER NOT NULL DEFAULT 0,
               active_calls INTEGER NOT NULL DEFAULT 0, elapsed_seconds REAL NOT NULL DEFAULT 0,
               reserved_elapsed_seconds REAL NOT NULL DEFAULT 0
@@ -259,8 +265,32 @@ class ControllerStore:
             ''')
             budget_columns = {row['name'] for row in db.execute(
                 'PRAGMA table_info(budgets)').fetchall()}
+            added_execution_counters = 'provider_reserved_calls' not in budget_columns
             if 'review_reserve' not in budget_columns:
                 db.execute('ALTER TABLE budgets ADD COLUMN review_reserve INTEGER NOT NULL DEFAULT 0')
+            for name, declaration in (
+                    ('max_provider_calls', 'INTEGER NOT NULL DEFAULT 1000'),
+                    ('max_planning_calls', 'INTEGER NOT NULL DEFAULT 0'),
+                    ('provider_reserved_calls', 'INTEGER NOT NULL DEFAULT 0'),
+                    ('provider_completed_calls', 'INTEGER NOT NULL DEFAULT 0'),
+                    ('planning_reserved_calls', 'INTEGER NOT NULL DEFAULT 0'),
+                    ('planning_completed_calls', 'INTEGER NOT NULL DEFAULT 0')):
+                if name not in budget_columns:
+                    db.execute('ALTER TABLE budgets ADD COLUMN ' + name + ' ' + declaration)
+            if added_execution_counters:
+                db.execute('''UPDATE budgets SET
+                  provider_reserved_calls=(SELECT COUNT(*) FROM executions e WHERE
+                    e.task_id=budgets.task_id AND e.engine IN ('codex','claude') AND
+                    e.status IN ('reserved','running','cancel_requested','reconciliation_required')),
+                  provider_completed_calls=(SELECT COUNT(*) FROM executions e WHERE
+                    e.task_id=budgets.task_id AND e.engine IN ('codex','claude') AND
+                    e.status NOT IN ('reserved','running','cancel_requested','reconciliation_required')),
+                  planning_reserved_calls=(SELECT COUNT(*) FROM executions e WHERE
+                    e.task_id=budgets.task_id AND e.role='planning' AND
+                    e.status IN ('reserved','running','cancel_requested','reconciliation_required')),
+                  planning_completed_calls=(SELECT COUNT(*) FROM executions e WHERE
+                    e.task_id=budgets.task_id AND e.role='planning' AND
+                    e.status NOT IN ('reserved','running','cancel_requested','reconciliation_required'))''')
             execution_columns = {row['name'] for row in db.execute(
                 'PRAGMA table_info(executions)').fetchall()}
             if 'effort' not in execution_columns:
@@ -278,7 +308,7 @@ class ControllerStore:
                        WHEN skill_id LIKE 'domain:%' THEN '[\"implementer\",\"reviewer\"]'
                        ELSE roles_json END WHERE roles_json='[]'""")
             existing = db.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
-            if existing and int(existing['value']) not in (1, 2, 3, 4, SCHEMA_VERSION):
+            if existing and int(existing['value']) not in (1, 2, 3, 4, 5, SCHEMA_VERSION):
                 raise ControllerError('unsupported controller schema')
             if existing and int(existing['value']) == 2:
                 db.execute('BEGIN IMMEDIATE')
@@ -366,7 +396,9 @@ class ControllerStore:
     def create_task(self, task_id, objective, dependencies=(), *, implementer=('codex', None),
                     reviewer=('claude', None), max_repairs=2, max_calls=6,
                     max_elapsed_seconds=300, max_concurrency=1,
-                    max_timeout_seconds=90, verification_reserve=2, review_reserve=0):
+                    max_timeout_seconds=90, verification_reserve=2, review_reserve=0,
+                    max_provider_calls=None, max_planning_calls=0):
+        max_provider_calls = max_calls if max_provider_calls is None else max_provider_calls
         if (not isinstance(task_id, str) or not task_id or len(task_id) > 128 or
                 not task_id.replace('-', '').replace('_', '').isalnum()):
             raise ControllerError('invalid task id')
@@ -377,6 +409,9 @@ class ControllerStore:
                 type(review_reserve) is not int or review_reserve < 0 or
                 verification_reserve + review_reserve >= max_calls or
                 type(max_concurrency) is not int or max_concurrency < 1 or
+                type(max_provider_calls) is not int or max_provider_calls < 1 or
+                max_provider_calls > max_calls or type(max_planning_calls) is not int or
+                max_planning_calls < 0 or max_planning_calls > max_provider_calls or
                 type(max_timeout_seconds) not in (int, float) or
                 not math.isfinite(max_timeout_seconds) or max_timeout_seconds <= 0 or
                 type(max_elapsed_seconds) not in (int, float) or
@@ -390,9 +425,11 @@ class ControllerStore:
               (task_id, 'received', objective, _json(list(dependencies)), implementer[0], implementer[1],
                reviewer[0], reviewer[1], max_repairs, 'validate task contract', now, now))
             db.execute('''INSERT INTO budgets(task_id,max_calls,max_elapsed_seconds,max_concurrency,
-              max_timeout_seconds,verification_reserve,review_reserve) VALUES(?,?,?,?,?,?,?)''',
+              max_timeout_seconds,verification_reserve,review_reserve,max_provider_calls,
+              max_planning_calls) VALUES(?,?,?,?,?,?,?,?,?)''',
               (task_id, max_calls, max_elapsed_seconds, max_concurrency,
-               max_timeout_seconds, verification_reserve, review_reserve))
+               max_timeout_seconds, verification_reserve, review_reserve,
+               max_provider_calls, max_planning_calls))
             self._append(db, task_id, 'task-created-' + task_id, 'task_created',
                          {'objective': objective, 'dependencies': list(dependencies)})
         return self.task(task_id)
@@ -506,6 +543,22 @@ class ControllerStore:
                 raise BudgetExceeded('execution timeout exceeds task maximum')
             if budget['active_calls'] >= budget['max_concurrency']:
                 raise BudgetExceeded('concurrency limit reached')
+            provider_call = engine in ('codex', 'claude')
+            planning_call = role == 'planning'
+            if provider_call and (budget['provider_completed_calls'] +
+                                  budget['provider_reserved_calls'] >=
+                                  budget['max_provider_calls']):
+                raise BudgetExceeded('provider execution limit reached')
+            if provider_call and role in ('implementer', 'repair'):
+                provider_remaining_after = (budget['max_provider_calls'] -
+                                            budget['provider_completed_calls'] -
+                                            budget['provider_reserved_calls'] - 1)
+                if provider_remaining_after < budget['review_reserve']:
+                    raise BudgetExceeded('provider review reserve protected')
+            if planning_call and (budget['planning_completed_calls'] +
+                                  budget['planning_reserved_calls'] >=
+                                  budget['max_planning_calls']):
+                raise BudgetExceeded('planning call limit reached')
             consumed = budget['completed_calls'] + budget['reserved_calls']
             remaining_after = budget['max_calls'] - consumed - 1
             if remaining_after < 0:
@@ -521,8 +574,10 @@ class ControllerStore:
                     budget['max_elapsed_seconds']):
                 raise BudgetExceeded('elapsed-time allocation exhausted')
             db.execute('''UPDATE budgets SET reserved_calls=reserved_calls+1,active_calls=active_calls+1,
-                          reserved_elapsed_seconds=reserved_elapsed_seconds+? WHERE task_id=?''',
-                       (timeout_seconds, task_id))
+                          reserved_elapsed_seconds=reserved_elapsed_seconds+?,
+                          provider_reserved_calls=provider_reserved_calls+?,
+                          planning_reserved_calls=planning_reserved_calls+? WHERE task_id=?''',
+                       (timeout_seconds, int(provider_call), int(planning_call), task_id))
             db.execute('''INSERT INTO executions(execution_id,task_id,role,engine,model,effort,
                           allocation_seconds,status) VALUES(?,?,?,?,?,?,?,?)''',
                        (execution_id, task_id, role, engine, model, effort, timeout_seconds, 'reserved'))
@@ -560,7 +615,7 @@ class ControllerStore:
                 elapsed_seconds < 0 or not isinstance(usage, UsageRecord)):
             raise ControllerError('invalid execution outcome')
         with self.transaction() as db:
-            row = db.execute('SELECT status,task_id,allocation_seconds FROM executions WHERE execution_id=?',
+            row = db.execute('SELECT status,task_id,allocation_seconds,engine,role FROM executions WHERE execution_id=?',
                              (execution_id,)).fetchone()
             if not row or row['status'] not in ('reserved', 'running', 'cancel_requested'):
                 raise ControllerError('execution is not active')
@@ -569,9 +624,17 @@ class ControllerStore:
                        (status, _now(), elapsed_seconds, _json(asdict(usage)), _json(result or {}), execution_id))
             db.execute('''UPDATE budgets SET reserved_calls=reserved_calls-1,active_calls=active_calls-1,
                           completed_calls=completed_calls+1,elapsed_seconds=elapsed_seconds+?,
-                          reserved_elapsed_seconds=reserved_elapsed_seconds-?
+                          reserved_elapsed_seconds=reserved_elapsed_seconds-?,
+                          provider_reserved_calls=provider_reserved_calls-?,
+                          provider_completed_calls=provider_completed_calls+?,
+                          planning_reserved_calls=planning_reserved_calls-?,
+                          planning_completed_calls=planning_completed_calls+?
                           WHERE task_id=?''',
-                       (elapsed_seconds, row['allocation_seconds'], row['task_id']))
+                       (elapsed_seconds, row['allocation_seconds'],
+                        int(row['engine'] in ('codex', 'claude')),
+                        int(row['engine'] in ('codex', 'claude')),
+                        int(row['role'] == 'planning'), int(row['role'] == 'planning'),
+                        row['task_id']))
             self._append(db, row['task_id'], 'finish-' + execution_id, 'execution_finished',
                          {'execution_id': execution_id, 'status': status, 'elapsed_seconds': elapsed_seconds})
 
@@ -610,7 +673,7 @@ class ControllerStore:
         if resolution not in ('not_started', 'terminated') or not isinstance(note, str) or not note.strip():
             raise ControllerError('resolution requires not_started/terminated and a concrete note')
         with self.transaction() as db:
-            row = db.execute('''SELECT execution_id,task_id,status,allocation_seconds FROM executions
+            row = db.execute('''SELECT execution_id,task_id,status,allocation_seconds,engine,role FROM executions
                               WHERE execution_id=?''', (execution_id,)).fetchone()
             if not row or row['status'] != 'reconciliation_required':
                 raise ReconciliationRequired('execution has no outstanding uncertainty')
@@ -620,8 +683,17 @@ class ControllerStore:
                        (final_status, _now(), note, execution_id))
             db.execute('''UPDATE budgets SET reserved_calls=reserved_calls-1,
                           active_calls=active_calls-1,completed_calls=completed_calls+1,
-                          reserved_elapsed_seconds=reserved_elapsed_seconds-?
-                          WHERE task_id=?''', (row['allocation_seconds'], row['task_id']))
+                          reserved_elapsed_seconds=reserved_elapsed_seconds-?,
+                          provider_reserved_calls=provider_reserved_calls-?,
+                          provider_completed_calls=provider_completed_calls+?,
+                          planning_reserved_calls=planning_reserved_calls-?,
+                          planning_completed_calls=planning_completed_calls+?
+                          WHERE task_id=?''',
+                       (row['allocation_seconds'],
+                        int(row['engine'] in ('codex', 'claude')),
+                        int(row['engine'] in ('codex', 'claude')),
+                        int(row['role'] == 'planning'), int(row['role'] == 'planning'),
+                        row['task_id']))
             self._append(db, row['task_id'], 'resolve-' + execution_id,
                          'execution_uncertainty_resolved',
                          {'execution_id': execution_id, 'resolution': resolution, 'note': note})

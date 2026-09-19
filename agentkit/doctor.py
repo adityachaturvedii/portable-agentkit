@@ -52,6 +52,9 @@ def owned_code_profile(runtime, workspace, denied_read_paths, startup_write_path
         text += '(deny network*)'
     text += '(allow file-write* (subpath ' + json.dumps(str(runtime)) + '))'
     text += '(allow file-write* (subpath ' + json.dumps(str(workspace)) + '))'
+    # Shells and Git use this character-device sink even when all durable writes
+    # are redirected into the disposable runtime/workspace.
+    text += '(allow file-write* (literal "/dev/null"))'
     for path in startup_write_paths:
         resolved = Path(path).resolve()
         selector = 'literal' if resolved.is_file() else 'subpath'
