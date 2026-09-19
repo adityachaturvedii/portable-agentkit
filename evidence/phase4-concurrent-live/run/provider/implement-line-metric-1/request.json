@@ -1,0 +1,13 @@
+{
+  "engine": "codex",
+  "task_id": "phase3-live-implementer",
+  "cwd": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worker-copies/concurrent-live-implement-line-metric",
+  "timeout_seconds": 60.0,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "effort": null,
+  "mode": "owned-code",
+  "schema_version": 1,
+  "prompt_sha256": "be6f917d327fd6b1321471d4f007926f2583f0ca9f657938023dcc4e39a0176c",
+  "prompt_bytes": 7992
+}

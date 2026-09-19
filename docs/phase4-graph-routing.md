@@ -10,6 +10,8 @@ Single mode uses implementation → verification → review → package. Decompo
 
 Node claims persist controller owner/PID before provider execution. A second controller observing a confirmed-live owner reports current state and does not launch duplicates. A dead or unprovable owner blocks replacement and requires reconciliation; no timer expires ownership. Cancellation marks every active execution and each supervised transport observes the durable flag. Authentication failure finalizes only that call, lets independent siblings finish, then creates one stage checkpoint. Detached children, process survival after controller crash and remote cancellation remain unsupported.
 
+The first bounded live concurrency attempt launched two Codex workers concurrently and retained one valid contribution. It blocked before integration when the other worker could not create a zsh heredoc temporary file or use Git's `/dev/null` config sink under the owned-code profile. Revision `b9df1ad` makes only those two runtime accommodations and passes offline and host boundary checks. Since no provider call was repeated, complete live integration, verification and cross-provider review remain unverified for the corrected revision.
+
 ## Routing
 
 The registry contains Codex and Claude Code account-default profiles. Submission may select the implementation and review provider:

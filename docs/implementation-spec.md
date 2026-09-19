@@ -239,6 +239,8 @@ Skills are curated first. A small feasibility spike then proves that the propose
 | 6. GitHub and packaging | PR broker tested against fixtures, gated live disposable-repo validation, installer/update/rollback | No duplicate PRs; stale approvals rejected; clean installation and resume on another supported machine |
 | 7. Calibrated release | Held-out evaluation report, failure corpus, compatibility matrix and documented limits | Workflow quality and intervention metrics justify added complexity over a single-agent baseline |
 
+Current Phase 4 status: deterministic fixtures establish request-driven planning, bounded two-worker overlap, dependency gating, routing and protected quality reserves. The bounded `b22020c` live attempt demonstrated concurrent provider launches and one brokered contribution, then blocked on a shell-runtime sandbox incompatibility before integration. The narrow `b9df1ad` correction is offline- and host-canary-tested; a complete concurrent live workflow against that revision remains an exit item. Phase 5 has not started.
+
 Do not make autonomous merging, a dashboard, a vector database, a fleet scheduler or a learning-based router prerequisites for the first release. Add them only when a demonstrated need warrants them. Use ordinary persisted DAG dependencies before building a general code knowledge graph.
 
 ## 14. Evaluation plan

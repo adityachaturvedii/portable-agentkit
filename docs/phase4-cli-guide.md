@@ -53,6 +53,8 @@ python3 -m agentkit task start \
 
 Live mode uses existing subscription authentication only. It does not add API keys, billing fallback or provider substitution. Stop a task with `task cancel`. If a provider returns a classified subscription-authentication failure, complete the official uncaptured login flow with `auth-login`, then run `task resume` with the same root, task ID, live flag and authorization. Authentication waiting does not reset budgets or repeat a completed sibling.
 
+The two-worker interface is fully fixture-tested. Its first bounded live attempt at `b22020c` proved overlapping calls but blocked before integration on a narrow shell-runtime sandbox issue. That issue is corrected and host-canary-tested at `b9df1ad`; the corrected concurrent path has not yet completed a live verification/review cycle. Use live mode only under a separately declared budget and retain a failed checkpoint instead of automatically retrying.
+
 `task status` groups implementation assignments as ready, active, waiting and completed. It also shows requested routes and reasons, total/provider/planning calls, elapsed allocation, token categories where reported, blockers and the next user action. A completed workflow stops at `awaiting_pr_approval`; the package records no publication approval and no push, PR, merge or deployment occurs.
 
 ## Routing configuration

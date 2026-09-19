@@ -1,0 +1,13 @@
+{
+  "engine": "codex",
+  "task_id": "phase3-live-implementer",
+  "cwd": "/private/tmp/agentkit-phase4-concurrent-b22020c/managed/worker-copies/concurrent-live-implement-word-metric",
+  "timeout_seconds": 60.0,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "effort": null,
+  "mode": "owned-code",
+  "schema_version": 1,
+  "prompt_sha256": "7c8a2206537c1a2a3dc032c60c86373452a6d363a4edac8e97790441f72ee487",
+  "prompt_bytes": 7992
+}

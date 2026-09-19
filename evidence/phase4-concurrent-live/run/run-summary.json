@@ -1,0 +1,102 @@
+{
+  "authentication": {
+    "claude": "existing Claude Max subscription verified before launch; no review call launched",
+    "codex": "existing ChatGPT subscription verified before launch",
+    "login_flow_used": false
+  },
+  "candidate": {
+    "approval_package_created": false,
+    "base_revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+    "integrated_revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+    "line_assignment_revision": "dd2b246a1136c412b6ff59f698e8468b4c87b389",
+    "publication_approval_recorded": false,
+    "word_assignment_revision": "ff44028cbf39740671a845224a8e6d8b55f69b85"
+  },
+  "correction_live_validated": false,
+  "cost_note": "Provider-reported token observations are telemetry. Estimated and billed cost are both unknown.",
+  "declared_budget": {
+    "calls_max": 4,
+    "captured_output_bytes_per_call_max": 1048576,
+    "concurrent_workers_max": 2,
+    "escalation_attempts_max": 0,
+    "implementation_attempts_max": 2,
+    "implementation_timeout_seconds_each": 60,
+    "planning_provider_calls": 0,
+    "provider_calls_max": 3,
+    "provider_substitution": false,
+    "repair_attempts_max": 0,
+    "retry_attempts_max": 0,
+    "review_attempts_max": 1,
+    "review_timeout_seconds": 60,
+    "total_allocated_execution_seconds": 190,
+    "verification_timeout_seconds": 10
+  },
+  "failure": {
+    "controller_classification": "authority_violation: worker produced no changes",
+    "controller_response": "blocked without integration, verification, review, repair, retry, escalation or approval package",
+    "specific_cause": [
+      "Seatbelt denied Git opening the configured /dev/null global-config sink.",
+      "zsh TMPPREFIX was not bound to the permitted runtime, so a heredoc temporary file was denied.",
+      "The line-assignment command ended with a successful empty unittest discovery after the failed heredoc, so the provider turn completed without changing lines.py."
+    ]
+  },
+  "limits_note": "Built-in subscription transport retries remain provider-controlled and unknown; the controller launched exactly two provider executions.",
+  "observed": {
+    "concurrent_overlap_seconds": 43.367214,
+    "implementation_attempts": 2,
+    "inference_attempts": 2,
+    "provider_elapsed_seconds_sum": 98.052993,
+    "provider_wall_interval_seconds": 55.387876,
+    "repair_attempts": 0,
+    "review_attempts": 0,
+    "usage": {
+      "billed_cost_usd": null,
+      "cache_creation_tokens": null,
+      "cached_input_tokens": 84352,
+      "estimated_cost_usd": null,
+      "input_tokens": 101996,
+      "output_tokens": 1920,
+      "reasoning_tokens": 149
+    },
+    "verification_executions": 0
+  },
+  "offline_corrected_revision": "b9df1ad8af93f9d62124859b30246d971f273e83",
+  "project": "text-metrics",
+  "provider_reported_configuration": {
+    "implementation_1": {
+      "effort": null,
+      "model": null
+    },
+    "implementation_2": {
+      "effort": null,
+      "model": null
+    },
+    "review": null
+  },
+  "requested_configuration": {
+    "implementer": {
+      "effort": null,
+      "model": null,
+      "provider": "codex"
+    },
+    "reviewer": {
+      "effort": null,
+      "model": null,
+      "provider": "claude"
+    }
+  },
+  "result": "blocked",
+  "schema_version": 1,
+  "stage_results": {
+    "approval_package": "not_created",
+    "integration": "not_run",
+    "line_assignment": "provider_process_succeeded_but_broker_rejected_no_changes",
+    "planning": "deterministic_passed",
+    "review": "not_run",
+    "verification": "not_run",
+    "word_assignment": "provider_succeeded_and_broker_committed"
+  },
+  "task_id": "concurrent-live",
+  "tested_executable_revision": "b22020cf6a1587617d14e8c6164581a5d291ed93",
+  "validation_passed": false
+}

@@ -1,0 +1,59 @@
+{
+  "acceptance": [
+    {
+      "expected": "word_count counts whitespace-separated words",
+      "id": "word-count"
+    },
+    {
+      "expected": "line_count follows splitlines semantics",
+      "id": "line-count"
+    },
+    {
+      "expected": "summarize returns both independently corrected metrics",
+      "id": "integration"
+    }
+  ],
+  "assumptions": [
+    "The request targets only the selected controller-created fixture.",
+    "Public interfaces and controller-owned acceptance criteria remain unchanged.",
+    "No network, dependency installation, publication, deployment, or external repository access is authorized.",
+    "Provider model and relative price use account defaults and remain unknown unless reported by the CLI."
+  ],
+  "context_allocation": "provider-managed-unknown",
+  "dependencies": [],
+  "difficulty": "substantial",
+  "execution_profile": "trusted-disposable-macos",
+  "implementation_timeout_seconds": 60.0,
+  "max_calls": 4,
+  "max_concurrency": 2,
+  "max_elapsed_seconds": 190.0,
+  "max_escalations": 0,
+  "max_output_bytes_per_call": 1048576,
+  "max_planning_calls": 0,
+  "max_provider_calls": 3,
+  "max_repairs": 0,
+  "max_retries": 0,
+  "max_subtasks": 2,
+  "max_timeout_seconds": 60,
+  "non_goals": [
+    "personal repositories",
+    "dependency installation",
+    "publication",
+    "merge",
+    "deployment",
+    "GPU or remote execution"
+  ],
+  "objective": "Repair word and line metrics",
+  "review_reserve": 1,
+  "review_timeout_seconds": 60.0,
+  "risk": "routine",
+  "schema_version": 1,
+  "scope": [
+    "lines.py",
+    "words.py"
+  ],
+  "task_id": "concurrent-live",
+  "user_request": "Repair word and line metrics",
+  "verification_reserve": 1,
+  "verification_timeout_seconds": 10.0
+}
