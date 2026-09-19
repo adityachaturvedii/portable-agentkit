@@ -158,6 +158,17 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [ ] Complete a future bounded concurrent live workflow against the corrected executable. The `b22020c` attempt does not validate `b9df1ad`, and no additional inference was authorized or used for the correction.
 - [ ] General repositories, detached-process containment, Linux/GPU/remote workers, dashboards and publication remain unsupported.
 
+## Phase 4 — dependency, claim and request correction
+
+- [x] Assemble each dependent assignment from validated predecessor deltas in deterministic graph order and record its actual starting revision plus dependency revisions.
+- [x] Measure worker changes against that assembled start and integrate each assignment's own delta once, preserving dependent overlays while rejecting independent conflicts.
+- [x] Add a behavioral regression whose downstream worker succeeds only after reading predecessor content created at runtime.
+- [x] Atomically claim an exact pending/failed implementation selection with status, version, attempts, dependency, cancellation and ownership checks.
+- [x] Remove the generic direct `succeeded → running` transition and retain explicit quality-stage resets.
+- [x] Add a synchronized stale-selection regression proving one provider invocation and preservation of the winning result.
+- [x] Reject unmatched requests rather than falling back to fixture tasks; require clarification for negated or contradictory matched requirements.
+- [x] Pass 19 focused dynamic-scheduler tests, all 41 Phase 4 tests, the 157-test repository suite (`OK`, one expected nested-Seatbelt skip), and `python3 -m agentkit check`; use no live inference.
+
 ## Later phases (planned, not implemented)
 
 - [ ] Phase 5: hardware domain validation and optional GPU worker.

@@ -686,6 +686,8 @@ class Phase4Workflow:
                    'objective': node['objective'], 'allowed_paths': node['allowed_paths'],
                    'interfaces': (assignment or {}).get('interfaces', []),
                    'dependencies': node['dependencies'],
+                   'dependency_contributions': (node.get('result') or {}).get(
+                       'dependency_contributions', []),
                    'acceptance': contract['contract']['acceptance'],
                    'candidate_revision': identity.get('revision', contract['head_revision']),
                    'evidence_references': ([feedback.get('revision')] if feedback else []),
@@ -706,22 +708,65 @@ class Phase4Workflow:
                 'undeclared path.\nASSIGNMENT_JSON:\n' + json.dumps(payload, sort_keys=True) +
                 '\nVERIFIED_SKILL_CONTEXT_JSON:\n' + json.dumps(skill_context, sort_keys=True))
 
+    def _dependency_contributions(self, task_id, node):
+        """Return predecessor-owned deltas in stable dependency order."""
+        ordered_nodes = [item for item in self.state.nodes(task_id)
+                         if item['kind'] == 'implementation']
+        by_id = {item['node_id']: item for item in ordered_nodes}
+        selected = []
+        visiting = set()
+        visited = set()
+
+        def visit(node_id):
+            if node_id not in by_id or node_id in visited:
+                return
+            if node_id in visiting:
+                raise GitBrokerError('dependency contribution cycle')
+            visiting.add(node_id)
+            predecessor = by_id[node_id]
+            for dependency in predecessor['dependencies']:
+                visit(dependency)
+            if predecessor['status'] != 'succeeded':
+                raise GitBrokerError('dependency contribution is not complete: ' + node_id)
+            result = predecessor.get('result') or {}
+            required = ('starting_revision', 'revision', 'changed_paths', 'worktree')
+            if any(not result.get(name) for name in required):
+                raise GitBrokerError('dependency contribution has incomplete provenance: ' + node_id)
+            selected.append({
+                'node_id': node_id,
+                'worktree': result['worktree'],
+                'starting_revision': result['starting_revision'],
+                'revision': result['revision'],
+                'changed_paths': list(result['changed_paths']),
+                'allowed_paths': list(predecessor['allowed_paths']),
+                'dependencies': list(predecessor['dependencies']),
+            })
+            visiting.remove(node_id)
+            visited.add(node_id)
+
+        for dependency in node['dependencies']:
+            visit(dependency)
+        return selected
+
     def _execute_implementation(self, task_id, fixture, repository, parent_worktree, node, *,
                                 repair=False, coordinated=False):
         if node['status'] in ('authentication_required', 'succeeded') and not repair:
             return node['status'] == 'succeeded'
-        if node['status'] in ('failed', 'authentication_required'):
+        if repair and node['status'] in ('failed', 'authentication_required', 'succeeded'):
             self.state.transition_node(task_id, node['node_id'], 'pending', authority=self.store.authority)
             node = self.state.node(task_id, node['node_id'])
-        try:
+        if repair:
             self.state.transition_node(
                 task_id, node['node_id'], 'running',
                 result={**(node.get('result') or {}), 'scheduler_owner': self.owner_id,
                         'scheduler_pid': os.getpid()}, authority=self.store.authority)
-        except ControllerError:
-            if coordinated and self.state.node(task_id, node['node_id'])['status'] == 'running':
-                return False
-            raise
+            node = self.state.node(task_id, node['node_id'])
+        else:
+            claimed = self.state.claim_implementation(
+                task_id, node, self.owner_id, os.getpid(), authority=self.store.authority)
+            if claimed is None:
+                return self.state.node(task_id, node['node_id'])['status'] == 'succeeded'
+            node = claimed
         task = self.store.task(task_id)
         head = task['head_revision']
         decomposed = self.state.plan(task_id)['plan']['mode'] == 'decomposed'
@@ -732,12 +777,34 @@ class Phase4Workflow:
             if saved.get('assignment_identity'):
                 assignment_worktree = self._validate_assignment_identity(task_id, node, repository)
             else:
-                with self._git_lock:
-                    _, assignment_worktree, _ = self.broker.create_task_worktree(
-                        repository, task_id + '-' + node['node_id'], task['base_revision'])
-                identity = self._assignment_identity(repository, assignment_worktree)
-                node = self.state.record_assignment_identity(
-                    task_id, node['node_id'], identity, authority=self.store.authority)
+                try:
+                    with self._git_lock:
+                        _, assignment_worktree, _ = self.broker.create_task_worktree(
+                            repository, task_id + '-' + node['node_id'], task['base_revision'])
+                        dependencies = self._dependency_contributions(task_id, node)
+                        if dependencies:
+                            self.broker.assemble_dependency_snapshot(
+                                repository, assignment_worktree, task['base_revision'], dependencies,
+                                'Assemble dependencies for ' + node['node_id'])
+                    identity = self._assignment_identity(repository, assignment_worktree)
+                    provenance = [
+                        {'node_id': item['node_id'],
+                         'starting_revision': item['starting_revision'],
+                         'revision': item['revision'],
+                         'changed_paths': list(item['changed_paths'])}
+                        for item in dependencies
+                    ]
+                    node = self.state.record_assignment_identity(
+                        task_id, node['node_id'], identity,
+                        dependency_contributions=provenance,
+                        authority=self.store.authority)
+                except GitBrokerError as exc:
+                    self.state.transition_node(
+                        task_id, node['node_id'], 'failed',
+                        result={**(node.get('result') or {}),
+                                'dependency_snapshot_error': str(exc)},
+                        authority=self.store.authority)
+                    return False
         assignment_identity = self._assignment_identity(repository, assignment_worktree)
         assignment_head = assignment_identity['revision']
         worker = self.broker.export_snapshot(
@@ -811,7 +878,10 @@ class Phase4Workflow:
                                  'inspect rejected worker scope expansion')
             return False
         result = {'revision': revision, 'changed_paths': list(changed),
-                  'worktree': str(assignment_worktree), 'execution_id': execution_id}
+                  'worktree': str(assignment_worktree), 'execution_id': execution_id,
+                  'starting_revision': assignment_head,
+                  'dependency_contributions': list(
+                      (node.get('result') or {}).get('dependency_contributions', []))}
         if not repair and decomposed:
             result['assignment_identity'] = assignment_identity
         self.state.transition_node(task_id, node['node_id'], 'succeeded', execution_id=execution_id,
@@ -948,9 +1018,13 @@ class Phase4Workflow:
                     if integration['status'] != 'succeeded':
                         self.state.transition_node(task_id, 'integrate', 'running',
                                                    authority=self.store.authority)
-                        contributions = [{'worktree': node['result']['worktree'],
+                        contributions = [{'node_id': node['node_id'],
+                                          'worktree': node['result']['worktree'],
+                                          'starting_revision': node['result']['starting_revision'],
                                           'revision': node['result']['revision'],
-                                          'allowed_paths': node['allowed_paths']}
+                                          'changed_paths': node['result']['changed_paths'],
+                                          'allowed_paths': node['allowed_paths'],
+                                          'dependencies': node['dependencies']}
                                          for node in implementation_nodes]
                         try:
                             head, changed = self.broker.integrate_contributions(
