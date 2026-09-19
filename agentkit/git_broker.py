@@ -172,6 +172,48 @@ class GitBroker:
         head = self.revision(repository, head)
         return self._git(repository, 'diff', '--no-ext-diff', '--binary', base, head)
 
+    def changed_paths(self, repository, base, head):
+        base = self.revision(repository, base)
+        head = self.revision(repository, head)
+        text = self._git(repository, 'diff', '--name-only', '--diff-filter=ACMRT', base, head)
+        paths = tuple(line for line in text.splitlines() if line)
+        for relative in paths:
+            self._safe_relative(repository, relative)
+        return paths
+
+    def integrate_contributions(self, repository, worktree, base_revision, contributions, message):
+        """Copy disjoint broker-validated commits into one controller-owned integration worktree."""
+        repository = self._inside(repository, self.repositories)
+        worktree = self._inside(worktree, self.worktrees)
+        base = self.revision(repository, base_revision)
+        identity = self.worktree_identity(repository, worktree)
+        if identity['revision'] != base or not identity['clean']:
+            raise GitBrokerError('integration worktree must be clean at the declared base')
+        selected = {}
+        for contribution in contributions:
+            source = self._inside(contribution['worktree'], self.worktrees)
+            revision = self.revision(repository, contribution['revision'])
+            source_identity = self.worktree_identity(repository, source)
+            if source_identity['revision'] != revision or not source_identity['clean']:
+                raise GitBrokerError('contribution worktree does not match its declared revision')
+            changed = self.changed_paths(repository, base, revision)
+            allowed = set(contribution['allowed_paths'])
+            if not changed or any(path not in allowed for path in changed):
+                raise GitBrokerError('contribution changed an undeclared path')
+            for relative in changed:
+                if relative in selected:
+                    raise GitBrokerError('parallel contributions overlap: ' + relative)
+                selected[relative] = source
+        if not selected:
+            raise GitBrokerError('integration has no changes')
+        for relative, source in sorted(selected.items()):
+            destination = self._safe_relative(worktree, relative)
+            origin = self._safe_relative(source, relative)
+            destination.write_bytes(origin.read_bytes())
+        self._git(repository, '-C', str(worktree), 'add', '--', *sorted(selected))
+        self._git(repository, '-C', str(worktree), 'commit', '-m', message)
+        return self.revision(repository, branch_for_worktree(repository, worktree)), tuple(sorted(selected))
+
 
 def branch_for_worktree(repository, worktree):
     run = subprocess.run(['git', '-C', str(worktree), 'symbolic-ref', '--short', 'HEAD'],

@@ -13,7 +13,7 @@ import threading
 import uuid
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 TRANSITIONS = {
     'received': {'contracted', 'blocked', 'cancelled'},
     'contracted': {'workspace_ready', 'blocked', 'cancelled'},
@@ -160,6 +160,7 @@ class ControllerStore:
               task_id TEXT PRIMARY KEY REFERENCES tasks(task_id), max_calls INTEGER NOT NULL,
               max_elapsed_seconds REAL NOT NULL, max_concurrency INTEGER NOT NULL,
               max_timeout_seconds REAL NOT NULL, verification_reserve INTEGER NOT NULL,
+              review_reserve INTEGER NOT NULL DEFAULT 0,
               reserved_calls INTEGER NOT NULL DEFAULT 0, completed_calls INTEGER NOT NULL DEFAULT 0,
               active_calls INTEGER NOT NULL DEFAULT 0, elapsed_seconds REAL NOT NULL DEFAULT 0,
               reserved_elapsed_seconds REAL NOT NULL DEFAULT 0
@@ -215,13 +216,52 @@ class ControllerStore:
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_authentication_checkpoint
               ON authentication_checkpoints(task_id)
               WHERE status IN ('waiting','ready','login_reconciliation_required');
+            CREATE TABLE IF NOT EXISTS phase4_intake(
+              task_id TEXT PRIMARY KEY REFERENCES tasks(task_id), request_text TEXT NOT NULL,
+              fixture_id TEXT NOT NULL, requirements_json TEXT NOT NULL,
+              assumptions_json TEXT NOT NULL, execution_profile TEXT NOT NULL,
+              created_at TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS phase4_plans(
+              task_id TEXT PRIMARY KEY REFERENCES tasks(task_id), plan_json TEXT NOT NULL,
+              plan_sha256 TEXT NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS phase4_nodes(
+              task_id TEXT NOT NULL REFERENCES tasks(task_id), node_id TEXT NOT NULL,
+              role TEXT NOT NULL, kind TEXT NOT NULL, objective TEXT NOT NULL,
+              dependencies_json TEXT NOT NULL, allowed_paths_json TEXT NOT NULL,
+              provider TEXT, model TEXT, effort TEXT, routing_reason TEXT,
+              status TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0,
+              max_attempts INTEGER NOT NULL, execution_id TEXT, result_json TEXT,
+              created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+              PRIMARY KEY(task_id,node_id)
+            );
+            CREATE TABLE IF NOT EXISTS phase4_edges(
+              task_id TEXT NOT NULL REFERENCES tasks(task_id), source_node TEXT NOT NULL,
+              target_node TEXT NOT NULL, edge_type TEXT NOT NULL, max_iterations INTEGER NOT NULL,
+              PRIMARY KEY(task_id,source_node,target_node,edge_type)
+            );
+            CREATE TABLE IF NOT EXISTS phase4_skills(
+              task_id TEXT NOT NULL REFERENCES tasks(task_id), skill_id TEXT NOT NULL,
+              relative_path TEXT NOT NULL, sha256 TEXT NOT NULL, reason TEXT NOT NULL,
+              PRIMARY KEY(task_id,skill_id)
+            );
+            CREATE TABLE IF NOT EXISTS phase4_controls(
+              task_id TEXT PRIMARY KEY REFERENCES tasks(task_id), cancel_requested INTEGER NOT NULL DEFAULT 0,
+              cancellation_reason TEXT, updated_at TEXT NOT NULL
+            );
             CREATE TRIGGER IF NOT EXISTS events_no_update
               BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT, 'events are append-only'); END;
             CREATE TRIGGER IF NOT EXISTS events_no_delete
               BEFORE DELETE ON events BEGIN SELECT RAISE(ABORT, 'events are append-only'); END;
             ''')
+            budget_columns = {row['name'] for row in db.execute(
+                'PRAGMA table_info(budgets)').fetchall()}
+            if 'review_reserve' not in budget_columns:
+                db.execute('ALTER TABLE budgets ADD COLUMN review_reserve INTEGER NOT NULL DEFAULT 0')
             existing = db.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
-            if existing and int(existing['value']) not in (1, 2, SCHEMA_VERSION):
+            if existing and int(existing['value']) not in (1, 2, 3, SCHEMA_VERSION):
                 raise ControllerError('unsupported controller schema')
             if existing and int(existing['value']) == 2:
                 db.execute('BEGIN IMMEDIATE')
@@ -309,7 +349,7 @@ class ControllerStore:
     def create_task(self, task_id, objective, dependencies=(), *, implementer=('codex', None),
                     reviewer=('claude', None), max_repairs=2, max_calls=6,
                     max_elapsed_seconds=300, max_concurrency=1,
-                    max_timeout_seconds=90, verification_reserve=2):
+                    max_timeout_seconds=90, verification_reserve=2, review_reserve=0):
         if (not isinstance(task_id, str) or not task_id or len(task_id) > 128 or
                 not task_id.replace('-', '').replace('_', '').isalnum()):
             raise ControllerError('invalid task id')
@@ -317,7 +357,8 @@ class ControllerStore:
             raise ControllerError('Phase 3 allows at most two repairs')
         if (type(max_calls) is not int or max_calls < 1 or
                 type(verification_reserve) is not int or verification_reserve < 1 or
-                verification_reserve >= max_calls or
+                type(review_reserve) is not int or review_reserve < 0 or
+                verification_reserve + review_reserve >= max_calls or
                 type(max_concurrency) is not int or max_concurrency < 1 or
                 type(max_timeout_seconds) not in (int, float) or
                 not math.isfinite(max_timeout_seconds) or max_timeout_seconds <= 0 or
@@ -332,9 +373,9 @@ class ControllerStore:
               (task_id, 'received', objective, _json(list(dependencies)), implementer[0], implementer[1],
                reviewer[0], reviewer[1], max_repairs, 'validate task contract', now, now))
             db.execute('''INSERT INTO budgets(task_id,max_calls,max_elapsed_seconds,max_concurrency,
-              max_timeout_seconds,verification_reserve) VALUES(?,?,?,?,?,?)''',
+              max_timeout_seconds,verification_reserve,review_reserve) VALUES(?,?,?,?,?,?,?)''',
               (task_id, max_calls, max_elapsed_seconds, max_concurrency,
-               max_timeout_seconds, verification_reserve))
+               max_timeout_seconds, verification_reserve, review_reserve))
             self._append(db, task_id, 'task-created-' + task_id, 'task_created',
                          {'objective': objective, 'dependencies': list(dependencies)})
         return self.task(task_id)
@@ -449,8 +490,13 @@ class ControllerStore:
             remaining_after = budget['max_calls'] - consumed - 1
             if remaining_after < 0:
                 raise BudgetExceeded('call limit reached')
-            if role != 'verification' and remaining_after < budget['verification_reserve']:
-                raise BudgetExceeded('verification reserve protected')
+            protected_calls = 0
+            if role in ('implementer', 'repair'):
+                protected_calls = budget['verification_reserve'] + budget['review_reserve']
+            elif role == 'verification':
+                protected_calls = budget['review_reserve']
+            if remaining_after < protected_calls:
+                raise BudgetExceeded('verification or review reserve protected')
             if (budget['elapsed_seconds'] + budget['reserved_elapsed_seconds'] + timeout_seconds >
                     budget['max_elapsed_seconds']):
                 raise BudgetExceeded('elapsed-time allocation exhausted')

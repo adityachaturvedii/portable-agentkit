@@ -18,7 +18,7 @@ Execution roles are state-bound: `implementer` to `implementing`, `repair` to `r
 |---|---|
 | Task | ID, objective, validated contract, dependencies, implementer/reviewer engine and model, base/head revisions, branch/worktree, repair count, state, version and next action. |
 | Event | Unique event ID, task, type, JSON payload, timestamp and monotonic database sequence. Rows cannot be updated or deleted. |
-| Budget | Maximum and current calls, elapsed allocation, concurrency, timeout and verification reserve. Reservations use one immediate transaction before launch. |
+| Budget | Maximum and current calls, elapsed allocation, concurrency, timeout, verification reserve and review reserve. Reservations use one immediate transaction before launch. |
 | Execution | Role, engine/model, allocation, lifecycle status, optional process identity, measured elapsed time, usage observation, result details and reconciliation note. |
 | Evidence | ID, task, exact revision, kind, status, content hash, details, stale flag and timestamp. Evidence for a noncurrent revision is rejected. |
 | Approval | ID, task, repository, branch, exact head, action, expiry, source and stale flag. It can be written only through controller authority after `awaiting_pr_approval`. |
@@ -32,7 +32,9 @@ Execution roles are state-bound: `implementer` to `implementing`, `repair` to `r
 
 All call/concurrency/repair/reserve counts require real integers and reject Boolean values. Elapsed limits and timeouts require finite positive integers or floats; completed elapsed time and observed costs require finite nonnegative values. NaN and either infinity are invalid.
 
-The controller can enforce reservation count, local concurrency, wall-time allocation and request timeout. It cannot enforce an exact provider token ceiling or monetary cap through the current CLI adapters. Capacity reserved for verification cannot be consumed by implementer or reviewer calls.
+The controller can enforce reservation count, local concurrency, wall-time allocation and request timeout. It cannot enforce an exact provider token ceiling or monetary cap through the current CLI adapters. Phase 4 protects verification and review separately: implementation/repair cannot consume either reserve, verification cannot consume the review reserve, and the designated quality stage may consume its own reserved call. Earlier workflows use a zero review reserve and retain their prior behavior.
+
+Phase 4 adds durable intake, plan, node, edge, skill-selection and cancellation-control rows. Node launch requires its persisted dependency nodes to have succeeded, and the persisted dependency list must match the validated graph edges. Ordinary edges form a DAG. The only cycle is an explicit bounded repair edge with at most two iterations. Role records do not imply a model process: intake, planning, scheduling, integration, verification and packaging are controller functions unless a provider execution is explicitly reserved.
 
 ## Revision and approval binding
 
@@ -45,5 +47,7 @@ When a check fails, the next repair prompt includes controller-generated JSON. V
 ## Restart semantics
 
 On restart, the controller inspects reserved, running and cancellation-requested rows before any replacement launch. Without independently established process ownership, it marks them `reconciliation_required`, records a reconciliation event and blocks the task. SQLite durability alone is not process containment. Detached descendants and remote cancellation remain unsupported.
+
+While the Phase 4 controller is actively supervising a provider call, the existing process transport polls the durable task cancellation flag and terminates the owned local process group. The finalized execution and graph node become cancelled, and the task launches no subsequent stage. This same-process guarantee does not survive controller death and does not establish termination for detached descendants.
 
 An `authentication_required` task is already free of active execution reservations and survives restart as a recoverable checkpoint. Login waiting does not consume calls, elapsed allocation, concurrency or repair count. A controller restart does not release an `in_progress` login based on elapsed time. The owner can confirm it is still running; a trusted controller can record confirmed process exit and permit a bounded replacement, or preserve uncertain termination as `reconciliation_required`. Resume recomputes the controller-owned repository/worktree identity and rejects a wrong path, branch, HEAD, dirty tree, changed manifest, stale referenced evidence, non-subscription login, unresolved execution or arbitrary blocked state before changing task state. See [guided authentication recovery](authentication-recovery.md).

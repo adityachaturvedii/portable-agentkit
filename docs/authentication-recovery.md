@@ -73,6 +73,8 @@ Resume requires all of the following:
 
 Cancelled, failed, or timed-out login leaves a recoverable checkpoint. Ctrl+C terminates and reaps the official login process group where this can be established; launcher failures with uncertain termination enter explicit reconciliation instead of reopening login. Network, quota, rate-limit, permission, sandbox and ordinary execution failures do not create authentication checkpoints. A changed candidate, dirty worktree, wrong branch or repository, stale evidence, non-subscription login or unresolved execution blocks resume before task state changes or approval packaging. PR approval remains separate and revision-bound.
 
+Phase 4 task workflows use these same checkpoint and login-session records. The checkpoint execution must identify exactly one persisted graph node in `authentication_required`. `python3 -m agentkit task resume --root ROOT --task-id ID --live --authorize-subscription-smoke` restores only that node and interrupted stage after the controller recomputes the actual candidate identity. Completed specialist branches, integration work, valid verification evidence, usage and repair counts remain intact.
+
 ## Security boundary
 
 Login is a trusted controller-side operation outside the worker sandbox. The subprocess gets the normal user home required by the official CLI, a credential-scrubbed environment, a neutral `/private/tmp` working directory, and direct terminal streams. The CLI manages its own credential storage. This mode does not claim that the provider CLI cannot read other user files or that browser/Keychain access is fully isolated.

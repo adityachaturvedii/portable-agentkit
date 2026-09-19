@@ -1,6 +1,6 @@
 # Portable Agentkit — skills, bounded CLI adapters and durable local delivery
 
-A standalone toolkit with ten curated procedures, seven domain references, versioned contracts, source attribution and disposable validation fixtures. Phase 2 adds CLI diagnosis and a narrow trusted disposable-workspace execution mode on the tested macOS host. Phase 3 adds transactional local orchestration, controller-owned Git worktrees, independent checks and review, bounded repair and a revision-bound local approval package.
+A standalone toolkit with ten curated procedures, seven domain references, versioned contracts, source attribution and disposable validation fixtures. Phase 2 adds CLI diagnosis and a narrow trusted disposable-workspace execution mode on the tested macOS host. Phase 3 adds transactional local delivery and authentication recovery. Phase 4 adds validated task intake, selective role graphs, account-default provider routing, separate quality reserves and a task-oriented terminal interface for controller-created disposable fixtures.
 
 ## Use from a checkout
 
@@ -15,6 +15,13 @@ python3 -m agentkit check
 python3 -m unittest discover -s tests -v
 python3 -m agentkit controller-demo --output /tmp/agentkit-phase3-demo
 python3 -m agentkit auth-status claude
+python3 -m agentkit task fixtures
+python3 -m agentkit task submit --root /tmp/agentkit-task --task-id demo \
+  --fixture calculator --request "Repair the calculator fixture"
+python3 -m agentkit task plan --root /tmp/agentkit-task --task-id demo
+python3 -m agentkit task start --root /tmp/agentkit-task --task-id demo
+python3 -m agentkit task status --root /tmp/agentkit-task --task-id demo
+python3 -m agentkit task package --root /tmp/agentkit-task --task-id demo
 ```
 
 Run these commands from this directory. To move machines, copy the entire directory, preserving relative paths. For a clean source copy, use `git archive HEAD` after committing. Skills link to shared contracts and notices, so copying a single SKILL.md is insufficient. Relocation is tested; installation, CLI skill auto-discovery and rollback are later work.
@@ -34,6 +41,7 @@ Run these commands from this directory. To move machines, copy the entire direct
 | Durable controller, protected approval records, budgets and controller-owned Git broker | Implemented and tested with deterministic adapters |
 | Guided subscription-auth recovery | Implemented with uncaptured official CLI terminal handoff, durable stage checkpoint, bounded retries and revision/evidence revalidation |
 | Cross-provider disposable delivery workflow | Deterministic path passes; the bounded live result is recorded in the current validation report |
+| Phase 4 task CLI, selective role graph, routing and quality reserves | Implemented and fixture-tested for controller-created disposable tasks; general repository onboarding remains unsupported |
 | Browser automation, CUDA/GPU worker, GitHub publication, installer/update | Not implemented; separate later gates |
 
 The procedures describe desired engineering behavior. They are not enforcement of authenticated roles, monetary ceilings or publication permissions. Git worktrees are not sandboxes. Unattended untrusted execution is unsupported. Managed Linux/WSL2/Windows execution has not been validated; the current guard is macOS-specific.
@@ -54,6 +62,14 @@ See [adapter contracts](docs/runtime-contracts.md), [original Phase 2 report](do
 
 When live execution reports missing or expired subscription login, the workflow stops at `authentication_required` after finalizing the failed call. Use `auth-login` in a real local terminal, then rerun `controller-demo` with the same output, live authorization and `--resume`. Login output is attached directly to the terminal and is never captured in evidence. If the controller ended while login was in progress, `auth-reconcile` requires explicit process evidence before another attempt. See [guided authentication recovery](docs/authentication-recovery.md) for Codex browser/device commands, Claude's manual code handoff, historical checkpoints, candidate validation and limitations.
 
+## Phase 4 task interface
+
+`task submit` accepts natural-language intent only for a named controller-created fixture. It records the original request separately from controller assumptions, validates scope, creates a proposed execution graph, selects audited skills by content hash and stops before execution. `task plan` shows that contract and graph. `task start` executes the deterministic fixture workflow by default; add both `--live` and `--authorize-subscription-smoke` only for the explicitly bounded subscription demonstration. `task status` reports the stage, active assignments, route reasons, reserves, observed usage, blocker and next action. `task cancel` prevents new launches. `task resume` resumes only a verified authentication checkpoint. `task package` reads the final local package and never publishes it.
+
+The `calculator` fixture uses one implementer, verification and review. `text-metrics` and `inventory` use two isolated specialist worktrees, a controller-owned integration commit, verification and review. Chief-of-staff, tech-lead and manager responsibilities are deterministic controller functions in this phase, so routine tasks incur no management-model calls. Provider defaults are configurable at submission with `--implementer-provider` and `--reviewer-provider`; exact model, effort, relative cost and availability remain unknown until the installed CLI/account reports them. No model identifier or price is inferred.
+
+The execution graph is bounded to two implementation subtasks, two repair cycles, two concurrent calls and twelve nodes. Verification and review each hold a separate call reserve. Output is bounded to 1 MiB per provider request; CLI-managed context remains unknown. Token categories, estimates and billed cost remain `null` when unavailable. See [role contracts](docs/phase4-role-contracts.md), [graph, routing and budget semantics](docs/phase4-graph-routing.md) and the [Phase 4 validation report](docs/phase4-validation-report.md).
+
 ## Inspect the work
 
 - [Implementation checklist](docs/checklist.md), [decision log](docs/decisions.md), [phase requirements](docs/requirements.md), [threat model](docs/threat-model.md)
@@ -63,6 +79,7 @@ When live execution reports missing or expired subscription login, the workflow 
 - [Phase 2 validation](docs/phase2-validation-report.md), [execution follow-up](docs/phase2-execution-followup.md), [sandbox matrix](docs/sandbox-matrix.md), [CLI source/compatibility review](docs/cli-source-review.md)
 - [Phase 3 controller contracts](docs/controller-contracts.md), [Phase 3 validation](docs/phase3-validation-report.md), [archived evidence](evidence/phase3/manifest.json)
 - [Guided authentication recovery](docs/authentication-recovery.md), [live completion evidence](evidence/phase3-auth-recovery/manifest.json)
+- [Phase 4 role contracts](docs/phase4-role-contracts.md), [graph and routing](docs/phase4-graph-routing.md), [Phase 4 validation](docs/phase4-validation-report.md), [live evidence manifest](evidence/phase4/manifest.json)
 - [Original implementation specification](docs/implementation-spec.md)
 
 The user authorized private GitHub publication on 2026-09-19: [adityachaturvedii/portable-agentkit](https://github.com/adityachaturvedii/portable-agentkit). All three phase branches are preserved; `implementation/phase-2` is the default branch for the latest work. No PR or merge is authorized by that publication request. Earlier validation records describe the local-only state at their recorded dates. Upstream MIT notices cover adapted material; an outbound license for original toolkit code will be chosen before broader distribution.

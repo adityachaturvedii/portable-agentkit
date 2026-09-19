@@ -107,9 +107,24 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [x] Run disposable fixture regressions only; spend no live inference quota.
 - [ ] Interactive provider login recovery remains fixture-tested; the successful live delivery reused existing authentication and did not exercise browser login.
 
+## Phase 4 — task intake and selective orchestration
+
+- [x] Start from exact `fa288720c2f1c5e85b33e5ed8a00d88c240f1a77` on `implementation/phase-4` in a dedicated worktree.
+- [x] Add a coherent `task` CLI for fixture discovery, intake, plan inspection, execution, status, cancellation, authentication resume and local package reading.
+- [x] Preserve the original request separately from explicit assumptions; reject non-fixture targets and authority expansion.
+- [x] Define chief-of-staff, tech-lead, manager, implementer, verifier and reviewer responsibilities without starting unnecessary management models.
+- [x] Persist bounded graph nodes/edges and require acyclic dependencies, completed prerequisites, isolated specialist worktrees and controller-owned integration.
+- [x] Route implementer/repair/reviewer through configurable Codex/Claude account-default profiles, preserving unknown model, effort, relative price and availability.
+- [x] Protect separate verification and review call reserves; enforce calls, concurrency, elapsed allocation, timeout, subtasks, repairs, graph size and output bounds.
+- [x] Hash and record only selected audited skill/domain content and use structured bounded handoffs instead of transcripts.
+- [x] Preserve authentication checkpoints, candidate/evidence revalidation, cancellation and restart uncertainty behavior.
+- [x] Test the minimal task path, decomposed integration, invalid graph/authority plans, routing, reserves, repairs, auth recovery, stale revisions, cancellation and unknown usage.
+- [x] Include an adversarial worker fixture whose unauthorized file change is rejected by the broker.
+- [x] Complete and archive one bounded Codex implementation → constrained verification → Claude review demonstration at the exact integrated candidate, with two inference calls and no repair.
+- [ ] General repository onboarding, Linux/GPU workers, dashboards, GitHub publication and broad autonomous execution remain unsupported.
+
 ## Later phases (planned, not implemented)
 
-- [ ] Phase 4: cross-provider roles and measured routing.
 - [ ] Phase 5: hardware domain validation and optional GPU worker.
 - [ ] Phase 6: GitHub broker, installation/update/rollback and machine handover.
 - [ ] Phase 7: held-out matched baseline evaluations and calibrated release.
@@ -123,5 +138,7 @@ Phase 2 implementation and authorized feasibility experiments are recorded. Both
 Phase 3 now implements the minimum local delivery graph for that narrow mode. After the corrective review, the deterministic workflow reaches a revision-bound `awaiting_pr_approval` package and 91 tests cover controller, Git, repair feedback, constrained verification, budget, numeric, lifecycle, restart and evidence invariants. The bounded live attempt validated Codex implementation plus an independent test, then blocked when Claude reported an expired OAuth token. No reauthentication was attempted, no billing fact was inferred, and no live approval package was created. Phase 4 should wait for a successful cross-provider live review and remains limited to trusted controller-created disposable repositories.
 
 The authentication-recovery follow-up supersedes that live gate: guided first-party subscription recovery is implemented and 107 tests pass, including the host macOS boundary test. One fresh bounded live workflow reached `awaiting_pr_approval` with Codex implementation, constrained local verification and Claude review. Existing authentication worked, so no interactive login was launched. A strict offline correction accepted Claude's single fenced JSON result after verifying its archived stream hash, provider-success terminal, candidate and snapshot, avoiding any repeat inference. Phase 4 may begin only for the same trusted disposable macOS mode; all broader limitations remain.
+
+Phase 4 now provides fixture-only natural-language intake, a reviewable plan, selective persisted role graphs, configurable account-default provider routing, separate verification/review reserves, active cancellation and a terminal status/package experience. The final suite passed 131 tests with one nested-sandbox skip, and the host boundary regression passed separately. One live two-inference-call workflow reached a clean revision-bound local package. General repositories, additional platforms, GPU/remote workers, dashboards and publication remain future gates.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).

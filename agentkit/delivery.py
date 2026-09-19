@@ -59,7 +59,7 @@ class FakeImplementer:
         self.failures = failures
         self.calls = 0
 
-    def run(self, workspace, output, boundary, prompt, policy):
+    def run(self, workspace, output, boundary, prompt, policy, cancel_event=None):
         started = time.monotonic()
         self.calls += 1
         path = Path(workspace) / 'calculator.py'
@@ -217,7 +217,8 @@ class LiveImplementer:
         request = ExecutionRequest(self.engine, 'phase3-live-implementer', prompt, str(Path(workspace).resolve()),
                                    timeout_seconds=60, max_output_bytes=1048576,
                                    model=self.model, mode='owned-code')
-        result = execute_owned_code(request, output, boundary, policy=policy)
+        result = execute_owned_code(request, output, boundary, policy=policy,
+                                    cancel_event=cancel_event)
         return EngineOutcome(result.status, result.elapsed_seconds, _usage_from_result(result),
                              {'error_class': result.error_class, 'artifacts': result.artifacts,
                               'limitations': result.limitations,
@@ -229,7 +230,7 @@ class LiveReviewer:
         self.engine = engine
         self.model = model
 
-    def run(self, snapshot, revision, output, prompt, policy):
+    def run(self, snapshot, revision, output, prompt, policy, cancel_event=None):
         files = {}
         for path in sorted(Path(snapshot).rglob('*')):
             if path.is_file():
@@ -241,7 +242,7 @@ class LiveReviewer:
             request = ExecutionRequest(self.engine, 'phase3-live-reviewer', review_prompt, str(Path(tmp).resolve()),
                                        timeout_seconds=60, max_output_bytes=1048576,
                                        model=self.model, mode='model-only')
-            result = execute(request, output, policy=policy)
+            result = execute(request, output, policy=policy, cancel_event=cancel_event)
         findings = ()
         parse_error = None
         if result.status == 'succeeded' and isinstance(result.structured_output, dict):

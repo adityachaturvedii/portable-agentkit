@@ -1,0 +1,170 @@
+{
+  "active_assignments": [],
+  "approval_package": "/private/tmp/agentkit-phase4-live-20260919/approval/approval-package.json",
+  "attention": "Review the local package; publication remains separately authorized.",
+  "blocker": null,
+  "budget": {
+    "active_calls": 0,
+    "billed_cost_usd": null,
+    "completed_calls": 3,
+    "context_allocation": "provider-managed-unknown",
+    "cost_note": "Unknown remains unknown; CLI estimates are not billing.",
+    "elapsed_seconds": 42.260266291,
+    "estimated_cost_usd": null,
+    "max_calls": 5,
+    "max_elapsed_seconds": 180.0,
+    "max_output_bytes_per_call": 1048576,
+    "remaining_calls": 2,
+    "remaining_elapsed_seconds": 137.739733709,
+    "review_reserve": 1,
+    "token_usage": {
+      "cache_creation_tokens": null,
+      "cached_input_tokens": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "reasoning_tokens": null
+    },
+    "verification_reserve": 1
+  },
+  "executions": [
+    {
+      "elapsed_seconds": 36.829807,
+      "engine": "codex",
+      "execution_id": "c96b5692-5e19-4f94-825c-cfd4c9b2fb73",
+      "model": null,
+      "role": "implementer",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": null,
+        "cached_input_tokens": 37120,
+        "estimated_cost_usd": null,
+        "input_tokens": 47785,
+        "output_tokens": 600,
+        "reasoning_tokens": 0,
+        "source": "codex.turn.completed"
+      }
+    },
+    {
+      "elapsed_seconds": 0.34233429100000023,
+      "engine": "local",
+      "execution_id": "80e4dbab-fd64-48b1-b8af-c47ddb7543c9",
+      "model": "python-unittest-seatbelt-v1",
+      "role": "verification",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": null,
+        "cached_input_tokens": null,
+        "estimated_cost_usd": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null,
+        "source": "local-command"
+      }
+    },
+    {
+      "elapsed_seconds": 5.088125,
+      "engine": "claude",
+      "execution_id": "c8376066-3620-4a24-8886-605f5128b95e",
+      "model": null,
+      "role": "reviewer",
+      "status": "succeeded",
+      "usage": {
+        "billed_cost_usd": null,
+        "cache_creation_tokens": 3007,
+        "cached_input_tokens": 0,
+        "estimated_cost_usd": 0.03768,
+        "input_tokens": 2,
+        "output_tokens": 304,
+        "reasoning_tokens": null,
+        "source": "claude.result"
+      }
+    }
+  ],
+  "findings": [],
+  "management_model_calls": 0,
+  "next_action": "await explicit publication approval bound to this revision",
+  "plan_mode": "single",
+  "resolved_findings": [],
+  "routing": [
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "implement-calculator-core",
+      "profile_id": "codex-account-default",
+      "provider": "codex",
+      "reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "implementer"
+    },
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "review",
+      "profile_id": "claude-account-default",
+      "provider": "claude",
+      "reason": "Configured account-default profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "reviewer"
+    },
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "repair",
+      "profile_id": "codex-account-default",
+      "provider": "codex",
+      "reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "repair"
+    }
+  ],
+  "skills": [
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/behavioral-testing/SKILL.md",
+      "sha256": "f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473",
+      "skill_id": "behavioral-testing",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/delivery-evidence/SKILL.md",
+      "sha256": "c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0",
+      "skill_id": "delivery-evidence",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Fixture domain context only.",
+      "relative_path": "domains/backend-database.md",
+      "sha256": "758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e",
+      "skill_id": "domain:backend-database",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/independent-review/SKILL.md",
+      "sha256": "5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb",
+      "skill_id": "independent-review",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/task-contract/SKILL.md",
+      "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d",
+      "skill_id": "task-contract",
+      "task_id": "phase4-live"
+    }
+  ],
+  "stage": "awaiting_pr_approval",
+  "state": "awaiting_pr_approval",
+  "task_id": "phase4-live",
+  "verification": [
+    {
+      "id": "phase4-verification-0",
+      "revision": "6c3074a5ee12a2577cf20fd7a2a45c0a8f638b73",
+      "stale": false,
+      "status": "passed"
+    }
+  ]
+}

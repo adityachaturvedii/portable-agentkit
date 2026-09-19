@@ -64,6 +64,37 @@ def main(argv=None):
     auth_reconcile.add_argument("--basis", required=True,
                                 choices=("process_exit_confirmed", "process_termination_unconfirmed"),
                                 help="sanitized process evidence; free-form terminal output is not accepted")
+    task = commands.add_parser("task", help="Phase 4 disposable task intake and orchestration")
+    task_commands = task.add_subparsers(dest="task_command", required=True)
+    task_commands.add_parser("fixtures", help="list supported controller-created disposable targets")
+    task_submit = task_commands.add_parser("submit", help="normalize a request and propose a bounded plan")
+    task_submit.add_argument("--root", required=True, help="fresh workflow directory")
+    task_submit.add_argument("--task-id", required=True)
+    task_submit.add_argument("--fixture", required=True)
+    task_submit.add_argument("--request", required=True)
+    task_submit.add_argument("--risk", choices=("routine", "material"))
+    task_submit.add_argument("--max-calls", type=int)
+    task_submit.add_argument("--max-elapsed-seconds", type=float)
+    task_submit.add_argument("--max-concurrency", type=int, choices=(1, 2))
+    task_submit.add_argument("--implementer-provider", choices=("codex", "claude"), default="codex",
+                             help="account-default provider for implementation and bounded repair")
+    task_submit.add_argument("--reviewer-provider", choices=("codex", "claude"), default="claude",
+                             help="account-default provider for independent review")
+    for name, help_text in (
+            ("plan", "show the validated contract and proposed graph"),
+            ("status", "show stage, assignments, routing, budget, blockers, and attention"),
+            ("cancel", "request cancellation and prevent subsequent launches"),
+            ("package", "read the final local approval package")):
+        command = task_commands.add_parser(name, help=help_text)
+        command.add_argument("--root", required=True)
+        command.add_argument("--task-id", required=True)
+    for name, help_text in (("start", "start or continue the proposed bounded workflow"),
+                            ("resume", "resume an authentication checkpoint after verified login")):
+        command = task_commands.add_parser(name, help=help_text)
+        command.add_argument("--root", required=True)
+        command.add_argument("--task-id", required=True)
+        command.add_argument("--live", action="store_true")
+        command.add_argument("--authorize-subscription-smoke", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -194,6 +225,46 @@ def main(argv=None):
                 authority=store.authority)
             print(json.dumps({'task_id': args.task_id, 'session_id': checkpoint['login_session_id'],
                               'status': status}, indent=2))
+            return 0
+        elif args.command == "task":
+            from .orchestration import Phase4Workflow, phase4_fixture_catalog
+            if args.task_command == 'fixtures':
+                print(json.dumps({'execution_profile': 'trusted-disposable-macos',
+                                  'fixtures': phase4_fixture_catalog()}, indent=2))
+                return 0
+            if args.task_command == 'submit':
+                from .phase4_contracts import ModelRegistry
+                registry = ModelRegistry.account_defaults(args.implementer_provider,
+                                                          args.reviewer_provider)
+                workflow = Phase4Workflow.submit(
+                    args.root, args.task_id, args.request, args.fixture, risk=args.risk,
+                    max_calls=args.max_calls, max_elapsed_seconds=args.max_elapsed_seconds,
+                    max_concurrency=args.max_concurrency, registry=registry)
+                print(json.dumps({'contract': json.loads((workflow.root / 'contract.json').read_text()),
+                                  'plan': json.loads((workflow.root / 'plan.json').read_text()),
+                                  'status': workflow.status(args.task_id)}, indent=2))
+                return 0
+            live = getattr(args, 'live', False)
+            authorized = getattr(args, 'authorize_subscription_smoke', False)
+            if live and not authorized:
+                raise ValueError('live Phase 4 execution requires explicit subscription-smoke authorization')
+            workflow = Phase4Workflow(args.root, live=live, authorized=authorized)
+            if args.task_command == 'plan':
+                print(json.dumps({'contract': json.loads((workflow.root / 'contract.json').read_text()),
+                                  'plan': workflow.state.plan(args.task_id)['plan']}, indent=2))
+            elif args.task_command == 'status':
+                print(json.dumps(workflow.status(args.task_id), indent=2))
+            elif args.task_command == 'start':
+                print(json.dumps(workflow.start(args.task_id), indent=2))
+            elif args.task_command == 'resume':
+                print(json.dumps(workflow.resume(args.task_id), indent=2))
+            elif args.task_command == 'cancel':
+                print(json.dumps(workflow.cancel(args.task_id), indent=2))
+            else:
+                package = workflow.result(args.task_id)['approval_package']
+                if package is None:
+                    raise ValueError('local approval package is not available')
+                print(json.dumps(package, indent=2))
             return 0
         else:
             print(json.dumps(check_pack(), indent=2))
