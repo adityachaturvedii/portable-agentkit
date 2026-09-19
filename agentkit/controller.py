@@ -29,6 +29,7 @@ TRANSITIONS = {
     'authentication_required': {'cancelled'},
 }
 ROLE_STATES = {
+    'planning': 'received',
     'implementer': 'implementing',
     'repair': 'repairing',
     'verification': 'verifying',
@@ -393,6 +394,10 @@ class ControllerStore:
         return (target.is_file() and not target.is_symlink() and
                 hashlib.sha256(target.read_bytes()).hexdigest() == digest)
 
+    def artifact_intact(self, digest):
+        """Read-only integrity check for a controller content-addressed artifact."""
+        return self._artifact_intact(digest)
+
     def create_task(self, task_id, objective, dependencies=(), *, implementer=('codex', None),
                     reviewer=('claude', None), max_repairs=2, max_calls=6,
                     max_elapsed_seconds=300, max_concurrency=1,
@@ -517,6 +522,20 @@ class ControllerStore:
             db.execute('UPDATE tasks SET head_revision=?,version=version+1,updated_at=? WHERE task_id=?',
                        (revision, _now(), task_id))
 
+    def set_next_action(self, task_id, expected_state, next_action, event_type, *, authority=None):
+        self._require(authority)
+        if (not isinstance(next_action, str) or not next_action.strip() or len(next_action) > 1024 or
+                not isinstance(event_type, str) or not event_type.strip() or len(event_type) > 128):
+            raise ControllerError('bounded next action and event type are required')
+        with self.transaction() as db:
+            row = db.execute('SELECT state FROM tasks WHERE task_id=?', (task_id,)).fetchone()
+            if not row or row['state'] != expected_state:
+                raise ControllerError('task state changed before next-action update')
+            db.execute('UPDATE tasks SET next_action=?,version=version+1,updated_at=? WHERE task_id=?',
+                       (next_action, _now(), task_id))
+            self._append(db, task_id, task_id + '-' + event_type + '-' + str(uuid.uuid4()),
+                         event_type, {'state': expected_state, 'next_action': next_action})
+
     def reserve_execution(self, task_id, role, engine, model, timeout_seconds, *, effort=None,
                           authority=None):
         self._require(authority)
@@ -549,11 +568,12 @@ class ControllerStore:
                                   budget['provider_reserved_calls'] >=
                                   budget['max_provider_calls']):
                 raise BudgetExceeded('provider execution limit reached')
-            if provider_call and role in ('implementer', 'repair'):
+            if provider_call and role in ('planning', 'implementer', 'repair'):
                 provider_remaining_after = (budget['max_provider_calls'] -
                                             budget['provider_completed_calls'] -
                                             budget['provider_reserved_calls'] - 1)
-                if provider_remaining_after < budget['review_reserve']:
+                provider_protected = budget['review_reserve'] + (1 if role == 'planning' else 0)
+                if provider_remaining_after < provider_protected:
                     raise BudgetExceeded('provider review reserve protected')
             if planning_call and (budget['planning_completed_calls'] +
                                   budget['planning_reserved_calls'] >=
@@ -564,7 +584,9 @@ class ControllerStore:
             if remaining_after < 0:
                 raise BudgetExceeded('call limit reached')
             protected_calls = 0
-            if role in ('implementer', 'repair'):
+            if role == 'planning':
+                protected_calls = budget['verification_reserve'] + budget['review_reserve'] + 1
+            elif role in ('implementer', 'repair'):
                 protected_calls = budget['verification_reserve'] + budget['review_reserve']
             elif role == 'verification':
                 protected_calls = budget['review_reserve']
@@ -1078,8 +1100,8 @@ class ControllerStore:
         with self.transaction() as db:
             task = db.execute('SELECT state,repair_count,max_repairs FROM tasks WHERE task_id=?',
                               (task_id,)).fetchone()
-            if not task or task['state'] not in ('verifying', 'reviewing'):
-                raise ControllerError('repair findings require verifying or reviewing state')
+            if not task or task['state'] not in ('verifying', 'reviewing', 'review_complete'):
+                raise ControllerError('repair findings require a quality-stage state')
             current = db.execute('SELECT count FROM failure_signatures WHERE task_id=? AND signature=?',
                                  (task_id, signature)).fetchone()
             count = (current['count'] if current else 0) + 1

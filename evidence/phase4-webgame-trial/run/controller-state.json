@@ -1,0 +1,108 @@
+{
+  "approvals": [],
+  "authentication_checkpoints": [],
+  "budget": {
+    "active_calls": 0,
+    "completed_calls": 1,
+    "elapsed_seconds": 29.313421,
+    "max_calls": 8,
+    "max_concurrency": 2,
+    "max_elapsed_seconds": 1200.0,
+    "max_planning_calls": 1,
+    "max_provider_calls": 8,
+    "max_timeout_seconds": 180.0,
+    "planning_completed_calls": 1,
+    "planning_reserved_calls": 0,
+    "provider_completed_calls": 1,
+    "provider_reserved_calls": 0,
+    "reserved_calls": 0,
+    "reserved_elapsed_seconds": 0.0,
+    "review_reserve": 1,
+    "task_id": "breakout-live",
+    "verification_reserve": 1
+  },
+  "events": [
+    {
+      "created_at": "2026-09-19T04:43:39.099995+00:00",
+      "event_id": "task-created-breakout-live",
+      "event_type": "task_created",
+      "payload_json": "{\"dependencies\":[],\"objective\":\"Build a polished browser-based Breakout game. It should support keyboard and touch controls, responsive desktop and mobile layouts, scoring, lives, start, pause/resume, restart, and clear win/lose states. Include concise instructions and readable, accessible controls. Make it visually cohesive and enjoyable to play. Run locally with no account, backend, external service, or deployment.\\n\\nUse only the controller-provided dependency-free static project. Keep the game deterministic enough for the protected mechanics contract. Expose the same test-only API as `module.exports` in Node and `globalThis.BreakoutTest` in a browser: `createState(options)`, `start(state)`, `togglePause(state)`, `restart(state)`, and `step(state, deltaSeconds, input)`. State must expose `width`, `height`, `status`, `score`, `lives`, `paddle`, `ball`, and `bricks`; bricks expose geometry, `alive`, and `points`. The visible game must use the same mechanics API. This interface exists for independent acceptance and must not bypass the playable UI.\"}",
+      "sequence": 1,
+      "task_id": "breakout-live"
+    },
+    {
+      "created_at": "2026-09-19T04:43:39.107883+00:00",
+      "event_id": "reserve-0896405d-0edc-4576-ae33-0950ef0a8144",
+      "event_type": "execution_reserved",
+      "payload_json": "{\"execution_id\":\"0896405d-0edc-4576-ae33-0950ef0a8144\",\"requested_configuration\":{\"effort\":null,\"model\":null},\"role\":\"planning\",\"timeout_seconds\":180.0}",
+      "sequence": 2,
+      "task_id": "breakout-live"
+    },
+    {
+      "created_at": "2026-09-19T04:43:39.110381+00:00",
+      "event_id": "start-0896405d-0edc-4576-ae33-0950ef0a8144",
+      "event_type": "execution_started",
+      "payload_json": "{\"execution_id\":\"0896405d-0edc-4576-ae33-0950ef0a8144\",\"pid\":76449}",
+      "sequence": 3,
+      "task_id": "breakout-live"
+    },
+    {
+      "created_at": "2026-09-19T04:44:09.303856+00:00",
+      "event_id": "finish-0896405d-0edc-4576-ae33-0950ef0a8144",
+      "event_type": "execution_finished",
+      "payload_json": "{\"elapsed_seconds\":29.313421,\"execution_id\":\"0896405d-0edc-4576-ae33-0950ef0a8144\",\"status\":\"failed\"}",
+      "sequence": 4,
+      "task_id": "breakout-live"
+    },
+    {
+      "created_at": "2026-09-19T04:44:09.317265+00:00",
+      "event_id": "breakout-live-phase4-planning-blocked-1789793049313462000",
+      "event_type": "transition",
+      "payload_json": "{\"from\":\"received\",\"to\":\"blocked\"}",
+      "sequence": 5,
+      "task_id": "breakout-live"
+    }
+  ],
+  "evidence": [],
+  "executions": [
+    {
+      "allocation_seconds": 180.0,
+      "effort": null,
+      "elapsed_seconds": 29.313421,
+      "engine": "claude",
+      "execution_id": "0896405d-0edc-4576-ae33-0950ef0a8144",
+      "finished_at": "2026-09-19T04:44:09.303710+00:00",
+      "model": null,
+      "pid": 76449,
+      "process_token": "phase4-controller-supervised:76449:a100609a09b445f89486c8f18338e865",
+      "reconciliation_note": null,
+      "result_json": "{\"artifacts\":{\"request.json\":\"4d784109de5e4390aac81839bbd9fdb504d4f31386a659024e65846d76b3ed76\",\"stderr.redacted.txt\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"stdout.redacted.jsonl\":\"6f9f7d405b4855931494f63117dbb9012db297f11b43b8815084633355372350\"},\"authentication_failure\":null,\"error_class\":\"rate_limit\",\"limitations\":[\"Provider events and final text are claims; fixture acceptance is independently computed.\",\"Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.\",\"Process groups cannot prove detached-descendant or remote cancellation.\",\"Whole-process guard denies global writes; parent provider network and auth access remain available.\",\"Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.\",\"No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.\"],\"proposal_document\":null,\"provider_reported_configuration\":{\"effort\":null,\"model\":\"claude-opus-5[1m]\"},\"requested_configuration\":{\"effort\":null,\"model\":null}}",
+      "role": "planning",
+      "started_at": "2026-09-19T04:43:39.110353+00:00",
+      "status": "failed",
+      "task_id": "breakout-live",
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":9678,\"cached_input_tokens\":25570,\"estimated_cost_usd\":0.160805,\"input_tokens\":8,\"output_tokens\":2048,\"reasoning_tokens\":null,\"source\":\"claude.result\"}"
+    }
+  ],
+  "task": {
+    "base_revision": null,
+    "branch": null,
+    "contract_json": null,
+    "created_at": "2026-09-19T04:43:39.098981+00:00",
+    "dependencies_json": "[]",
+    "head_revision": null,
+    "implementer_engine": "codex",
+    "implementer_model": null,
+    "max_repairs": 2,
+    "next_action": "inspect bounded product planning failure",
+    "objective": "Build a polished browser-based Breakout game. It should support keyboard and touch controls, responsive desktop and mobile layouts, scoring, lives, start, pause/resume, restart, and clear win/lose states. Include concise instructions and readable, accessible controls. Make it visually cohesive and enjoyable to play. Run locally with no account, backend, external service, or deployment.\n\nUse only the controller-provided dependency-free static project. Keep the game deterministic enough for the protected mechanics contract. Expose the same test-only API as `module.exports` in Node and `globalThis.BreakoutTest` in a browser: `createState(options)`, `start(state)`, `togglePause(state)`, `restart(state)`, and `step(state, deltaSeconds, input)`. State must expose `width`, `height`, `status`, `score`, `lives`, `paddle`, `ball`, and `bricks`; bricks expose geometry, `alive`, and `points`. The visible game must use the same mechanics API. This interface exists for independent acceptance and must not bypass the playable UI.",
+    "repair_count": 0,
+    "reviewer_engine": "claude",
+    "reviewer_model": null,
+    "state": "blocked",
+    "task_id": "breakout-live",
+    "updated_at": "2026-09-19T04:44:09.317296+00:00",
+    "version": 1,
+    "worktree": null
+  }
+}

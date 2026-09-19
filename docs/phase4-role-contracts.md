@@ -1,11 +1,11 @@
 # Phase 4 role contracts
 
-The executable definitions are in `agentkit/phase4_contracts.py`. Roles describe responsibility; only implementer/repair and reviewer nodes require provider calls. The controller owns authority, scheduling, Git operations, evidence and approval state.
+The executable definitions are in `agentkit/phase4_contracts.py`. Roles describe responsibility. Fixture planning keeps the tech lead deterministic; the static-web product profile may allocate one explicit tech-lead provider call. Implementer/repair and reviewer nodes are the other provider roles. The controller owns authority, scheduling, Git operations, evidence and approval state.
 
 | Role | Inputs | Outputs | Allowed tools | Completion | Escalation |
 |---|---|---|---|---|---|
 | Chief of staff | User request, controller status | Validated intake, concise status, attention request | Controller read | Requirements and assumptions are separate; next action is explicit | Material ambiguity, authority/access/cost change or final approval |
-| Tech lead | Validated intake, fixture contract | Decomposition, interfaces, acceptance design | Controller read | Bounded graph and immutable acceptance are recorded | Contradictory requirements or unsupported integration |
+| Tech lead | Validated intake, bounded project inventory, capabilities and acceptance | Decomposition, interfaces, acceptance design | Controller read; one model-only planning call only in the product profile | Bounded graph and immutable acceptance are recorded | Contradictory requirements, rejected provider proposal or unsupported integration |
 | Manager/coordinator | Validated graph, budget ledger | Dependency schedule, bounded allocations | Controller read | Dependencies, concurrency and quality reserves are valid | Capacity exhaustion or uncertain execution ownership |
 | Implementer/specialist | One assignment, candidate revision, bounded feedback | Candidate changes, structured result | Owned code in one worker copy | Git broker accepts only declared paths into the owned worktree | Authentication, sandbox failure, failed acceptance or authority request |
 | Verifier | Immutable candidate, controller acceptance test | Measured evidence | Local read-only/no-network Seatbelt profile in live mode | Candidate remains unchanged and acceptance passes | Missing sandbox, failed check or identity change |
@@ -14,5 +14,7 @@ The executable definitions are in `agentkit/phase4_contracts.py`. Roles describe
 Workers receive no controller authority object, database path, Git metadata or approval capability. A worker proposal to add tools, paths, network, publication, spending or another agent is untrusted data. The controller rejects it unless a separate trusted policy already authorizes it.
 
 A routine one-assignment task activates no manager node and uses no planning model. Request-driven deterministic planning selects from controller-declared project interfaces and acceptance or raises a material clarification. A decomposed plan activates a deterministic schedule, gives each specialist a separate branch/worktree and runs independent ready assignments concurrently up to the two-worker limit. Dependent assignments remain waiting. The manager remains a controller responsibility in the event history rather than an autonomous or always-running model process.
+
+The static-web product profile invokes a tech-lead model because the brief is outside the fixture term map. Its structured proposal includes no source code or authority. The controller requires exact brief/acceptance preservation, validates every path, dependency, interface and allocation, and records the route and actual planning usage before accepting the graph.
 
 Handoffs contain the task/node ID, objective, allowed paths, declared interfaces/dependencies, acceptance criteria, exact candidate/assignment revision, evidence references, remaining allocation, constraints and, for repair, only the applicable failed-test tail or validated review findings. Provider handoffs also contain only the role-relevant audited skill/domain sources, with path and SHA-256 revalidated immediately before assembly. Implementers receive behavioral-testing plus the project domain; reviewers receive independent-review plus the project domain. They omit unrelated selected skills, full transcripts, credentials and approval state.

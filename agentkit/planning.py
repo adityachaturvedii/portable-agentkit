@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import PurePosixPath
+import re
 
 from .controller import ControllerError
 
@@ -14,6 +15,14 @@ class ClarificationRequired(ControllerError):
     def __init__(self, questions):
         self.questions = tuple(questions)
         super().__init__('clarification required: ' + '; '.join(self.questions))
+
+
+class UnsupportedRequest(ControllerError):
+    """The bounded project catalog cannot satisfy the requested work."""
+
+    def __init__(self, request):
+        self.request = request
+        super().__init__('unsupported request for this disposable project: ' + request.strip())
 
 
 def bounded_inventory(fixture):
@@ -30,7 +39,7 @@ def bounded_inventory(fixture):
 
 
 def _request_tokens(request):
-    return {token.strip('.,:;()[]{}').lower() for token in request.split() if token.strip()}
+    return set(re.findall(r"[a-z0-9]+(?:'[a-z]+)?", request.lower()))
 
 
 def _selected_subtasks(request, fixture):
@@ -46,7 +55,14 @@ def _selected_subtasks(request, fixture):
         ))
     matched = [subtask for subtask in fixture.subtasks
                if subtask.request_terms and tokens.intersection(subtask.request_terms)]
-    selected = {item.subtask_id: item for item in (matched or fixture.subtasks)}
+    if matched and (re.search(r"\b(?:do\s+not|don't|must\s+not|exclude|without)\b", lower) or
+                    re.search(r"\bleave\b.{0,48}\bunchanged\b", lower)):
+        raise ClarificationRequired((
+            'Clarify which matched capability is requested and which must remain unchanged.',
+        ))
+    if not matched:
+        raise UnsupportedRequest(request)
+    selected = {item.subtask_id: item for item in matched}
     pending = list(selected.values())
     while pending:
         current = pending.pop()

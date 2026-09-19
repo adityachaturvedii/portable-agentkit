@@ -1,0 +1,13 @@
+{
+  "engine": "claude",
+  "task_id": "phase4-product-planner",
+  "cwd": "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-product-plan-jnnu0hc_",
+  "timeout_seconds": 180.0,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "effort": null,
+  "mode": "model-only",
+  "schema_version": 1,
+  "prompt_sha256": "03c547200661420aaaff8eaba4ff6cbdaccdbc456e940529f65ff7abd8f5f069",
+  "prompt_bytes": 14558
+}

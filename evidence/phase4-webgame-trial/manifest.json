@@ -1,0 +1,27 @@
+{
+  "algorithm": "sha256",
+  "candidate_revision": null,
+  "files": {
+    "inputs/acceptance.json": "c550e9910e3e0c999da5a01a492c043dcef877a6bec674ccbcf6c553a9fb0c32",
+    "inputs/brief.txt": "6200b32454f7b9a15a2031892026f0b26268f4aac5992992b992e973e870e402",
+    "inputs/mechanics-acceptance.mjs": "10c6f27e714e30abd192114eca0b3178c9f8de1459ef42bf18f01689a99bd1e3",
+    "preflight/auth-claude.json": "7a8669f4a4b5f1e4850c88549673185545be9abcb0125f5e0ff94cbb50880d08",
+    "preflight/auth-codex.json": "e176ef2503fa8c5983564c05a27bef809346b01b7661603ed943bac356d56c3e",
+    "preflight/executable-commit.txt": "b48fa8aca824514dcafde88a0f7b29093d76dab8479f27e6da8020973a97cf73",
+    "run/controller-state.json": "95181bd097e6c27c7f5f60774b13eed6c8ed65d93456f367e9920d8688323831",
+    "run/planning-result.json": "6be89be1a56ab270c191ee3bbca789421735f872c8f63b8c5463ba66168c1099",
+    "run/product-request.json": "671e47a24dd8dcbbd48f7030b8d6721484984df02d841bd7921f005f7dfdb1df",
+    "run/provider/planning-0/request.json": "4d784109de5e4390aac81839bbd9fdb504d4f31386a659024e65846d76b3ed76",
+    "run/provider/planning-0/result.json": "5bbeb61a8f649ee744a92bc55b34a115034e53e77b26cdd12fc581535ff687f3",
+    "run/provider/planning-0/stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run/provider/planning-0/stdout.redacted.jsonl": "6f9f7d405b4855931494f63117dbb9012db297f11b43b8815084633355372350",
+    "run/registry.json": "b27b1c269bc25b58de998c3497ef14aa60d538d839bef95100b4e1ff867d2154",
+    "run/run-summary.json": "6a9533bed96f151976566632033e6661b8910f33a6011c9835a7e26ae0efc44e",
+    "run/status.json": "c74958a8e37cb2f2c3484c3c731274ccc60a1628b84554e1ba2631e7530b21a8",
+    "sanitization-report.json": "5369732e354d419b339cb25ba5fd094cb5f14399e9c4151813835434e8efb28c"
+  },
+  "provider_invocations": 1,
+  "schema_version": 1,
+  "tested_executable_revision": "70070e293c890a5c47bbb448b99a9b7cf34f8237",
+  "validation_result": "blocked_during_planning_output_allocation"
+}

@@ -14,7 +14,7 @@ NODE_TRANSITIONS = {
     'running': {'succeeded', 'failed', 'authentication_required', 'cancelled'},
     'authentication_required': {'pending', 'cancelled'},
     'failed': {'pending', 'running', 'blocked', 'cancelled'},
-    'succeeded': {'pending', 'running'},  # quality nodes reset; bounded repair may run again
+    'succeeded': {'pending'},  # quality nodes reset explicitly; success is never directly re-claimed
     'blocked': set(),
     'cancelled': set(),
 }
@@ -160,7 +160,64 @@ class Phase4State:
                                 'attempt': attempts, 'execution_id': execution_id})
         return self.node(task_id, node_id)
 
-    def record_assignment_identity(self, task_id, node_id, identity, *, authority=None):
+    def claim_implementation(self, task_id, expected, owner_id, owner_pid, *, authority=None):
+        """Atomically claim one exact scheduler selection.
+
+        A stale caller receives ``None``. It cannot turn a completed assignment back into
+        running or overwrite another controller's ownership.
+        """
+        self._require(authority)
+        if (not isinstance(expected, dict) or expected.get('kind') != 'implementation' or
+                expected.get('status') not in ('pending', 'failed') or
+                not isinstance(owner_id, str) or not owner_id or
+                isinstance(owner_pid, bool) or not isinstance(owner_pid, int) or owner_pid <= 0):
+            raise ControllerError('invalid implementation claim')
+        now = _now()
+        with self.store.transaction() as db:
+            control = db.execute('SELECT cancel_requested FROM phase4_controls WHERE task_id=?',
+                                 (task_id,)).fetchone()
+            if not control or control['cancel_requested']:
+                return None
+            row = db.execute('SELECT * FROM phase4_nodes WHERE task_id=? AND node_id=?',
+                             (task_id, expected.get('node_id'))).fetchone()
+            if (not row or row['kind'] != 'implementation' or
+                    row['status'] != expected.get('status') or
+                    row['updated_at'] != expected.get('updated_at') or
+                    row['attempts'] != expected.get('attempts')):
+                return None
+            dependencies = json.loads(row['dependencies_json'])
+            if dependencies:
+                placeholders = ','.join('?' for _ in dependencies)
+                completed = db.execute(
+                    'SELECT node_id,status FROM phase4_nodes WHERE task_id=? AND node_id IN (' +
+                    placeholders + ')', (task_id, *dependencies)).fetchall()
+                statuses = {item['node_id']: item['status'] for item in completed}
+                if any(statuses.get(node_id) != 'succeeded' for node_id in dependencies):
+                    return None
+            attempts = row['attempts'] + 1
+            if attempts > row['max_attempts']:
+                raise ControllerError('graph node attempt bound exhausted')
+            result = json.loads(row['result_json']) if row['result_json'] else {}
+            result.update(scheduler_owner=owner_id, scheduler_pid=owner_pid,
+                          selection_updated_at=expected['updated_at'])
+            changed = db.execute(
+                '''UPDATE phase4_nodes SET status='running',attempts=?,result_json=?,updated_at=?
+                   WHERE task_id=? AND node_id=? AND status=? AND updated_at=? AND attempts=?''',
+                (attempts, _json(result), now, task_id, row['node_id'], row['status'],
+                 row['updated_at'], row['attempts'])).rowcount
+            if changed != 1:
+                return None
+            self.store._append(
+                db, task_id,
+                task_id + '-node-' + row['node_id'] + '-claim-' + str(uuid.uuid4()),
+                'phase4_implementation_claimed',
+                {'node_id': row['node_id'], 'from': row['status'], 'to': 'running',
+                 'attempt': attempts, 'scheduler_owner': owner_id, 'scheduler_pid': owner_pid,
+                 'selection_updated_at': expected['updated_at']})
+        return self.node(task_id, row['node_id'])
+
+    def record_assignment_identity(self, task_id, node_id, identity, *, dependency_contributions=(),
+                                   authority=None):
         """Persist controller-observed workspace identity before a provider is launched."""
         self._require(authority)
         required = {'repository', 'worktree', 'branch', 'revision', 'clean', 'manifest_sha256'}
@@ -169,6 +226,20 @@ class Phase4State:
                 any(not isinstance(identity.get(name), str) or not identity[name]
                     for name in required - {'clean'})):
             raise ControllerError('complete clean assignment identity is required')
+        if not isinstance(dependency_contributions, (tuple, list)):
+            raise ControllerError('dependency contributions must be an ordered sequence')
+        normalized = []
+        for contribution in dependency_contributions:
+            required_contribution = {'node_id', 'starting_revision', 'revision', 'changed_paths'}
+            if (not isinstance(contribution, dict) or
+                    set(contribution) != required_contribution or
+                    any(not isinstance(contribution.get(name), str) or not contribution[name]
+                        for name in ('node_id', 'starting_revision', 'revision')) or
+                    not isinstance(contribution.get('changed_paths'), list) or
+                    any(not isinstance(path, str) or not path
+                        for path in contribution['changed_paths'])):
+                raise ControllerError('invalid dependency contribution identity')
+            normalized.append(contribution)
         now = _now()
         with self.store.transaction() as db:
             row = db.execute('SELECT kind,status,result_json FROM phase4_nodes '
@@ -177,6 +248,8 @@ class Phase4State:
                 raise ControllerError('assignment identity requires a running implementation node')
             current = json.loads(row['result_json']) if row['result_json'] else {}
             current['assignment_identity'] = identity
+            current['starting_revision'] = identity['revision']
+            current['dependency_contributions'] = normalized
             db.execute('UPDATE phase4_nodes SET result_json=?,updated_at=? '
                        'WHERE task_id=? AND node_id=?',
                        (_json(current), now, task_id, node_id))
@@ -184,7 +257,8 @@ class Phase4State:
                 db, task_id, task_id + '-assignment-identity-' + node_id + '-' + str(uuid.uuid4()),
                 'phase4_assignment_identity_recorded',
                 {'node_id': node_id, 'branch': identity['branch'],
-                 'revision': identity['revision'], 'manifest_sha256': identity['manifest_sha256']})
+                 'revision': identity['revision'], 'manifest_sha256': identity['manifest_sha256'],
+                 'dependency_revisions': [item['revision'] for item in normalized]})
         return self.node(task_id, node_id)
 
     def request_cancellation(self, task_id, reason='user_requested', *, authority=None):

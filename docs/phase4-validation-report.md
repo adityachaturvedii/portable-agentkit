@@ -18,9 +18,43 @@ Concurrent live-tested executable: `b22020cf6a1587617d14e8c6164581a5d291ed93`
 
 Offline-corrected executable: `b9df1ad8af93f9d62124859b30246d971f273e83`
 
+Dependency/claim/request correction: `dd8da0ed2eaf973a646bb5f2e95fcd543fddb3b9`
+
+Static-web executable milestone: `70070e293c890a5c47bbb448b99a9b7cf34f8237`
+
+## Bounded static-web product acceptance path
+
+The product path accepts an arbitrary product brief only within a fixed fresh static-web inventory. One accounted Claude account-default tech-lead call proposes deliverables, dependencies, four-file write scopes, interfaces, observable criteria and allocations. The controller requires the proposal to preserve the original request and predeclared acceptance and rejects unsupported operations, stale inventory, unsafe paths, inconsistent summaries, cycles, fan-out above two, independent overlap and mandatory call/time excess. No game solution or game-specific assignment graph is present in the harness.
+
+Validated assignments reuse the existing atomic scheduler and broker. The controller-created repository, assignment worktrees and worker copies are under the workflow managed root; controller state, evidence, approvals, Git metadata and mechanics-test source remain outside worker scope. The dependency-free profile permits no install or package-manager network access. It records the installed Node path/version/hash, copies that executable into the disposable verification runtime, runs `node --check game.js` plus controller-owned mechanics checks in a separate candidate copy, and requires the candidate manifest/revision to remain unchanged.
+
+Passing mechanics and independent review stop at `review_complete`. Packaging requires a clean exact-revision browser evidence object covering every protected acceptance ID, browser identity, hashed screenshots where retained, explicit final visual judgment, and a recorded preview session with confirmed process cleanup. The supported preview stays in one foreground controller process until Ctrl+C and records cleanup in `finally`. Detached descendants, browser credential isolation, browser egress control and crash-safe process recovery are not claimed.
+
+Nine focused product tests use deterministic planning/provider fixtures and one external-transport-only planner stub. They cover real model-only request construction, malicious scope/cycle/acceptance rejection, mandatory budget infeasibility, immutable product-spec binding, generated-project isolation, protected Node mechanics acceptance, unchanged-candidate evidence, stale candidate rejection, screenshot hash checking, browser gating and local package binding. The preview lifecycle test is skipped inside the managed outer sandbox because loopback `bind` returns `PermissionError`; it passes separately at host level with the foreground owner recording confirmed cleanup. After the output-allocation correction, the 167-test repository suite passes with the expected nested-Seatbelt and managed-loopback skips. No further live inference was used for this implementation evidence.
+
+## Bounded Breakout trial
+
+The trial tested exact executable `70070e293c890a5c47bbb448b99a9b7cf34f8237`. Read-only preflight reported Codex CLI 0.154.0 and Claude Code 2.1.220 using existing first-party subscription authentication. The controller recorded account-default Claude planning, Codex implementation and cross-provider Claude review routes; requested model and effort were `null`. The declared ceiling was eight provider calls, two simultaneous workers, two repairs, 180 seconds per provider call, 10 seconds per local verification and 1,200 seconds overall.
+
+Only the planning invocation ran. It ended after 29.313421 seconds with no structured proposal. Claude Code's terminal message says the response exceeded the configured 512 output-token maximum. The stream also included an allowed rate-limit metadata event with overage disabled, causing the existing broad classifier to label the combined failure `rate_limit`; this is a classification defect. The direct terminal cause was the adapter's planner output allocation, not an observed subscription usage-limit or payment demand. The controller made no retry, provider substitution or authentication change.
+
+The task remains `blocked` before contract/plan persistence, repository creation or candidate revision. Therefore no generated task graph, game, build, mechanics verification, review, repair, preview, browser check, screenshot or local approval package exists. This failed trial does not validate any subsequently corrected code.
+
+The offline follow-up adds a durable Claude-only `max_generated_output_tokens` request field constrained to 256..8,192 and configures the product planner at 8,192. The ordinary model-only smoke retains 512, owned-code Claude retains its 2,048 default, and Codex rejects this unsupported setting. Error classification now recognizes the terminal output-limit text before allowed rate metadata. Fixture tests cover request validation, actual transport environment propagation and the archived failure string. No second provider call was made, so this correction remains live-unvalidated.
+
+Claude reported 8 input, 2,048 output, 25,570 cached-input and 9,678 cache-creation tokens. Reasoning tokens are unknown. It reported a USD 0.160805 estimate; billed cost and account billing impact are unknown. The [trial archive](../evidence/phase4-webgame-trial/manifest.json) retains the brief, protected criteria/test, request hash, redacted stream, normalized result, controller snapshot, status, versions, usage and diagnosis without the SQLite database, credentials, login transcripts, authorization codes or environment values.
+
 ## Request-driven planning and concurrency increment
 
 This increment keeps the supported target at trusted controller-created disposable projects on the tested macOS profile. It adds request/inventory-bound planning, request-selected protected acceptance, ordered and independent assignment graphs, a real two-worker scheduler, durable owner records, conservative controller integration, explicit routing policies and separate provider/planning-call budgets. Routine planning remains deterministic. Contradictory requirements stop for clarification, and unaccounted model-assisted planning is rejected.
+
+### Post-review dependency, claim and request correction
+
+The follow-up review found that ordered nodes launched in the correct order but still forked from the task base, a stale in-memory selection could exploit the generic success-to-running transition, and an unmatched request selected every predefined fixture subtask. The correction composes a dependent worker's start from validated predecessor-owned deltas, records the actual starting revision and dependency provenance, measures only the worker's own delta, and integrates those deltas once in stable graph order. Independent overlaps, invalid ancestry and stale dependency identities block explicitly.
+
+Implementation claims now use one `BEGIN IMMEDIATE` compare-and-set over the selected status, update timestamp and attempt count while rechecking dependencies, cancellation and ownership. A stale contender receives no claim and cannot launch or overwrite success. Quality retries reset through an explicit pending state; generic success-to-running is invalid. The deterministic planner now raises an unsupported result on a term miss and requires clarification for negated or contradictory matched work.
+
+Focused tests include runtime-generated predecessor content that the downstream worker must read, a synchronized stale-selection contender released only after the winner commits, and supported/unmatched/negated/contradictory request cases. These corrections use deterministic providers and disposable repositories only; no live inference or historical evidence mutation is involved.
 
 Sixteen focused behavioral tests cover different request plans, a one-assignment plan without management calls, clarification, adversarial plan rejection, barrier-proven two-worker overlap, ordered dependency launch, duplicate-controller suppression, integration conflict preservation, sibling completion during authentication failure, cancellation observed by both workers, uncertain owner blocking, dated routing configuration, cross-contributor review independence, time-budget infeasibility and bounded repair/model escalation. One test drives the actual scheduler and `LiveImplementer`/`LiveReviewer` request construction while stubbing only external provider transports; it verifies concurrent requests, exact model/effort and configured 7/8-second request limits.
 

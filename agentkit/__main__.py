@@ -109,6 +109,50 @@ def main(argv=None):
         command.add_argument("--task-id", required=True)
         command.add_argument("--live", action="store_true")
         command.add_argument("--authorize-subscription-smoke", action="store_true")
+    product = commands.add_parser(
+        "product", help="provider-planned controller-created static web product")
+    product_commands = product.add_subparsers(dest="product_command", required=True)
+    product_submit = product_commands.add_parser(
+        "submit", help="run one bounded provider planning call and record a validated proposal")
+    product_submit.add_argument("--root", required=True, help="fresh workflow directory")
+    product_submit.add_argument("--task-id", required=True)
+    product_submit.add_argument("--brief-file", required=True)
+    product_submit.add_argument("--acceptance-file", required=True)
+    product_submit.add_argument("--mechanics-test", required=True)
+    product_submit.add_argument("--routing-config")
+    product_submit.add_argument("--max-calls", type=int, default=8)
+    product_submit.add_argument("--max-provider-calls", type=int, default=8)
+    product_submit.add_argument("--max-concurrency", type=int, choices=(1, 2), default=2)
+    product_submit.add_argument("--max-repairs", type=int, choices=(0, 1, 2), default=2)
+    product_submit.add_argument("--max-escalations", type=int, choices=(0, 1, 2), default=2)
+    product_submit.add_argument("--max-elapsed-seconds", type=float, default=1200)
+    product_submit.add_argument("--planning-timeout", type=float, default=180)
+    product_submit.add_argument("--implementation-timeout", type=float, default=180)
+    product_submit.add_argument("--review-timeout", type=float, default=180)
+    product_submit.add_argument("--verification-timeout", type=float, default=10)
+    product_submit.add_argument("--live", action="store_true")
+    product_submit.add_argument("--authorize-subscription-smoke", action="store_true")
+    for name, help_text in (
+            ("plan", "show the provider proposal and validated graph"),
+            ("status", "show product stage, resources, blockers and attention"),
+            ("cancel", "request bounded workflow cancellation"),
+            ("package", "read the revision-bound local approval package"),
+            ("preview-serve", "serve the reviewed candidate until Ctrl+C and confirm cleanup")):
+        command = product_commands.add_parser(name, help=help_text)
+        command.add_argument("--root", required=True)
+        command.add_argument("--task-id", required=True)
+    for name, help_text in (("start", "execute the validated product plan"),
+                            ("resume", "resume a verified product authentication checkpoint")):
+        command = product_commands.add_parser(name, help=help_text)
+        command.add_argument("--root", required=True)
+        command.add_argument("--task-id", required=True)
+        command.add_argument("--live", action="store_true")
+        command.add_argument("--authorize-subscription-smoke", action="store_true")
+    browser_record = product_commands.add_parser(
+        "browser-record", help="validate exact-revision controller-owned browser evidence")
+    browser_record.add_argument("--root", required=True)
+    browser_record.add_argument("--task-id", required=True)
+    browser_record.add_argument("--evidence", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -293,6 +337,65 @@ def main(argv=None):
                 package = workflow.result(args.task_id)['approval_package']
                 if package is None:
                     raise ValueError('local approval package is not available')
+                print(json.dumps(package, indent=2))
+            return 0
+        elif args.command == "product":
+            from .product import ProductWorkflow
+            if args.product_command == 'submit':
+                if not args.live or not args.authorize_subscription_smoke:
+                    raise ValueError(
+                        'product planning uses a provider and requires explicit live subscription authorization')
+                from .phase4_contracts import ModelRegistry
+                registry = (ModelRegistry.from_dict(read_json(args.routing_config))
+                            if args.routing_config else ModelRegistry.account_defaults())
+                acceptance = read_json(args.acceptance_file)
+                workflow = ProductWorkflow.submit_product(
+                    args.root, args.task_id, Path(args.brief_file).read_text(), acceptance,
+                    Path(args.mechanics_test).read_text(), registry=registry, live=True,
+                    authorized=True, max_calls=args.max_calls,
+                    max_provider_calls=args.max_provider_calls,
+                    max_concurrency=args.max_concurrency, max_repairs=args.max_repairs,
+                    max_escalations=args.max_escalations,
+                    max_elapsed_seconds=args.max_elapsed_seconds,
+                    planning_timeout_seconds=args.planning_timeout,
+                    implementation_timeout_seconds=args.implementation_timeout,
+                    review_timeout_seconds=args.review_timeout,
+                    verification_timeout_seconds=args.verification_timeout)
+                result = workflow.status(args.task_id)
+                if (workflow.root / 'plan.json').is_file():
+                    result = {'contract': read_json(workflow.root / 'contract.json'),
+                              'plan': read_json(workflow.root / 'plan.json'), 'status': result}
+                print(json.dumps(result, indent=2))
+                return 0 if result.get('state', result.get('status', {}).get('state')) != 'blocked' else 1
+            live = getattr(args, 'live', False)
+            authorized = getattr(args, 'authorize_subscription_smoke', False)
+            if live and not authorized:
+                raise ValueError('live product execution requires explicit subscription authorization')
+            workflow = ProductWorkflow(args.root, live=live, authorized=authorized)
+            if args.product_command == 'plan':
+                print(json.dumps({'request': read_json(workflow.root / 'product-request.json'),
+                                  'contract': read_json(workflow.root / 'contract.json'),
+                                  'plan': read_json(workflow.root / 'plan.json')}, indent=2))
+            elif args.product_command == 'status':
+                print(json.dumps(workflow.status(args.task_id), indent=2))
+            elif args.product_command == 'start':
+                print(json.dumps(workflow.start(args.task_id), indent=2))
+            elif args.product_command == 'resume':
+                print(json.dumps(workflow.resume(args.task_id), indent=2))
+            elif args.product_command == 'cancel':
+                print(json.dumps(workflow.cancel(args.task_id), indent=2))
+            elif args.product_command == 'preview-serve':
+                workflow.serve_preview(
+                    args.task_id,
+                    ready_callback=lambda session: print(json.dumps(session), flush=True))
+                print(json.dumps({'status': 'stopped', 'cleanup_confirmed': True}, indent=2))
+            elif args.product_command == 'browser-record':
+                print(json.dumps(workflow.record_browser_evidence(
+                    args.task_id, read_json(args.evidence)), indent=2))
+            else:
+                package = workflow.result(args.task_id)['approval_package']
+                if package is None:
+                    raise ValueError('local product approval package is not available')
                 print(json.dumps(package, indent=2))
             return 0
         else:

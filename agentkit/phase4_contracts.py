@@ -389,20 +389,23 @@ class ModelRegistry:
                 raise ValueError('routing policy has invalid difficulty or risk')
 
     @classmethod
-    def account_defaults(cls, implementer='codex', reviewer='claude'):
+    def account_defaults(cls, implementer='codex', reviewer='claude', planner='claude'):
         profiles = (
             ModelProfile('codex-account-default', 'codex', None, None,
-                         ('implementer', 'repair', 'reviewer'), ('owned-code', 'model-only'),
+                         ('tech_lead', 'implementer', 'repair', 'reviewer'),
+                         ('owned-code', 'model-only'),
                          'unknown', 'Installed CLI/account default; exact model and relative cost are unknown.',
                          evidence_source='installed CLI account default'),
             ModelProfile('claude-account-default', 'claude', None, None,
-                         ('implementer', 'repair', 'reviewer'), ('owned-code', 'model-only'),
+                         ('tech_lead', 'implementer', 'repair', 'reviewer'),
+                         ('owned-code', 'model-only'),
                          'unknown', 'Installed CLI/account default; exact model and relative cost are unknown.',
                          evidence_source='installed CLI account default'),
         )
         return cls(profiles, {'implementer': implementer + '-account-default',
                               'repair': implementer + '-account-default',
-                              'reviewer': reviewer + '-account-default'})
+                              'reviewer': reviewer + '-account-default',
+                              'tech_lead': planner + '-account-default'})
 
     def route(self, node_id, role, required_capability, *, exclude_provider=None,
               exclude_providers=(), difficulty='routine', risk='routine'):

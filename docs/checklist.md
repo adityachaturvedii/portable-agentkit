@@ -158,6 +158,34 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [ ] Complete a future bounded concurrent live workflow against the corrected executable. The `b22020c` attempt does not validate `b9df1ad`, and no additional inference was authorized or used for the correction.
 - [ ] General repositories, detached-process containment, Linux/GPU/remote workers, dashboards and publication remain unsupported.
 
+## Phase 4 — dependency, claim and request correction
+
+- [x] Assemble each dependent assignment from validated predecessor deltas in deterministic graph order and record its actual starting revision plus dependency revisions.
+- [x] Measure worker changes against that assembled start and integrate each assignment's own delta once, preserving dependent overlays while rejecting independent conflicts.
+- [x] Add a behavioral regression whose downstream worker succeeds only after reading predecessor content created at runtime.
+- [x] Atomically claim an exact pending/failed implementation selection with status, version, attempts, dependency, cancellation and ownership checks.
+- [x] Remove the generic direct `succeeded → running` transition and retain explicit quality-stage resets.
+- [x] Add a synchronized stale-selection regression proving one provider invocation and preservation of the winning result.
+- [x] Reject unmatched requests rather than falling back to fixture tasks; require clarification for negated or contradictory matched requirements.
+- [x] Pass 19 focused dynamic-scheduler tests, all 41 Phase 4 tests, the 157-test repository suite (`OK`, one expected nested-Seatbelt skip), and `python3 -m agentkit check`; use no live inference.
+
+## Phase 4 — bounded static-web product acceptance
+
+- [x] Add one accounted provider tech-lead planning path for a product brief, protected acceptance, bounded inventory, capabilities, verified planning context and resource limits.
+- [x] Reject planner authority expansion, changed requirements/acceptance, stale inventory, unsafe paths, unsupported operations, inconsistent interfaces/dependencies, cycles, excessive fan-out, independent path overlap and infeasible calls/time.
+- [x] Create a fresh dependency-free static project separate from harness source, controller state, evidence, approval data and controller-owned acceptance.
+- [x] Reuse the durable scheduler, dependency snapshots, isolated assignments, integration, routing, authentication recovery, cancellation, bounded repair and usage accounting without a product-specific task graph.
+- [x] Pin the installed Node executable, copy it into the verifier runtime, run the documented syntax build plus protected mechanics test in a separate candidate copy and confirm the candidate remains unchanged.
+- [x] Gate packaging on exact-revision browser observations covering every predeclared criterion and on confirmed cleanup of the owned loopback preview.
+- [x] Add `product submit|plan|start|status|cancel|resume|preview-serve|browser-record|package` and document the exact live budget interface; the foreground preview retains one owner through Ctrl+C.
+- [x] Pass nine focused product tests; the loopback lifecycle case is explicitly skipped inside the managed outer sandbox and passes separately at host level with confirmed foreground cleanup.
+- [x] Commit reusable executable `70070e293c890a5c47bbb448b99a9b7cf34f8237` before inference and declare the eight-call, two-worker, two-repair, 180-second-per-provider and 1,200-second overall ledger.
+- [x] Attempt one bounded Breakout trial. The sole Claude planning invocation ended after 29.313421 seconds because its response exceeded the adapter's 512 generated-output-token allocation; stop without retry or provider substitution.
+- [x] Retain sanitized planning request/result/events, controller state, inputs, versions, usage and failure diagnosis in a hash-manifested archive; no browser/game artifacts exist because planning was not accepted.
+- [x] Correct the planner output allocation and terminal classification offline: persist an explicit Claude-only 8,192-token planner allocation, retain 512 for ordinary smoke, reject unsupported Codex values and classify output-limit text before allowed rate metadata.
+- [ ] The corrected product planner remains live-unvalidated. Do not use the failed `70070e2` attempt as validation or repeat inference without new authorization.
+- [ ] Dependency installation, general repositories, hostile inputs, arbitrary builds, browser credential/egress isolation and crash-safe preview containment remain unsupported.
+
 ## Later phases (planned, not implemented)
 
 - [ ] Phase 5: hardware domain validation and optional GPU worker.
@@ -183,5 +211,9 @@ The corrected Phase 4 live gate is now complete for exact executable revision `3
 The next Phase 4 increment replaces fixture-ID-only sequential decomposition with request/inventory-bound plans and a two-worker scheduler. Offline behavioral coverage proves synchronized overlap, dependency gates, duplicate-controller suppression, sibling authentication progress, two-worker cancellation, conservative conflict blocking, provider-review reservation and actual adapter-request propagation with only external transports stubbed. Its executable revision still requires the separately authorized bounded live parallel demonstration; the earlier calculator archive is not repeated or promoted to validate this increment.
 
 The bounded concurrent live attempt used exact executable `b22020c` and launched only its two authorized Codex implementation calls. The executions overlapped, proving the live scheduler path, and the word contribution was broker-committed. The line worker then produced no change because zsh heredoc temporary files and Git's `/dev/null` sink were denied by the owned-code profile. The controller blocked safely with the main candidate unchanged; verification and Claude review did not run, no package or approval was created, and no repair/retry/escalation occurred. The narrow correction is committed at `b9df1ad` and passes 154 tests plus a host no-inference boundary canary, but remains live-unvalidated.
+
+The dependency/claim/request corrective milestone is committed at `dd8da0e`. The next local increment adds only the bounded dependency-free static-web profile described above. Offline evidence establishes proposal validation, protected mechanics verification, revision-bound browser gating and adapter request construction. It does not yet establish that the live Breakout trial, browser interaction or host preview succeeds; those remain separate validation steps against the committed executable revision.
+
+The first authorized Breakout trial tested exact executable `70070e2` and consumed one Claude planning call. Claude generated partial plan text but terminated with an API error after exceeding the adapter's 512 generated-output-token allocation. The task failed closed in `blocked` before a plan, workspace or candidate existed. No Codex call, local verification, repair, review, preview, browser interaction, package, approval or publication occurred. The adapter recorded the failure as `rate_limit` because an allowed rate metadata event appeared in the same stream; retained terminal evidence establishes an output-allocation failure instead. The provider reported 8 input, 2,048 output, 25,570 cached-input and 9,678 cache-creation tokens, plus a USD 0.160805 estimate. Reasoning tokens and billed cost remain unknown.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).

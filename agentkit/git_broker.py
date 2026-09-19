@@ -181,6 +181,62 @@ class GitBroker:
             self._safe_relative(repository, relative)
         return paths
 
+    def _validated_own_contribution(self, repository, contribution):
+        required = {'node_id', 'worktree', 'starting_revision', 'revision',
+                    'changed_paths', 'allowed_paths', 'dependencies'}
+        if not isinstance(contribution, dict) or set(contribution) != required:
+            raise GitBrokerError('incomplete dependency contribution')
+        source = self._inside(contribution['worktree'], self.worktrees)
+        start = self.revision(repository, contribution['starting_revision'])
+        revision = self.revision(repository, contribution['revision'])
+        try:
+            self._git(repository, 'merge-base', '--is-ancestor', start, revision)
+        except GitBrokerError as exc:
+            raise GitBrokerError('contribution does not descend from its starting revision') from exc
+        source_identity = self.worktree_identity(repository, source)
+        if source_identity['revision'] != revision or not source_identity['clean']:
+            raise GitBrokerError('contribution worktree does not match its declared revision')
+        changed = self.changed_paths(repository, start, revision)
+        declared = tuple(contribution['changed_paths'])
+        if changed != declared:
+            raise GitBrokerError('contribution delta does not match its declared changed paths')
+        allowed = set(contribution['allowed_paths'])
+        if not changed or any(path not in allowed for path in changed):
+            raise GitBrokerError('contribution changed an undeclared path')
+        return source, revision, changed
+
+    def assemble_dependency_snapshot(self, repository, worktree, base_revision, contributions,
+                                     message):
+        """Create a deterministic assignment start from predecessor-owned deltas."""
+        repository = self._inside(repository, self.repositories)
+        worktree = self._inside(worktree, self.worktrees)
+        base = self.revision(repository, base_revision)
+        identity = self.worktree_identity(repository, worktree)
+        if identity['revision'] != base or not identity['clean']:
+            raise GitBrokerError('dependency snapshot worktree must be clean at the declared base')
+        applied_nodes = set()
+        selected = set()
+        for contribution in contributions:
+            node_id = contribution.get('node_id') if isinstance(contribution, dict) else None
+            if not isinstance(node_id, str) or not node_id or node_id in applied_nodes:
+                raise GitBrokerError('dependency snapshot contains a duplicate or invalid node')
+            known_dependencies = [item for item in contribution.get('dependencies', ())
+                                  if item.startswith('implement-')]
+            if any(item not in applied_nodes for item in known_dependencies):
+                raise GitBrokerError('dependency contributions are not in deterministic order')
+            source, revision, changed = self._validated_own_contribution(repository, contribution)
+            for relative in changed:
+                destination = self._safe_relative(worktree, relative)
+                origin = self._safe_relative(source, relative)
+                destination.write_bytes(origin.read_bytes())
+                selected.add(relative)
+            applied_nodes.add(node_id)
+        if not selected:
+            return base, ()
+        self._git(repository, '-C', str(worktree), 'add', '--', *sorted(selected))
+        self._git(repository, '-C', str(worktree), 'commit', '-m', message)
+        return self.revision(repository, branch_for_worktree(repository, worktree)), tuple(sorted(selected))
+
     def integrate_contributions(self, repository, worktree, base_revision, contributions, message):
         """Copy disjoint broker-validated commits into one controller-owned integration worktree."""
         repository = self._inside(repository, self.repositories)
@@ -189,6 +245,10 @@ class GitBroker:
         identity = self.worktree_identity(repository, worktree)
         if identity['revision'] != base or not identity['clean']:
             raise GitBrokerError('integration worktree must be clean at the declared base')
+        if contributions and all(isinstance(item, dict) and 'starting_revision' in item
+                                 for item in contributions):
+            return self._integrate_own_contributions(
+                repository, worktree, base, contributions, message)
         selected = {}
         for contribution in contributions:
             source = self._inside(contribution['worktree'], self.worktrees)
@@ -210,6 +270,47 @@ class GitBroker:
             destination = self._safe_relative(worktree, relative)
             origin = self._safe_relative(source, relative)
             destination.write_bytes(origin.read_bytes())
+        self._git(repository, '-C', str(worktree), 'add', '--', *sorted(selected))
+        self._git(repository, '-C', str(worktree), 'commit', '-m', message)
+        return self.revision(repository, branch_for_worktree(repository, worktree)), tuple(sorted(selected))
+
+    def _integrate_own_contributions(self, repository, worktree, base, contributions, message):
+        """Integrate only each assignment's own delta, allowing ordered dependent overlays."""
+        graph = {item.get('node_id'): set(item.get('dependencies', ())) for item in contributions}
+        if None in graph or len(graph) != len(contributions):
+            raise GitBrokerError('integration contribution identities are not unique')
+
+        def depends_on(node, ancestor, seen=None):
+            seen = set() if seen is None else seen
+            if node in seen:
+                return False
+            seen.add(node)
+            direct = graph.get(node, set())
+            return ancestor in direct or any(depends_on(parent, ancestor, seen)
+                                             for parent in direct if parent in graph)
+
+        applied = set()
+        writers = {}
+        selected = set()
+        for contribution in contributions:
+            node_id = contribution['node_id']
+            implementation_dependencies = [item for item in contribution['dependencies']
+                                           if item in graph]
+            if any(item not in applied for item in implementation_dependencies):
+                raise GitBrokerError('integration contributions are not in dependency order')
+            source, revision, changed = self._validated_own_contribution(repository, contribution)
+            for relative in changed:
+                previous = writers.get(relative)
+                if previous is not None and not depends_on(node_id, previous):
+                    raise GitBrokerError('parallel contributions overlap: ' + relative)
+                destination = self._safe_relative(worktree, relative)
+                origin = self._safe_relative(source, relative)
+                destination.write_bytes(origin.read_bytes())
+                writers[relative] = node_id
+                selected.add(relative)
+            applied.add(node_id)
+        if not selected:
+            raise GitBrokerError('integration has no changes')
         self._git(repository, '-C', str(worktree), 'add', '--', *sorted(selected))
         self._git(repository, '-C', str(worktree), 'commit', '-m', message)
         return self.revision(repository, branch_for_worktree(repository, worktree)), tuple(sorted(selected))
