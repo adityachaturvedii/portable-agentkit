@@ -26,6 +26,7 @@ python3 -m agentkit task plan --root /tmp/agentkit-task --task-id demo
 python3 -m agentkit task start --root /tmp/agentkit-task --task-id demo
 python3 -m agentkit task status --root /tmp/agentkit-task --task-id demo
 python3 -m agentkit task package --root /tmp/agentkit-task --task-id demo
+python3 -m agentkit product --help
 ```
 
 Run these commands from this directory. To move machines, copy the entire directory, preserving relative paths. For a clean source copy, use `git archive HEAD` after committing. Skills link to shared contracts and notices, so copying a single SKILL.md is insufficient. Relocation is tested; installation, CLI skill auto-discovery and rollback are later work.
@@ -46,7 +47,9 @@ Run these commands from this directory. To move machines, copy the entire direct
 | Guided subscription-auth recovery | Implemented with uncaptured official CLI terminal handoff, durable stage checkpoint, bounded retries and revision/evidence revalidation |
 | Cross-provider disposable delivery workflow | Corrected single-assignment path live-tested at executable `342423e`; the concurrent `b22020c` attempt proved two live workers overlap but blocked before integration because of a narrow shell-runtime guard incompatibility |
 | Phase 4 task CLI, request-driven graph, concurrent scheduler, routing and quality reserves | Implemented and fixture-tested for controller-created disposable projects; maximum two supervised provider workers |
-| Browser automation, CUDA/GPU worker, GitHub publication, installer/update | Not implemented; separate later gates |
+| Provider-planned static web products | Implemented and fixture-tested for fresh dependency-free controller repositories; live game trial pending |
+| Browser acceptance gate | Implemented as exact-revision evidence and owned preview lifecycle; browser interaction is externally driven and host validation is pending |
+| General browser automation, CUDA/GPU worker, GitHub publication, installer/update | Not implemented; separate later gates |
 
 The procedures describe desired engineering behavior. They are not enforcement of authenticated roles, monetary ceilings or publication permissions. Git worktrees are not sandboxes. Unattended untrusted execution is unsupported. Managed Linux/WSL2/Windows execution has not been validated; the current guard is macOS-specific.
 
@@ -77,6 +80,10 @@ Provider defaults are configurable with `--implementer-provider` and `--reviewer
 Use the portable account-default example with `--routing-config docs/examples/phase4-routing.json`. Replace an account default with an exact model only after recording current CLI/account availability evidence; configuration is not a discovery mechanism.
 
 The execution graph is bounded to two implementation assignments, two repair cycles and twelve nodes. The controller atomically enforces total calls, provider calls, planning calls, two-worker concurrency, per-stage timeouts, total allocated execution time and captured output. Verification and independent review retain call capacity under concurrent pressure; provider implementation/repair calls also preserve the provider review slot. Output defaults to 1 MiB per request; CLI-managed context remains unknown. Before each provider call, role-relevant skill/domain content is rehashed against the plan and assembled into a bounded context. Token categories, estimates and billed cost remain `null` when unavailable. See [role contracts](docs/phase4-role-contracts.md), [graph, routing and budget semantics](docs/phase4-graph-routing.md) and the [Phase 4 validation report](docs/phase4-validation-report.md).
+
+## Static web product trial
+
+`product submit` is a separate, tightly bounded provider-planning path for a fresh dependency-free static web project. It accounts one planner call, validates the proposal against the brief, protected acceptance, inventory, authority and budget, then reuses the existing scheduler and adapters. Controller verification runs the documented Node syntax build and a protected mechanics test in a separate candidate copy. Exact-revision browser evidence is required after review and before packaging. See the [bounded product workflow](docs/product-workflow.md) for complete commands and limitations.
 
 ## Inspect the work
 

@@ -62,3 +62,9 @@ The two-worker interface is fully fixture-tested. Its first bounded live attempt
 The example registry uses verified account defaults and makes no exact-model, price or quality claim. Policies can select a profile by role, capability, difficulty, risk and optional node. An exact model loaded from JSON requires `availability`, `evidence_source` and a dated `evidence_date`. `unverified` and `unavailable` profiles cannot be routed. Relative evidence is optional; without it, the configured default is used and is not described as cost-optimal.
 
 Requested provider/model/effort is durable controller data. Provider-reported model/effort is a separate nullable observation. The current contract accepts the installed Claude effort levels and rejects Codex effort because that CLI option is not part of the tested adapter.
+
+## Provider-planned static web products
+
+The `product` command family is the only model-assisted planning surface. It requires explicit live subscription authorization at submission because planning itself consumes one provider call. The planner is confined to a fresh dependency-free four-file inventory, and the controller validates its JSON before creating any worker workspace. Start/resume use the same live authorization flags as `task`; plan, status, cancel, preview lifecycle, browser evidence import and package reads are local controller operations.
+
+The exact commands, evidence schema, browser gate and unsupported modes are documented in [product-workflow.md](product-workflow.md). This profile does not make the fixture planner general and does not accept an existing repository path.

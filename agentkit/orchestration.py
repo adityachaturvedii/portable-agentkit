@@ -239,7 +239,7 @@ def build_contract(task_id, request, fixture, *, risk=None, max_calls=None,
                    max_provider_calls=None, max_planning_calls=0, max_repairs=2,
                    max_escalations=None,
                    implementation_timeout_seconds=60, review_timeout_seconds=60,
-                   verification_timeout_seconds=10, proposal=None):
+                   verification_timeout_seconds=10, max_timeout_seconds=60, proposal=None):
     fixture = get_fixture(fixture) if isinstance(fixture, str) else fixture
     _safe_scope(fixture.scope)
     assumptions = (
@@ -267,7 +267,7 @@ def build_contract(task_id, request, fixture, *, risk=None, max_calls=None,
         max_elapsed_seconds=((600 if decomposed else 420) if max_elapsed_seconds is None
                              else max_elapsed_seconds),
         max_concurrency=(2 if decomposed else 1) if max_concurrency is None else max_concurrency,
-        max_timeout_seconds=60, verification_reserve=1, review_reserve=1,
+        max_timeout_seconds=max_timeout_seconds, verification_reserve=1, review_reserve=1,
         max_subtasks=subtask_count, max_output_bytes_per_call=1048576,
         context_allocation='provider-managed-unknown', max_repairs=max_repairs,
         max_provider_calls=min(provider_limit, call_limit),
@@ -278,9 +278,9 @@ def build_contract(task_id, request, fixture, *, risk=None, max_calls=None,
         verification_timeout_seconds=verification_timeout_seconds)
 
 
-def build_plan(contract, fixture, registry, toolkit_root, proposal=None):
+def build_plan(contract, fixture, registry, toolkit_root, proposal=None, *, planner_accounted=False):
     proposal = validate_proposal(proposal or propose(contract.user_request, fixture), fixture, contract)
-    if proposal['planner']['model_call']:
+    if proposal['planner']['model_call'] and not planner_accounted:
         raise ControllerError('model-assisted planning requires an explicitly configured planner transport')
     nodes = [GraphNode('intake', 'chief_of_staff', 'intake',
                        'Normalize user intent without expanding authority.', initial_status='succeeded'),
@@ -359,7 +359,7 @@ def build_plan(contract, fixture, registry, toolkit_root, proposal=None):
     edges.append(GraphEdge('review', 'package'))
     return ExecutionPlan(contract.task_id, mode, tuple(nodes), tuple(edges), tuple(routes),
                          _selected_skills(toolkit_root, fixture),
-                         management_calls=0,
+                         management_calls=1 if proposal['planner']['model_call'] else 0,
                          proposal=proposal)
 
 
@@ -462,6 +462,15 @@ class Phase4Workflow:
         return self.store.transition(task_id, expected, target,
                                      task_id + '-phase4-' + label + '-' + str(time.time_ns()),
                                      next_action=next_action, authority=self.store.authority)
+
+    def _requires_browser_verification(self, task_id):
+        return False
+
+    def _browser_evidence_passed(self, task_id):
+        task = self.store.task(task_id)
+        return any(item['kind'] == 'browser-check' and item['status'] == 'passed' and
+                   item['revision'] == task['head_revision'] and not item['stale']
+                   for item in self.store.snapshot(task_id)['evidence'])
 
     def _run_engine(self, task_id, role, engine, model, timeout, callback, *, effort=None):
         if role == 'repair':
@@ -903,6 +912,10 @@ class Phase4Workflow:
             if item['kind'] == 'independent-review':
                 return {'kind': 'review_findings', 'revision': item['revision'],
                         'findings': details.get('findings', [])}
+            if item['kind'] == 'browser-check':
+                return {'kind': 'browser_findings', 'revision': item['revision'],
+                        'findings': [check for check in details.get('checks', [])
+                                     if check.get('status') == 'failed']}
         return None
 
     def _schedule_implementations(self, task_id, fixture, repository, worktree):
@@ -1205,6 +1218,13 @@ class Phase4Workflow:
                                  'prepare local approval package')
                 continue
             if state == 'review_complete':
+                if (self._requires_browser_verification(task_id) and
+                        not self._browser_evidence_passed(task_id)):
+                    if task['next_action'] != 'run controller-owned browser acceptance':
+                        self.store.set_next_action(
+                            task_id, 'review_complete', 'run controller-owned browser acceptance',
+                            'browser_acceptance_required', authority=self.store.authority)
+                    break
                 self._transition(task_id, 'review_complete', 'packaging', 'packaging',
                                  'bind package to integrated candidate')
                 continue
@@ -1240,6 +1260,7 @@ class Phase4Workflow:
                 'base_revision': task['base_revision'], 'head_revision': task['head_revision'],
                 'diff': self.broker.diff(repository, task['base_revision'], task['head_revision']),
                 'verification': status['verification'], 'review_findings': status['findings'],
+                'browser_verification': status['browser_verification'],
                 'resolved_findings': status['resolved_findings'],
                 'routing': status['routing'], 'skills': status['skills'],
                 'resources': status['budget'],
@@ -1294,6 +1315,7 @@ class Phase4Workflow:
         findings = []
         resolved_findings = []
         verification = []
+        browser_verification = []
         for evidence in controller['evidence']:
             details = json.loads(evidence['details_json'])
             if evidence['kind'] == 'independent-review' and evidence['status'] == 'failed':
@@ -1302,6 +1324,11 @@ class Phase4Workflow:
             if evidence['kind'] == 'independent-check':
                 verification.append({'id': evidence['evidence_id'], 'revision': evidence['revision'],
                                      'status': evidence['status'], 'stale': bool(evidence['stale'])})
+            if evidence['kind'] == 'browser-check':
+                browser_verification.append({
+                    'id': evidence['evidence_id'], 'revision': evidence['revision'],
+                    'status': evidence['status'], 'stale': bool(evidence['stale']),
+                    'details': details})
         active = [{'node_id': node['node_id'], 'role': node['role'], 'status': node['status'],
                    'provider': node['provider'],
                    'requested_configuration': {'model': node['model'], 'effort': node['effort']}}
@@ -1333,6 +1360,11 @@ class Phase4Workflow:
             attention = 'Inspect the blocker; unsafe automatic relaunch is disabled.'
         elif task['state'] == 'awaiting_pr_approval':
             attention = 'Review the local package; publication remains separately authorized.'
+        elif (task['state'] == 'review_complete' and
+              self._requires_browser_verification(task_id) and
+              not self._browser_evidence_passed(task_id)):
+            blocker = 'browser acceptance is required for the exact reviewed revision'
+            attention = 'Start the supervised preview and record controller-owned browser evidence.'
         return {'task_id': task_id, 'state': task['state'], 'stage': task['state'],
                 'next_action': task['next_action'], 'active_assignments': active,
                 'assignments': assignments,
@@ -1364,7 +1396,8 @@ class Phase4Workflow:
                            'cost_note': 'Unknown remains unknown; CLI estimates are not billing.'},
                 'blocker': blocker, 'attention': attention, 'findings': findings,
                 'resolved_findings': resolved_findings,
-                'verification': verification, 'executions': executions,
+                'verification': verification, 'browser_verification': browser_verification,
+                'executions': executions,
                 'plan_mode': plan['mode'], 'management_model_calls': plan['management_calls'],
                 'approval_package': (str(self.approval_root / 'approval-package.json')
                                      if (self.approval_root / 'approval-package.json').is_file() else None)}

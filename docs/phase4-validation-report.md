@@ -18,6 +18,20 @@ Concurrent live-tested executable: `b22020cf6a1587617d14e8c6164581a5d291ed93`
 
 Offline-corrected executable: `b9df1ad8af93f9d62124859b30246d971f273e83`
 
+Dependency/claim/request correction: `dd8da0ed2eaf973a646bb5f2e95fcd543fddb3b9`
+
+Static-web executable milestone: pending local commit
+
+## Bounded static-web product acceptance path
+
+The product path accepts an arbitrary product brief only within a fixed fresh static-web inventory. One accounted Claude account-default tech-lead call proposes deliverables, dependencies, four-file write scopes, interfaces, observable criteria and allocations. The controller requires the proposal to preserve the original request and predeclared acceptance and rejects unsupported operations, stale inventory, unsafe paths, inconsistent summaries, cycles, fan-out above two, independent overlap and mandatory call/time excess. No game solution or game-specific assignment graph is present in the harness.
+
+Validated assignments reuse the existing atomic scheduler and broker. The controller-created repository, assignment worktrees and worker copies are under the workflow managed root; controller state, evidence, approvals, Git metadata and mechanics-test source remain outside worker scope. The dependency-free profile permits no install or package-manager network access. It records the installed Node path/version/hash, copies that executable into the disposable verification runtime, runs `node --check game.js` plus controller-owned mechanics checks in a separate candidate copy, and requires the candidate manifest/revision to remain unchanged.
+
+Passing mechanics and independent review stop at `review_complete`. Packaging requires a clean exact-revision browser evidence object covering every protected acceptance ID, browser identity, hashed screenshots where retained, explicit final visual judgment, and a recorded preview session with confirmed process cleanup. The supported preview stays in one foreground controller process until Ctrl+C and records cleanup in `finally`. Detached descendants, browser credential isolation, browser egress control and crash-safe process recovery are not claimed.
+
+Nine focused product tests use deterministic planning/provider fixtures and one external-transport-only planner stub. They cover real model-only request construction, malicious scope/cycle/acceptance rejection, mandatory budget infeasibility, immutable product-spec binding, generated-project isolation, protected Node mechanics acceptance, unchanged-candidate evidence, stale candidate rejection, screenshot hash checking, browser gating and local package binding. The preview lifecycle test is skipped inside the managed outer sandbox because loopback `bind` returns `PermissionError`; it passes separately at host level with the foreground owner recording confirmed cleanup. The 166-test repository suite passes with the expected nested-Seatbelt and managed-loopback skips. No live inference was used for this implementation evidence.
+
 ## Request-driven planning and concurrency increment
 
 This increment keeps the supported target at trusted controller-created disposable projects on the tested macOS profile. It adds request/inventory-bound planning, request-selected protected acceptance, ordered and independent assignment graphs, a real two-worker scheduler, durable owner records, conservative controller integration, explicit routing policies and separate provider/planning-call budgets. Routine planning remains deterministic. Contradictory requirements stop for clarification, and unaccounted model-assisted planning is rejected.
