@@ -143,6 +143,10 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [ ] Phase 6: GitHub broker, installation/update/rollback and machine handover.
 - [ ] Phase 7: held-out matched baseline evaluations and calibrated release.
 
+## Project documentation
+
+- [x] Reorganize the README as a public project landing page with an offline quick start, architecture, exact CLI scope, support matrix, validation evidence, contribution guidance and explicit license status.
+
 ## Exit status
 
 Phase 0 complete. Phase 1 offline foundation complete on the observed macOS/Python environment. All ten procedures were exercised across invoice, independent-review and optimisation development cases. Review found two outcome contradictions; both were fixed and independently rechecked. Required browser/GPU/provider boundaries remain explicitly unverified and are later-phase gates, not Phase 1 passes. The external skill-creator validator was unavailable due to missing PyYAML; local pack checks passed.
