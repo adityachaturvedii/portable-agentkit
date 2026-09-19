@@ -289,19 +289,21 @@ def _usage(result):
 
 class LiveProductPlanner:
     def __init__(self, provider, model=None, effort=None, *, timeout_seconds=180,
-                 max_output_bytes=1048576):
+                 max_output_bytes=1048576, max_generated_output_tokens=8192):
         self.provider = provider
         self.model = model
         self.effort = effort
         self.timeout_seconds = timeout_seconds
         self.max_output_bytes = max_output_bytes
+        self.max_generated_output_tokens = max_generated_output_tokens
 
     def run(self, prompt, output, policy, cancel_event=None):
         with tempfile.TemporaryDirectory(prefix='agentkit-product-plan-') as tmp:
             request = ExecutionRequest(
                 self.provider, 'phase4-product-planner', prompt, str(Path(tmp).resolve()),
                 timeout_seconds=self.timeout_seconds, max_output_bytes=self.max_output_bytes,
-                model=self.model, effort=self.effort, mode='model-only')
+                model=self.model, effort=self.effort, mode='model-only',
+                max_generated_output_tokens=self.max_generated_output_tokens)
             result = execute(request, output, policy=policy, cancel_event=cancel_event)
         return EngineOutcome(
             result.status, result.elapsed_seconds, _usage(result),

@@ -182,7 +182,8 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [x] Commit reusable executable `70070e293c890a5c47bbb448b99a9b7cf34f8237` before inference and declare the eight-call, two-worker, two-repair, 180-second-per-provider and 1,200-second overall ledger.
 - [x] Attempt one bounded Breakout trial. The sole Claude planning invocation ended after 29.313421 seconds because its response exceeded the adapter's 512 generated-output-token allocation; stop without retry or provider substitution.
 - [x] Retain sanitized planning request/result/events, controller state, inputs, versions, usage and failure diagnosis in a hash-manifested archive; no browser/game artifacts exist because planning was not accepted.
-- [ ] Correct the planner output allocation and terminal classification offline. Do not use this failed attempt as validation of the corrected revision and do not repeat inference without new authorization.
+- [x] Correct the planner output allocation and terminal classification offline: persist an explicit Claude-only 8,192-token planner allocation, retain 512 for ordinary smoke, reject unsupported Codex values and classify output-limit text before allowed rate metadata.
+- [ ] The corrected product planner remains live-unvalidated. Do not use the failed `70070e2` attempt as validation or repeat inference without new authorization.
 - [ ] Dependency installation, general repositories, hostile inputs, arbitrary builds, browser credential/egress isolation and crash-safe preview containment remain unsupported.
 
 ## Later phases (planned, not implemented)

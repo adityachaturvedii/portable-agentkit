@@ -290,6 +290,7 @@ class ProductTests(unittest.TestCase):
         request = captured['request']
         self.assertEqual((request.engine, request.mode, request.effort, request.timeout_seconds),
                          ('claude', 'model-only', 'low', 12))
+        self.assertEqual(request.max_generated_output_tokens, 8192)
         self.assertIn('verified planning skill content', request.prompt)
         self.assertIsNone(result.details['provider_reported_configuration']['model'])
 
