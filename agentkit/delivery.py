@@ -209,14 +209,18 @@ def _usage_from_result(result):
 
 
 class LiveImplementer:
-    def __init__(self, engine='codex', model=None, effort=None):
+    def __init__(self, engine='codex', model=None, effort=None, *, timeout_seconds=60,
+                 max_output_bytes=1048576):
         self.engine = engine
         self.model = model
         self.effort = effort
+        self.timeout_seconds = timeout_seconds
+        self.max_output_bytes = max_output_bytes
 
     def run(self, workspace, output, boundary, prompt, policy, cancel_event=None):
         request = ExecutionRequest(self.engine, 'phase3-live-implementer', prompt, str(Path(workspace).resolve()),
-                                   timeout_seconds=60, max_output_bytes=1048576,
+                                   timeout_seconds=self.timeout_seconds,
+                                   max_output_bytes=self.max_output_bytes,
                                    model=self.model, effort=self.effort, mode='owned-code')
         result = execute_owned_code(request, output, boundary, policy=policy,
                                     cancel_event=cancel_event)
@@ -231,10 +235,13 @@ class LiveImplementer:
 
 
 class LiveReviewer:
-    def __init__(self, engine='claude', model=None, effort=None):
+    def __init__(self, engine='claude', model=None, effort=None, *, timeout_seconds=60,
+                 max_output_bytes=1048576):
         self.engine = engine
         self.model = model
         self.effort = effort
+        self.timeout_seconds = timeout_seconds
+        self.max_output_bytes = max_output_bytes
 
     def run(self, snapshot, revision, output, prompt, policy, cancel_event=None):
         files = {}
@@ -246,7 +253,8 @@ class LiveReviewer:
                           '{"id":"...","severity":"material","path":"...","criterion":"...","description":"..."}]}')
         with tempfile.TemporaryDirectory(prefix='agentkit-review-empty-') as tmp:
             request = ExecutionRequest(self.engine, 'phase3-live-reviewer', review_prompt, str(Path(tmp).resolve()),
-                                       timeout_seconds=60, max_output_bytes=1048576,
+                                       timeout_seconds=self.timeout_seconds,
+                                       max_output_bytes=self.max_output_bytes,
                                        model=self.model, effort=self.effort, mode='model-only')
             result = execute(request, output, policy=policy, cancel_event=cancel_event)
         findings = ()

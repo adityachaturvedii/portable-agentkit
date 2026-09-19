@@ -93,6 +93,13 @@ class TaskContract:
     max_output_bytes_per_call: int = 1048576
     context_allocation: str = 'provider-managed-unknown'
     max_repairs: int = 2
+    max_provider_calls: int = 8
+    max_planning_calls: int = 0
+    max_retries: int = 0
+    max_escalations: int = 0
+    implementation_timeout_seconds: float = 60
+    review_timeout_seconds: float = 60
+    verification_timeout_seconds: float = 10
     schema_version: int = PHASE4_SCHEMA_VERSION
 
     def __post_init__(self):
@@ -121,7 +128,8 @@ class TaskContract:
             raise ValueError('unsupported Phase 4 contract schema')
         integer_limits = (self.max_calls, self.max_concurrency, self.verification_reserve,
                           self.review_reserve, self.max_subtasks, self.max_repairs,
-                          self.max_output_bytes_per_call)
+                          self.max_output_bytes_per_call, self.max_provider_calls,
+                          self.max_planning_calls, self.max_retries, self.max_escalations)
         if any(type(value) is not int for value in integer_limits):
             raise ValueError('budget counts must be integers')
         if (self.max_calls < 3 or self.max_concurrency < 1 or self.max_concurrency > 2 or
@@ -129,13 +137,23 @@ class TaskContract:
                 self.verification_reserve + self.review_reserve >= self.max_calls or
                 self.max_subtasks < 1 or self.max_subtasks > MAX_IMPLEMENTATION_NODES or
                 self.max_repairs < 0 or self.max_repairs > MAX_REPAIR_ATTEMPTS or
+                self.max_provider_calls < 1 or self.max_provider_calls > self.max_calls or
+                self.max_planning_calls < 0 or self.max_planning_calls > self.max_provider_calls or
+                self.max_retries < 0 or self.max_retries > 2 or
+                self.max_escalations < 0 or self.max_escalations > 2 or
                 not 1024 <= self.max_output_bytes_per_call <= 4194304):
             raise ValueError('invalid Phase 4 count budget')
         if self.context_allocation != 'provider-managed-unknown':
             raise ValueError('provider context allocation is not enforceable by the tested CLIs')
-        for value in (self.max_elapsed_seconds, self.max_timeout_seconds):
+        for value in (self.max_elapsed_seconds, self.max_timeout_seconds,
+                      self.implementation_timeout_seconds, self.review_timeout_seconds,
+                      self.verification_timeout_seconds):
             if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
                 raise ValueError('time budgets must be finite positive numbers')
+        for value in (self.implementation_timeout_seconds, self.review_timeout_seconds,
+                      self.verification_timeout_seconds):
+            if value > self.max_timeout_seconds:
+                raise ValueError('stage timeout exceeds the per-execution maximum')
 
     def controller_contract(self):
         return {
@@ -164,6 +182,10 @@ class ModelProfile:
     relative_cost: str
     evidence: str
     enabled: bool = True
+    availability: str = 'verified'
+    evidence_source: str = 'local configuration'
+    evidence_date: Optional[str] = None
+    relative_quality: str = 'unknown'
 
     def __post_init__(self):
         _bounded_text(self.profile_id, 'profile id', 128)
@@ -177,6 +199,13 @@ class ModelProfile:
                 raise ValueError('effort is supported only for tested Claude levels')
         if self.relative_cost not in ('unknown', 'lower', 'higher'):
             raise ValueError('invalid relative cost evidence')
+        if self.relative_quality not in ('unknown', 'lower', 'higher'):
+            raise ValueError('invalid relative quality evidence')
+        if self.availability not in ('verified', 'unverified', 'unavailable'):
+            raise ValueError('invalid model availability evidence')
+        _bounded_text(self.evidence_source, 'evidence source', 512)
+        if self.evidence_date is not None:
+            _bounded_text(self.evidence_date, 'evidence date', 32)
         if not self.roles or not self.capabilities:
             raise ValueError('model profile requires roles and capabilities')
 
@@ -269,6 +298,7 @@ class ExecutionPlan:
     routes: Tuple[RouteDecision, ...]
     selected_skills: Tuple[dict, ...]
     management_calls: int = 0
+    proposal: Optional[dict] = None
     schema_version: int = PHASE4_SCHEMA_VERSION
 
     def __post_init__(self):
@@ -309,8 +339,18 @@ class ExecutionPlan:
                         ready.append(target)
         if len(visited) != len(identifiers):
             raise ValueError('ordinary graph dependencies must be acyclic')
-        if type(self.management_calls) is not int or self.management_calls != 0:
-            raise ValueError('Phase 4 planning roles are deterministic and consume no model calls')
+        if type(self.management_calls) is not int or self.management_calls not in (0, 1):
+            raise ValueError('planning permits at most one tech-lead model call')
+        if self.proposal is not None:
+            required = {'objective', 'requirements', 'assumptions', 'acceptance', 'assignments',
+                        'interfaces', 'dependencies', 'integration_strategy',
+                        'verification_requirements', 'review_requirements', 'roles', 'model_profiles',
+                        'resource_allocations', 'inventory_sha256', 'planner'}
+            if not isinstance(self.proposal, dict) or set(self.proposal) != required:
+                raise ValueError('structured planning proposal is incomplete')
+            if (not self.proposal['acceptance'] or not self.proposal['assignments'] or
+                    not isinstance(self.proposal['assumptions'], list)):
+                raise ValueError('planning proposal lacks acceptance or assignments')
         for skill in self.selected_skills:
             if (not isinstance(skill, dict) or set(skill) !=
                     {'id', 'path', 'sha256', 'reason', 'roles'} or
@@ -327,38 +367,62 @@ class ExecutionPlan:
 
 
 class ModelRegistry:
-    def __init__(self, profiles, defaults):
+    def __init__(self, profiles, defaults, policies=()):
         profiles = tuple(profiles)
         self.profiles = {profile.profile_id: profile for profile in profiles}
         self.defaults = dict(defaults)
+        self.policies = tuple(dict(item) for item in policies)
         if len(self.profiles) != len(profiles):
             raise ValueError('duplicate model profile')
         for role, profile_id in self.defaults.items():
             if profile_id not in self.profiles or role not in self.profiles[profile_id].roles:
                 raise ValueError('registry default is incompatible with its role')
+        required_policy = {'role', 'profile_id', 'difficulty', 'risk', 'required_capability'}
+        for policy in self.policies:
+            if (not required_policy <= set(policy) or set(policy) - required_policy - {'node_id'} or
+                    policy['profile_id'] not in self.profiles):
+                raise ValueError('invalid routing policy')
+            if policy['role'] not in ROLE_CONTRACTS:
+                raise ValueError('routing policy has an invalid role')
+            if policy['difficulty'] not in ('any', 'routine', 'substantial') or policy['risk'] not in (
+                    'any', 'routine', 'material'):
+                raise ValueError('routing policy has invalid difficulty or risk')
 
     @classmethod
     def account_defaults(cls, implementer='codex', reviewer='claude'):
         profiles = (
             ModelProfile('codex-account-default', 'codex', None, None,
                          ('implementer', 'repair', 'reviewer'), ('owned-code', 'model-only'),
-                         'unknown', 'Installed CLI/account default; exact model and relative cost are unknown.'),
+                         'unknown', 'Installed CLI/account default; exact model and relative cost are unknown.',
+                         evidence_source='installed CLI account default'),
             ModelProfile('claude-account-default', 'claude', None, None,
                          ('implementer', 'repair', 'reviewer'), ('owned-code', 'model-only'),
-                         'unknown', 'Installed CLI/account default; exact model and relative cost are unknown.'),
+                         'unknown', 'Installed CLI/account default; exact model and relative cost are unknown.',
+                         evidence_source='installed CLI account default'),
         )
         return cls(profiles, {'implementer': implementer + '-account-default',
                               'repair': implementer + '-account-default',
                               'reviewer': reviewer + '-account-default'})
 
-    def route(self, node_id, role, required_capability, *, exclude_provider=None):
-        preferred = self.profiles[self.defaults[role]]
+    def route(self, node_id, role, required_capability, *, exclude_provider=None,
+              exclude_providers=(), difficulty='routine', risk='routine'):
+        excluded = set(exclude_providers)
+        if exclude_provider:
+            excluded.add(exclude_provider)
+        matching = [rule for rule in self.policies if rule['role'] == role and
+                    rule['required_capability'] == required_capability and
+                    rule['difficulty'] in ('any', difficulty) and rule['risk'] in ('any', risk)]
+        matching = [rule for rule in matching if rule.get('node_id') in (None, node_id)]
+        matching.sort(key=lambda rule: rule.get('node_id') != node_id)
+        preferred_id = matching[0]['profile_id'] if matching else self.defaults[role]
+        preferred = self.profiles[preferred_id]
         candidates = [profile for profile in self.profiles.values()
-                      if profile.enabled and role in profile.roles and
+                      if profile.enabled and profile.availability == 'verified' and role in profile.roles and
                       required_capability in profile.capabilities and
-                      profile.provider != exclude_provider]
+                      profile.provider not in excluded]
         lower_cost = [profile for profile in candidates if profile.relative_cost == 'lower']
-        selected = (lower_cost[0] if lower_cost else
+        selected = (preferred if matching and preferred in candidates else
+                    lower_cost[0] if lower_cost else
                     preferred if preferred in candidates else
                     candidates[0] if candidates else None)
         if selected is None:
@@ -369,12 +433,28 @@ class ModelRegistry:
                      if selected.relative_cost == 'lower' else
                      'Relative price and quality are unknown, so the explicit default is used. ') +
                   'No larger or second model is added.')
-        if exclude_provider:
-            reason += ' Provider differs from implementation for independent review.'
+        if excluded:
+            reason += ' Provider differs from every implementation contributor for independent review.'
         return RouteDecision(node_id, role, selected.profile_id, selected.provider,
                              selected.model, selected.effort, reason, selected.relative_cost)
+
+    @classmethod
+    def from_dict(cls, value):
+        if not isinstance(value, dict) or not {'schema_version', 'profiles', 'defaults'} <= set(value) or \
+                set(value) - {'schema_version', 'profiles', 'defaults', 'policies'}:
+            raise ValueError('invalid model registry document')
+        if value['schema_version'] != PHASE4_SCHEMA_VERSION:
+            raise ValueError('unsupported model registry schema')
+        for item in value['profiles']:
+            if item.get('model') is not None:
+                required = {'availability', 'evidence_source', 'evidence_date'}
+                if not required <= set(item) or (item.get('availability') == 'verified' and
+                                                  not item.get('evidence_date')):
+                    raise ValueError('exact model profiles require dated availability evidence')
+        return cls(tuple(ModelProfile(**item) for item in value['profiles']), value['defaults'],
+                   value.get('policies', ()))
 
     def to_dict(self):
         return {'schema_version': PHASE4_SCHEMA_VERSION,
                 'profiles': [asdict(value) for value in self.profiles.values()],
-                'defaults': self.defaults}
+                'defaults': self.defaults, 'policies': list(self.policies)}

@@ -501,12 +501,8 @@ class Phase4Tests(unittest.TestCase):
                 self.assertTrue(assignment['clean'])
                 sibling = node_ids[1 - index]
                 sibling_before = workflow.state.node('decomposed-auth-' + str(index), sibling)
-                if index == 1:
-                    self.assertEqual(sibling_before['status'], 'succeeded')
-                    sibling_revision = sibling_before['result']['revision']
-                else:
-                    self.assertEqual(sibling_before['status'], 'pending')
-                    sibling_revision = None
+                self.assertEqual(sibling_before['status'], 'succeeded')
+                sibling_revision = sibling_before['result']['revision']
                 claim = workflow.store.claim_authentication_login(
                     'decomposed-auth-' + str(index), 'codex', authority=workflow.store.authority)
                 workflow.store.finish_authentication_login(
@@ -516,10 +512,9 @@ class Phase4Tests(unittest.TestCase):
                 self.assertEqual(resumed['task']['state'], 'awaiting_pr_approval')
                 self.assertEqual(specialist.calls[target], 2)
                 self.assertEqual(specialist.calls[sibling], 1)
-                if sibling_revision:
-                    self.assertEqual(workflow.state.node(
-                        'decomposed-auth-' + str(index), sibling)['result']['revision'],
-                        sibling_revision)
+                self.assertEqual(workflow.state.node(
+                    'decomposed-auth-' + str(index), sibling)['result']['revision'],
+                    sibling_revision)
 
     def test_changed_decomposed_assignment_identity_blocks_authentication_resume(self):
         task_id = 'changed-assignment'

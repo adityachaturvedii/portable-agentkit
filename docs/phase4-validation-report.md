@@ -10,7 +10,19 @@ Corrected live validation branch: `validation/phase-4-corrected-live`
 
 Tested executable revision: `342423ea27700e7d46a977d47e3307bd8fa58c23`
 
-## Implemented and independently tested
+Concurrent increment branch: `implementation/phase-4-dynamic-scheduling`
+
+Concurrent increment base: `41290944ca3a6048e0ed7c3eb85331d028f18a43`
+
+## Request-driven planning and concurrency increment
+
+This increment keeps the supported target at trusted controller-created disposable projects on the tested macOS profile. It adds request/inventory-bound planning, request-selected protected acceptance, ordered and independent assignment graphs, a real two-worker scheduler, durable owner records, conservative controller integration, explicit routing policies and separate provider/planning-call budgets. Routine planning remains deterministic. Contradictory requirements stop for clarification, and unaccounted model-assisted planning is rejected.
+
+Sixteen focused behavioral tests cover different request plans, a one-assignment plan without management calls, clarification, adversarial plan rejection, barrier-proven two-worker overlap, ordered dependency launch, duplicate-controller suppression, integration conflict preservation, sibling completion during authentication failure, cancellation observed by both workers, uncertain owner blocking, dated routing configuration, cross-contributor review independence, time-budget infeasibility and bounded repair/model escalation. One test drives the actual scheduler and `LiveImplementer`/`LiveReviewer` request construction while stubbing only external provider transports; it verifies concurrent requests, exact model/effort and configured 7/8-second request limits.
+
+After documentation finalization, `python3 -m unittest discover -s tests -v` passed 153 tests with one expected nested-Seatbelt skip in the managed session. `python3 -m agentkit check` passed the offline 10-skill, 7-domain, 10-example and 3-source inventory. No inference was used for this implementation pass. The prior corrected calculator archive remains evidence for executable `342423e`; it does not validate concurrent scheduling. The authorized live gate will use a different two-assignment disposable project after the executable commit, with at most four provider executions, two local verification executions, no repair/escalation/retry and 90/10-second bounds.
+
+## Corrected single-assignment baseline implemented and independently tested
 
 - Task intake preserves the original request and explicit assumptions, validates the supported fixture/profile and rejects unsupported targets.
 - The terminal interface submits, inspects, starts, reports, cancels, resumes supported authentication checkpoints and reads a local approval package.
@@ -28,7 +40,7 @@ The original Phase 4 review passed 17 Phase 4 tests and 22 authentication tests 
 
 ## Simulated behavior
 
-Most provider outcomes, authentication expiry/recovery, quota-independent failures, review findings and repairs use deterministic adapters. Live adapter/request construction is exercised with only the external execution transports stubbed. The current controller executes fixture-defined specialist nodes sequentially, so concurrent scheduling is not claimed. Chief-of-staff, tech-lead and manager labels describe deterministic controller responsibilities rather than autonomous reasoning. Routing follows configured evidence and defaults; calibrated model optimization is not claimed. Interactive browser/device login remains fixture-tested.
+Most provider outcomes, authentication expiry/recovery, quota-independent failures, review findings and repairs use deterministic adapters. The concurrent increment's adapter/request construction is exercised with only external execution transports stubbed. Synchronization primitives prove controller overlap without inference. Chief-of-staff, tech-lead and manager labels remain deterministic controller responsibilities rather than autonomous reasoning. Routing follows configured evidence and defaults; calibrated model optimization is not claimed. Interactive browser/device login remains fixture-tested.
 
 ## Corrected live validation
 

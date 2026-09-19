@@ -138,6 +138,23 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [x] Validate exact executable revision `342423ea27700e7d46a977d47e3307bd8fa58c23` in one fresh bounded live calculator workflow: one Codex implementation, one constrained verification and one Claude review reached a candidate-bound local package with no repair or approval.
 - [x] Archive sanitized prompts, redacted provider records, controller state, verification, candidate identity/diff, usage and package in a 28-file SHA-256 manifest distinct from the historical `af80791` archive.
 
+## Phase 4 — request-driven planning and bounded concurrency increment
+
+- [x] Start from verified evidence-bearing descendant `41290944ca3a6048e0ed7c3eb85331d028f18a43` with executable baseline `342423ea27700e7d46a977d47e3307bd8fa58c23` on dedicated branch `implementation/phase-4-dynamic-scheduling`.
+- [x] Add inspectable request-driven proposals bound to a path/hash/interface inventory, with user requirements separated from assumptions and expected patches excluded.
+- [x] Add controller-created small, parallel, ordered and conflicting-requirement project scenarios, including independently testable request-selected subsets.
+- [x] Deterministically reject stale inventory, changed acceptance, unsafe paths, cycles, excessive fan-out, overlapping independent writes and call/time infeasibility before execution.
+- [x] Launch up to two ready provider assignments concurrently with atomic reservations, separate worktrees/copies, persisted owner identity and controller-only integration.
+- [x] Preserve completed siblings through authentication pause; propagate cancellation to both active workers; block uncertain ownership and conservative integration conflicts.
+- [x] Add portable routing-registry JSON, dated exact-model evidence, explicit defaults, node/risk/difficulty policies and independent-review exclusion across implementation/repair providers.
+- [x] Propagate configured model, supported effort, per-stage timeout and output bounds through actual adapter requests while keeping provider-reported metadata separate.
+- [x] Track total/provider/planning calls transactionally and preserve total and provider review capacity under concurrent implementation pressure.
+- [x] Extend structured handoffs with interfaces, dependencies, exact revision, evidence references and remaining allocation; retain role-bounded hash-verified skills.
+- [x] Add status groups for ready, active, waiting and completed assignments with routing reasons and remaining total/provider budgets.
+- [x] Pass 16 focused request-planning/concurrency tests, the 153-test repository regression suite (`OK`, one expected nested-Seatbelt skip) and `python3 -m agentkit check` before the implementation commit.
+- [ ] Run the separately authorized four-provider-execution maximum live demonstration only after committing the executable revision; retain sanitized hash-bound evidence in a separate commit.
+- [ ] General repositories, detached-process containment, Linux/GPU/remote workers, dashboards and publication remain unsupported.
+
 ## Later phases (planned, not implemented)
 
 - [ ] Phase 5: hardware domain validation and optional GPU worker.
@@ -159,5 +176,7 @@ Phase 4 now provides fixture-only natural-language intake, a reviewable plan, se
 The Phase 4 corrective review fixes the live cancellation interface, decomposed authentication resume, requested model/effort propagation and verified worker skill context. The corrected revision completes its 137-test repository suite with status `OK` and one expected nested-Seatbelt skip; the skipped boundary test passes separately at host level. The earlier live package remains historical evidence for `af80791`. No live inference was used for the correction, so the corrected live implementation → verification → review path still needs one future bounded validation.
 
 The corrected Phase 4 live gate is now complete for exact executable revision `342423ea27700e7d46a977d47e3307bd8fa58c23`. Under a three-call/130-second controller budget, one Codex implementation, one constrained verification and one Claude review reached `awaiting_pr_approval` at disposable candidate `ee3f6ffc260f6cf1ee5537db1913debb0f4168ff`. Only `calculator.py` changed, both prompt hashes matched the recorded role-specific contexts, verification and review passed, no repair/login/publication ran and no approval was recorded. Broader platforms, repositories and isolation claims remain unchanged.
+
+The next Phase 4 increment replaces fixture-ID-only sequential decomposition with request/inventory-bound plans and a two-worker scheduler. Offline behavioral coverage proves synchronized overlap, dependency gates, duplicate-controller suppression, sibling authentication progress, two-worker cancellation, conservative conflict blocking, provider-review reservation and actual adapter-request propagation with only external transports stubbed. Its executable revision still requires the separately authorized bounded live parallel demonstration; the earlier calculator archive is not repeated or promoted to validate this increment.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).

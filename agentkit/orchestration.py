@@ -1,14 +1,18 @@
 """Selective Phase 4 orchestration for controller-created disposable fixtures."""
 
 from dataclasses import asdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
+import os
 from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
+import uuid
 
 from .controller import (AuthenticationRecoveryError, ControllerError, ControllerStore,
                          ReconciliationRequired, StaleEvidence, UsageRecord)
@@ -19,6 +23,7 @@ from .phase4_contracts import (ExecutionPlan, GraphEdge, GraphNode, ModelRegistr
                                ROLE_CONTRACTS, RouteDecision, TaskContract)
 from .phase4_fixtures import FIXTURES, fixture_catalog, get_fixture
 from .phase4_state import Phase4State
+from .planning import propose, validate_proposal
 from .process import run_process
 from .runtime_contracts import ExecutionBoundary, LivePolicy
 
@@ -105,9 +110,13 @@ class Phase4FixtureVerifier:
     engine = 'local'
     model = 'deterministic-fixture-unittest'
 
-    def __init__(self, broker, fixture):
+    def __init__(self, broker, fixture, *, timeout_seconds=10, max_output_bytes=1048576,
+                 acceptance_test=None):
         self.broker = broker
         self.fixture = fixture
+        self.timeout_seconds = timeout_seconds
+        self.max_output_bytes = max_output_bytes
+        self.acceptance_test = acceptance_test or fixture.acceptance_test
 
     def run(self, repository, worktree, head, attempt, cancel_event=None):
         before = self.broker.worktree_identity(repository, worktree)
@@ -118,12 +127,12 @@ class Phase4FixtureVerifier:
                 target = workspace / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes((Path(worktree) / relative).read_bytes())
-            (workspace / 'test_acceptance.py').write_text(self.fixture.acceptance_test)
+            (workspace / 'test_acceptance.py').write_text(self.acceptance_test)
             run = subprocess.run([sys.executable, '-B', '-m', 'unittest', '-v'], cwd=str(workspace),
                                  env={'PATH': '/usr/bin:/bin', 'HOME': str(workspace),
                                       'PYTHONDONTWRITEBYTECODE': '1'},
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 timeout=10, check=False)
+                                 timeout=self.timeout_seconds, check=False)
         after = self.broker.worktree_identity(repository, worktree)
         unchanged = before == after and before['revision'] == head and before['clean']
         return EngineOutcome('succeeded' if run.returncode == 0 and unchanged else 'failed',
@@ -137,8 +146,10 @@ class Phase4ConstrainedVerifier(Phase4FixtureVerifier):
     model = 'python-unittest-seatbelt-v1'
 
     def __init__(self, broker, fixture, controller_root, approval_root, evidence_root,
-                 *, capability_check=native_sandbox_capability, process_runner=run_process):
-        super().__init__(broker, fixture)
+                 *, capability_check=native_sandbox_capability, process_runner=run_process,
+                 timeout_seconds=10, max_output_bytes=1048576, acceptance_test=None):
+        super().__init__(broker, fixture, timeout_seconds=timeout_seconds,
+                         max_output_bytes=max_output_bytes, acceptance_test=acceptance_test)
         self.controller_root = Path(controller_root).resolve()
         self.approval_root = Path(approval_root).resolve()
         self.evidence_root = Path(evidence_root).resolve()
@@ -167,7 +178,7 @@ class Phase4ConstrainedVerifier(Phase4FixtureVerifier):
                 target = workspace / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes((Path(worktree) / relative).read_bytes())
-            (workspace / 'test_acceptance.py').write_text(self.fixture.acceptance_test)
+            (workspace / 'test_acceptance.py').write_text(self.acceptance_test)
             controlled_before = _manifest(workspace)
             denied = tuple(str(path) for path in (
                 self.controller_root, self.approval_root, self.evidence_root,
@@ -178,7 +189,8 @@ class Phase4ConstrainedVerifier(Phase4FixtureVerifier):
                                PYTHONDONTWRITEBYTECODE='1')
             outcome = self.process_runner(
                 ['/usr/bin/sandbox-exec', '-p', profile, sys.executable, '-B', '-m', 'unittest', '-v'],
-                cwd=str(workspace), env=environment, timeout=10, max_bytes=1048576,
+                cwd=str(workspace), env=environment, timeout=self.timeout_seconds,
+                max_bytes=self.max_output_bytes,
                 cancel_event=cancel_event)
             controlled_after = _manifest(workspace)
         after = self.broker.worktree_identity(repository, worktree)
@@ -223,7 +235,11 @@ def _selected_skills(root, fixture):
 
 
 def build_contract(task_id, request, fixture, *, risk=None, max_calls=None,
-                   max_elapsed_seconds=None, max_concurrency=None):
+                   max_elapsed_seconds=None, max_concurrency=None,
+                   max_provider_calls=None, max_planning_calls=0, max_repairs=2,
+                   max_escalations=None,
+                   implementation_timeout_seconds=60, review_timeout_seconds=60,
+                   verification_timeout_seconds=10, proposal=None):
     fixture = get_fixture(fixture) if isinstance(fixture, str) else fixture
     _safe_scope(fixture.scope)
     assumptions = (
@@ -232,31 +248,48 @@ def build_contract(task_id, request, fixture, *, risk=None, max_calls=None,
         'No network, dependency installation, publication, deployment, or external repository access is authorized.',
         'Provider model and relative price use account defaults and remain unknown unless reported by the CLI.',
     )
-    decomposed = len(fixture.subtasks) > 1
+    assignments = proposal['assignments'] if proposal else None
+    scope = (tuple(sorted({path for item in assignments for path in item['allowed_paths']}))
+             if assignments else fixture.scope)
+    acceptance = tuple(proposal['acceptance']) if proposal else fixture.acceptance
+    subtask_count = len(assignments) if assignments else len(fixture.subtasks)
+    decomposed = subtask_count > 1
+    call_limit = (10 if decomposed else 8) if max_calls is None else max_calls
+    provider_limit = call_limit if max_provider_calls is None else max_provider_calls
     return TaskContract(
-        task_id=task_id, user_request=request, objective=request.strip(), scope=fixture.scope,
-        acceptance=fixture.acceptance,
+        task_id=task_id, user_request=request, objective=request.strip(), scope=scope,
+        acceptance=acceptance,
         non_goals=('personal repositories', 'dependency installation', 'publication', 'merge',
                    'deployment', 'GPU or remote execution'), dependencies=(),
         risk=risk or fixture.risk, difficulty=fixture.difficulty,
         execution_profile='trusted-disposable-macos', assumptions=assumptions,
-        max_calls=(10 if decomposed else 8) if max_calls is None else max_calls,
+        max_calls=call_limit,
         max_elapsed_seconds=((600 if decomposed else 420) if max_elapsed_seconds is None
                              else max_elapsed_seconds),
         max_concurrency=(2 if decomposed else 1) if max_concurrency is None else max_concurrency,
         max_timeout_seconds=60, verification_reserve=1, review_reserve=1,
-        max_subtasks=len(fixture.subtasks), max_output_bytes_per_call=1048576,
-        context_allocation='provider-managed-unknown', max_repairs=2)
+        max_subtasks=subtask_count, max_output_bytes_per_call=1048576,
+        context_allocation='provider-managed-unknown', max_repairs=max_repairs,
+        max_provider_calls=min(provider_limit, call_limit),
+        max_planning_calls=max_planning_calls, max_retries=0,
+        max_escalations=max_repairs if max_escalations is None else max_escalations,
+        implementation_timeout_seconds=implementation_timeout_seconds,
+        review_timeout_seconds=review_timeout_seconds,
+        verification_timeout_seconds=verification_timeout_seconds)
 
 
-def build_plan(contract, fixture, registry, toolkit_root):
+def build_plan(contract, fixture, registry, toolkit_root, proposal=None):
+    proposal = validate_proposal(proposal or propose(contract.user_request, fixture), fixture, contract)
+    if proposal['planner']['model_call']:
+        raise ControllerError('model-assisted planning requires an explicitly configured planner transport')
     nodes = [GraphNode('intake', 'chief_of_staff', 'intake',
                        'Normalize user intent without expanding authority.', initial_status='succeeded'),
              GraphNode('plan', 'tech_lead', 'plan',
                        'Define interfaces, decomposition, and immutable acceptance.',
                        dependencies=('intake',), initial_status='succeeded')]
     edges = [GraphEdge('intake', 'plan')]
-    if len(fixture.subtasks) > 1:
+    assignments = proposal['assignments']
+    if len(assignments) > 1:
         nodes.append(GraphNode('schedule', 'manager', 'schedule',
                                'Allocate two isolated subtasks within the parent budget.',
                                dependencies=('plan',), initial_status='succeeded'))
@@ -266,15 +299,19 @@ def build_plan(contract, fixture, registry, toolkit_root):
         predecessor = 'plan'
     routes = []
     implementation_ids = []
-    for subtask in fixture.subtasks:
-        node_id = 'implement-' + subtask.subtask_id
-        route = registry.route(node_id, 'implementer', 'owned-code')
+    for assignment in assignments:
+        node_id = assignment['id']
+        route = registry.route(node_id, 'implementer', 'owned-code',
+                               difficulty=contract.difficulty, risk=contract.risk)
         routes.append(route)
-        nodes.append(GraphNode(node_id, 'implementer', 'implementation', subtask.objective,
-                               dependencies=(predecessor,), allowed_paths=_safe_scope(subtask.allowed_paths),
+        dependencies = tuple(assignment['dependencies']) or (predecessor,)
+        nodes.append(GraphNode(node_id, 'implementer', 'implementation', assignment['objective'],
+                               dependencies=dependencies,
+                               allowed_paths=_safe_scope(assignment['allowed_paths']),
                                provider=route.provider, model=route.model, effort=route.effort,
                                routing_reason=route.reason, max_attempts=2))
-        edges.append(GraphEdge(predecessor, node_id))
+        for dependency in dependencies:
+            edges.append(GraphEdge(dependency, node_id))
         implementation_ids.append(node_id)
     if len(implementation_ids) > 1:
         nodes.append(GraphNode('integrate', 'tech_lead', 'integration',
@@ -291,10 +328,16 @@ def build_plan(contract, fixture, registry, toolkit_root):
                            'Run controller-owned acceptance under the tested execution profile.',
                            dependencies=(verification_dependency,), max_attempts=3))
     edges.append(GraphEdge(verification_dependency, 'verify'))
-    implementer_provider = routes[0].provider
+    implementer_providers = {route.provider for route in routes if route.role == 'implementer'}
+    repair_route = registry.route('repair', 'repair', 'owned-code',
+                                  difficulty=contract.difficulty, risk=contract.risk)
+    review_exclusions = set(implementer_providers)
+    if contract.max_repairs:
+        review_exclusions.add(repair_route.provider)
     review_route = registry.route('review', 'reviewer', 'model-only',
-                                  exclude_provider=implementer_provider if contract.risk == 'material' or
-                                  contract.difficulty == 'substantial' else None)
+                                  exclude_providers=(review_exclusions if contract.risk == 'material' or
+                                                     contract.difficulty == 'substantial' else ()),
+                                  difficulty=contract.difficulty, risk=contract.risk)
     routes.append(review_route)
     nodes.append(GraphNode('review', 'reviewer', 'review',
                            'Independently review the integrated candidate against the contract.',
@@ -302,7 +345,6 @@ def build_plan(contract, fixture, registry, toolkit_root):
                            model=review_route.model, effort=review_route.effort,
                            routing_reason=review_route.reason, max_attempts=3))
     edges.append(GraphEdge('verify', 'review'))
-    repair_route = registry.route('repair', 'repair', 'owned-code')
     routes.append(repair_route)
     nodes.append(GraphNode('repair', 'implementer', 'repair',
                            'Apply only controller-supplied failed-check or review feedback.',
@@ -316,7 +358,9 @@ def build_plan(contract, fixture, registry, toolkit_root):
                            'Prepare a revision-bound local approval package.', dependencies=('review',)))
     edges.append(GraphEdge('review', 'package'))
     return ExecutionPlan(contract.task_id, mode, tuple(nodes), tuple(edges), tuple(routes),
-                         _selected_skills(toolkit_root, fixture), management_calls=0)
+                         _selected_skills(toolkit_root, fixture),
+                         management_calls=0,
+                         proposal=proposal)
 
 
 class Phase4Workflow:
@@ -342,10 +386,16 @@ class Phase4Workflow:
         self.verifier_factory = verifier_factory
         self.policy = LivePolicy(authorized,
             'Operator authorized one bounded Phase 4 disposable subscription demonstration.')
+        self.owner_id = str(os.getpid()) + ':' + uuid.uuid4().hex
+        self._git_lock = threading.Lock()
 
     @classmethod
     def submit(cls, root, task_id, request, fixture_id, *, registry=None, risk=None,
-               max_calls=None, max_elapsed_seconds=None, max_concurrency=None):
+               max_calls=None, max_elapsed_seconds=None, max_concurrency=None,
+               max_provider_calls=None, max_planning_calls=0, max_repairs=2,
+               max_escalations=None,
+               implementation_timeout_seconds=60, review_timeout_seconds=60,
+               verification_timeout_seconds=10, planner_output=None):
         root = Path(root).resolve()
         if root.exists() or root.is_symlink():
             raise ControllerError('submission root must be fresh')
@@ -355,10 +405,19 @@ class Phase4Workflow:
         self = cls(root)
         fixture = get_fixture(fixture_id)
         registry = registry or ModelRegistry.account_defaults()
+        proposal = planner_output or propose(request, fixture)
         contract = build_contract(task_id, request, fixture, risk=risk, max_calls=max_calls,
                                   max_elapsed_seconds=max_elapsed_seconds,
-                                  max_concurrency=max_concurrency)
-        plan = build_plan(contract, fixture, registry, Path(__file__).resolve().parents[1])
+                                  max_concurrency=max_concurrency,
+                                  max_provider_calls=max_provider_calls,
+                                  max_planning_calls=max_planning_calls,
+                                  max_repairs=max_repairs,
+                                  max_escalations=max_escalations,
+                                  implementation_timeout_seconds=implementation_timeout_seconds,
+                                  review_timeout_seconds=review_timeout_seconds,
+                                  verification_timeout_seconds=verification_timeout_seconds,
+                                  proposal=proposal)
+        plan = build_plan(contract, fixture, registry, Path(__file__).resolve().parents[1], proposal)
         implementation = next(route for route in plan.routes if route.role == 'implementer')
         review = next(route for route in plan.routes if route.role == 'reviewer')
         self.store.create_task(
@@ -369,7 +428,9 @@ class Phase4Workflow:
             max_concurrency=contract.max_concurrency,
             max_timeout_seconds=contract.max_timeout_seconds,
             verification_reserve=contract.verification_reserve,
-            review_reserve=contract.review_reserve)
+            review_reserve=contract.review_reserve,
+            max_provider_calls=contract.max_provider_calls,
+            max_planning_calls=contract.max_planning_calls)
         self.state.record_intake(contract, fixture_id, authority=self.store.authority)
         self.store.set_contract(task_id, contract.controller_contract(), authority=self.store.authority)
         self.store.transition(task_id, 'received', 'contracted', task_id + '-phase4-contracted',
@@ -403,10 +464,17 @@ class Phase4Workflow:
                                      next_action=next_action, authority=self.store.authority)
 
     def _run_engine(self, task_id, role, engine, model, timeout, callback, *, effort=None):
+        if role == 'repair':
+            contract = json.loads((self.root / 'contract.json').read_text())
+            repairs = [item for item in self.store.snapshot(task_id)['executions']
+                       if item['role'] == 'repair']
+            if len(repairs) >= contract['max_escalations']:
+                raise ControllerError('configured repair/model escalation bound exhausted')
         execution_id = self.store.reserve_execution(task_id, role, engine, model, timeout,
                                                     effort=effort,
                                                     authority=self.store.authority)
-        self.store.start_execution(execution_id, process_token='phase4-controller-supervised',
+        self.store.start_execution(execution_id, pid=os.getpid(),
+                                   process_token='phase4-controller-supervised:' + self.owner_id,
                                    authority=self.store.authority)
         try:
             outcome = callback()
@@ -424,22 +492,37 @@ class Phase4Workflow:
     def _adapter(self, provider, fixture, model=None, effort=None):
         if self.specialist_factory:
             return self.specialist_factory(provider, fixture)
-        return (LiveImplementer(provider, model, effort) if self.live else
+        contract = json.loads((self.root / 'contract.json').read_text())
+        return (LiveImplementer(provider, model, effort,
+                                timeout_seconds=contract['implementation_timeout_seconds'],
+                                max_output_bytes=contract['max_output_bytes_per_call']) if self.live else
                 DeterministicSpecialist(provider, fixture))
 
     def _reviewer(self, provider, model=None, effort=None):
         if self.reviewer_override:
             return self.reviewer_override
-        return (LiveReviewer(provider, model, effort) if self.live else
+        contract = json.loads((self.root / 'contract.json').read_text())
+        return (LiveReviewer(provider, model, effort,
+                             timeout_seconds=contract['review_timeout_seconds'],
+                             max_output_bytes=contract['max_output_bytes_per_call']) if self.live else
                 DeterministicReviewer(provider))
 
-    def _verifier(self, fixture):
+    def _verifier(self, task_id, fixture):
         if self.verifier_factory:
             return self.verifier_factory(self.broker, fixture)
+        contract = json.loads((self.root / 'contract.json').read_text())
+        acceptance_test = fixture.acceptance_test_for(
+            [item['id'] for item in contract['acceptance']])
         if self.live:
             return Phase4ConstrainedVerifier(self.broker, fixture, self.controller_root,
-                                             self.approval_root, self.evidence_root)
-        return Phase4FixtureVerifier(self.broker, fixture)
+                                             self.approval_root, self.evidence_root,
+                                             timeout_seconds=contract['verification_timeout_seconds'],
+                                             max_output_bytes=contract['max_output_bytes_per_call'],
+                                             acceptance_test=acceptance_test)
+        return Phase4FixtureVerifier(
+            self.broker, fixture, timeout_seconds=contract['verification_timeout_seconds'],
+            max_output_bytes=contract['max_output_bytes_per_call'],
+            acceptance_test=acceptance_test)
 
     def _candidate_identity(self, task_id):
         task = self.store.task(task_id)
@@ -535,9 +618,21 @@ class Phase4Workflow:
         active = [item for item in self.store.snapshot(task_id)['executions']
                   if item['status'] in ('reserved', 'running', 'cancel_requested')]
         if active:
-            self.store.reconcile_active(authority=self.store.authority)
+            live_owner = all(item.get('pid') and self._pid_exists(item['pid']) for item in active)
+            if not live_owner:
+                self.store.reconcile_active(authority=self.store.authority)
             return self.result(task_id)
         return self._drive(task_id)
+
+    @staticmethod
+    def _pid_exists(pid):
+        try:
+            os.kill(pid, 0)
+        except (ProcessLookupError, ValueError):
+            return False
+        except PermissionError:
+            return True
+        return True
 
     def resume(self, task_id):
         task = self.store.task(task_id)
@@ -550,7 +645,8 @@ class Phase4Workflow:
         if len(nodes) != 1:
             raise AuthenticationRecoveryError('authentication checkpoint has no unique graph assignment')
         fixture = self._fixture(task_id)
-        if nodes[0]['kind'] == 'implementation' and len(fixture.subtasks) > 1:
+        if (nodes[0]['kind'] == 'implementation' and
+                self.state.plan(task_id)['plan']['mode'] == 'decomposed'):
             self._validate_assignment_identity(
                 task_id, nodes[0], self.broker.repositories / task_id)
         self.store.resume_after_authentication(task_id, candidate_identity=self._candidate_identity(task_id),
@@ -581,11 +677,28 @@ class Phase4Workflow:
         return True
 
     def _implementation_prompt(self, contract, fixture, node, skill_context, feedback=None):
+        plan = self.state.plan(contract['task_id'])['plan']
+        assignment = next((item for item in plan['proposal']['assignments']
+                           if item['id'] == node['node_id']), None)
+        budget = self.store.snapshot(contract['task_id'])['budget']
+        identity = (node.get('result') or {}).get('assignment_identity') or {}
         payload = {'task_id': contract['task_id'], 'role': node['role'],
                    'objective': node['objective'], 'allowed_paths': node['allowed_paths'],
+                   'interfaces': (assignment or {}).get('interfaces', []),
+                   'dependencies': node['dependencies'],
                    'acceptance': contract['contract']['acceptance'],
-                   'candidate_revision': contract['head_revision'],
-                   'constraints': ['controller-created fixture only', 'no network',
+                   'candidate_revision': identity.get('revision', contract['head_revision']),
+                   'evidence_references': ([feedback.get('revision')] if feedback else []),
+                   'remaining_resource_allocation': {
+                       'calls': budget['max_calls'] - budget['completed_calls'] -
+                                budget['reserved_calls'],
+                       'provider_calls': budget['max_provider_calls'] -
+                                         budget['provider_completed_calls'] -
+                                         budget['provider_reserved_calls'],
+                       'elapsed_seconds': max(0, budget['max_elapsed_seconds'] -
+                                              budget['elapsed_seconds'] -
+                                              budget['reserved_elapsed_seconds'])},
+                   'constraints': ['controller-created disposable project only', 'no network',
                                    'no authority or scope expansion', 'run local unittest when present']}
         if feedback:
             payload['controller_feedback'] = feedback
@@ -593,24 +706,35 @@ class Phase4Workflow:
                 'undeclared path.\nASSIGNMENT_JSON:\n' + json.dumps(payload, sort_keys=True) +
                 '\nVERIFIED_SKILL_CONTEXT_JSON:\n' + json.dumps(skill_context, sort_keys=True))
 
-    def _execute_implementation(self, task_id, fixture, repository, parent_worktree, node, *, repair=False):
+    def _execute_implementation(self, task_id, fixture, repository, parent_worktree, node, *,
+                                repair=False, coordinated=False):
         if node['status'] in ('authentication_required', 'succeeded') and not repair:
             return node['status'] == 'succeeded'
         if node['status'] in ('failed', 'authentication_required'):
             self.state.transition_node(task_id, node['node_id'], 'pending', authority=self.store.authority)
             node = self.state.node(task_id, node['node_id'])
-        self.state.transition_node(task_id, node['node_id'], 'running', authority=self.store.authority)
+        try:
+            self.state.transition_node(
+                task_id, node['node_id'], 'running',
+                result={**(node.get('result') or {}), 'scheduler_owner': self.owner_id,
+                        'scheduler_pid': os.getpid()}, authority=self.store.authority)
+        except ControllerError:
+            if coordinated and self.state.node(task_id, node['node_id'])['status'] == 'running':
+                return False
+            raise
         task = self.store.task(task_id)
         head = task['head_revision']
-        if repair or len(fixture.subtasks) == 1:
+        decomposed = self.state.plan(task_id)['plan']['mode'] == 'decomposed'
+        if repair or not decomposed:
             assignment_worktree = parent_worktree
         else:
             saved = node['result'] or {}
             if saved.get('assignment_identity'):
                 assignment_worktree = self._validate_assignment_identity(task_id, node, repository)
             else:
-                _, assignment_worktree, _ = self.broker.create_task_worktree(
-                    repository, task_id + '-' + node['node_id'], task['base_revision'])
+                with self._git_lock:
+                    _, assignment_worktree, _ = self.broker.create_task_worktree(
+                        repository, task_id + '-' + node['node_id'], task['base_revision'])
                 identity = self._assignment_identity(repository, assignment_worktree)
                 node = self.state.record_assignment_identity(
                     task_id, node['node_id'], identity, authority=self.store.authority)
@@ -637,48 +761,62 @@ class Phase4Workflow:
             callback = lambda: adapter.run(worker, output, boundary, prompt, self.policy)
         try:
             outcome, execution_id = self._run_engine(
-                task_id, role, node['provider'], node['model'], 60, callback,
+                task_id, role, node['provider'], node['model'],
+                json.loads((self.root / 'contract.json').read_text())[
+                    'implementation_timeout_seconds'], callback,
                 effort=node['effort'])
         except Exception as exc:
             self.state.transition_node(task_id, node['node_id'], 'failed',
                                        result={'exception': type(exc).__name__},
                                        authority=self.store.authority)
-            self._transition(task_id, task['state'], 'blocked', 'assignment-exception',
-                             'inspect failed assignment')
+            if not coordinated:
+                self._transition(task_id, task['state'], 'blocked', 'assignment-exception',
+                                 'inspect failed assignment')
             return False
         if outcome.details.get('error_class') == 'authentication':
-            self._checkpoint_auth(task_id, node['node_id'], execution_id, outcome)
+            if coordinated:
+                result = dict(self.state.node(task_id, node['node_id'])['result'] or {})
+                result['authentication_failure'] = outcome.details
+                self.state.transition_node(task_id, node['node_id'], 'authentication_required',
+                                           execution_id=execution_id, result=result,
+                                           authority=self.store.authority)
+            else:
+                self._checkpoint_auth(task_id, node['node_id'], execution_id, outcome)
             return False
         if self.state.cancellation_requested(task_id):
             self.state.transition_node(task_id, node['node_id'], 'cancelled', execution_id=execution_id,
                                        result=outcome.details, authority=self.store.authority)
-            self._transition(task_id, task['state'], 'cancelled', 'cancelled-during-assignment',
-                             'no further action')
+            if not coordinated:
+                self._transition(task_id, task['state'], 'cancelled', 'cancelled-during-assignment',
+                                 'no further action')
             return False
         if outcome.status != 'succeeded':
             self.state.transition_node(task_id, node['node_id'], 'failed', execution_id=execution_id,
                                        result=outcome.details, authority=self.store.authority)
-            self._transition(task_id, task['state'], 'blocked', 'assignment-blocked',
-                             'inspect failed assignment')
+            if not coordinated:
+                self._transition(task_id, task['state'], 'blocked', 'assignment-blocked',
+                                 'inspect failed assignment')
             return False
         try:
-            revision, changed = self.broker.apply_worker_changes(
-                repository, assignment_worktree, worker, node['allowed_paths'],
-                ('Repair integrated fixture' if repair else 'Complete ' + node['node_id']))
+            with self._git_lock:
+                revision, changed = self.broker.apply_worker_changes(
+                    repository, assignment_worktree, worker, node['allowed_paths'],
+                    ('Repair integrated fixture' if repair else 'Complete ' + node['node_id']))
         except GitBrokerError as exc:
             self.state.transition_node(task_id, node['node_id'], 'failed', execution_id=execution_id,
                                        result={'authority_violation': str(exc)},
                                        authority=self.store.authority)
-            self._transition(task_id, task['state'], 'blocked', 'authority-violation',
-                             'inspect rejected worker scope expansion')
+            if not coordinated:
+                self._transition(task_id, task['state'], 'blocked', 'authority-violation',
+                                 'inspect rejected worker scope expansion')
             return False
         result = {'revision': revision, 'changed_paths': list(changed),
                   'worktree': str(assignment_worktree), 'execution_id': execution_id}
-        if not repair and len(fixture.subtasks) > 1:
+        if not repair and decomposed:
             result['assignment_identity'] = assignment_identity
         self.state.transition_node(task_id, node['node_id'], 'succeeded', execution_id=execution_id,
                                    result=result, authority=self.store.authority)
-        if repair or len(fixture.subtasks) == 1:
+        if repair or not decomposed:
             self.store.set_head(task_id, revision, authority=self.store.authority)
         return True
 
@@ -696,6 +834,87 @@ class Phase4Workflow:
                 return {'kind': 'review_findings', 'revision': item['revision'],
                         'findings': details.get('findings', [])}
         return None
+
+    def _schedule_implementations(self, task_id, fixture, repository, worktree):
+        """Run ready implementation nodes with durable claims and a two-worker bound."""
+        while True:
+            nodes = [node for node in self.state.nodes(task_id)
+                     if node['kind'] == 'implementation']
+            if all(node['status'] == 'succeeded' for node in nodes):
+                return True
+            if self.state.cancellation_requested(task_id):
+                task = self.store.task(task_id)
+                if task['state'] == 'implementing':
+                    self._transition(task_id, 'implementing', 'cancelled',
+                                     'cancelled-implementation-batch', 'no further action')
+                return False
+            running = [node for node in nodes if node['status'] == 'running']
+            if running:
+                owners_alive = all((node.get('result') or {}).get('scheduler_pid') and
+                                   self._pid_exists((node.get('result') or {})['scheduler_pid'])
+                                   for node in running)
+                if not owners_alive and self.store.task(task_id)['state'] == 'implementing':
+                    self._transition(task_id, 'implementing', 'blocked',
+                                     'assignment-ownership-uncertain',
+                                     'reconcile uncertain assignment process ownership')
+                return False
+            succeeded = {node['node_id'] for node in nodes if node['status'] == 'succeeded'}
+            ready = [node for node in nodes if node['status'] in ('pending', 'failed') and
+                     set(node['dependencies']) <= succeeded.union({'intake', 'plan', 'schedule'})]
+            if not ready:
+                auth = [node for node in nodes if node['status'] == 'authentication_required']
+                if auth:
+                    node = auth[0]
+                    details = (node.get('result') or {}).get('authentication_failure', {})
+                    self.store.checkpoint_authentication(
+                        task_id, node['execution_id'], node['provider'],
+                        auth_reason=details.get('authentication_failure') or 'missing_or_expired',
+                        candidate_identity=self._candidate_identity(task_id),
+                        authority=self.store.authority)
+                    return False
+                if self.store.task(task_id)['state'] == 'implementing':
+                    self._transition(task_id, 'implementing', 'blocked', 'scheduler-no-ready-node',
+                                     'inspect failed or unsatisfied assignment dependency')
+                return False
+            concurrency = min(2, self.store.snapshot(task_id)['budget']['max_concurrency'], len(ready))
+            with ThreadPoolExecutor(max_workers=concurrency,
+                                    thread_name_prefix='agentkit-worker') as pool:
+                futures = {pool.submit(self._execute_implementation, task_id, fixture,
+                                       repository, worktree, node, coordinated=True): node
+                           for node in ready[:concurrency]}
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as exc:
+                        node = self.state.node(task_id, futures[future]['node_id'])
+                        if node['status'] == 'running':
+                            self.state.transition_node(
+                                task_id, node['node_id'], 'failed',
+                                result={**(node.get('result') or {}),
+                                        'controller_exception': type(exc).__name__},
+                                authority=self.store.authority)
+            refreshed = [self.state.node(task_id, node['node_id']) for node in ready[:concurrency]]
+            if self.state.cancellation_requested(task_id):
+                if self.store.task(task_id)['state'] == 'implementing':
+                    self._transition(task_id, 'implementing', 'cancelled',
+                                     'cancelled-implementation-batch', 'no further action')
+                return False
+            failed = [node for node in refreshed if node['status'] == 'failed']
+            if failed:
+                if self.store.task(task_id)['state'] == 'implementing':
+                    self._transition(task_id, 'implementing', 'blocked', 'assignment-batch-blocked',
+                                     'inspect failed assignment')
+                return False
+            auth = [node for node in refreshed if node['status'] == 'authentication_required']
+            if auth:
+                node = auth[0]
+                details = (node.get('result') or {}).get('authentication_failure', {})
+                self.store.checkpoint_authentication(
+                    task_id, node['execution_id'], node['provider'],
+                    auth_reason=details.get('authentication_failure') or 'missing_or_expired',
+                    candidate_identity=self._candidate_identity(task_id),
+                    authority=self.store.authority)
+                return False
 
     def _drive(self, task_id):
         fixture = self._fixture(task_id)
@@ -715,10 +934,8 @@ class Phase4Workflow:
             if state == 'implementing':
                 implementation_nodes = [node for node in self.state.nodes(task_id)
                                         if node['kind'] == 'implementation']
-                for node in implementation_nodes:
-                    if node['status'] != 'succeeded':
-                        if not self._execute_implementation(task_id, fixture, repository, worktree, node):
-                            break
+                if not self._schedule_implementations(task_id, fixture, repository, worktree):
+                    continue
                 task = self.store.task(task_id)
                 if task['state'] != 'implementing':
                     continue
@@ -775,7 +992,7 @@ class Phase4Workflow:
                 if node['status'] == 'failed':
                     self.state.transition_node(task_id, 'verify', 'pending', authority=self.store.authority)
                 self.state.transition_node(task_id, 'verify', 'running', authority=self.store.authority)
-                verifier = self._verifier(fixture)
+                verifier = self._verifier(task_id, fixture)
                 if self.live:
                     verify_callback = lambda: verifier.run(
                         repository, worktree, task['head_revision'], task['repair_count'],
@@ -784,7 +1001,9 @@ class Phase4Workflow:
                     verify_callback = lambda: verifier.run(
                         repository, worktree, task['head_revision'], task['repair_count'])
                 outcome, execution_id = self._run_engine(
-                    task_id, 'verification', verifier.engine, verifier.model, 10, verify_callback)
+                    task_id, 'verification', verifier.engine, verifier.model,
+                    json.loads((self.root / 'contract.json').read_text())[
+                        'verification_timeout_seconds'], verify_callback)
                 if self.state.cancellation_requested(task_id):
                     self.state.transition_node(task_id, 'verify', 'cancelled', execution_id=execution_id,
                                                result=outcome.details, authority=self.store.authority)
@@ -833,9 +1052,25 @@ class Phase4Workflow:
                 before = self.broker.manifest(snapshot)
                 reviewer = self._reviewer(node['provider'], node['model'], node['effort'])
                 skill_context = self._skill_context(task_id, 'reviewer')
+                budget = self.store.snapshot(task_id)['budget']
+                evidence_refs = [item['evidence_id'] for item in self.store.snapshot(task_id)['evidence']
+                                 if item['revision'] == task['head_revision'] and not item['stale']]
+                handoff = {'task_id': task_id, 'role': 'reviewer',
+                           'candidate_revision': task['head_revision'],
+                           'interfaces': self.state.plan(task_id)['plan']['proposal']['interfaces'],
+                           'dependencies': self.state.plan(task_id)['plan']['proposal']['dependencies'],
+                           'acceptance': task['contract']['acceptance'],
+                           'evidence_references': evidence_refs,
+                           'remaining_resource_allocation': {
+                               'calls': budget['max_calls'] - budget['completed_calls'] -
+                                        budget['reserved_calls'],
+                               'provider_calls': budget['max_provider_calls'] -
+                                                 budget['provider_completed_calls'] -
+                                                 budget['provider_reserved_calls']}}
                 prompt = ('Review the exact candidate against this validated contract. Return only concrete '
                           'material findings; do not edit or grant authority. CONTRACT_JSON:\n' +
                           json.dumps(task['contract'], sort_keys=True) +
+                          '\nREVIEW_HANDOFF_JSON:\n' + json.dumps(handoff, sort_keys=True) +
                           '\nVERIFIED_SKILL_CONTEXT_JSON:\n' +
                           json.dumps(skill_context, sort_keys=True))
                 output = self._fresh(self.evidence_root, 'review-' + str(task['repair_count']))
@@ -847,7 +1082,9 @@ class Phase4Workflow:
                     review_callback = lambda: reviewer.run(
                         snapshot, task['head_revision'], output, prompt, self.policy)
                 review, execution_id = self._run_engine(
-                    task_id, 'reviewer', node['provider'], node['model'], 60, review_callback,
+                    task_id, 'reviewer', node['provider'], node['model'],
+                    json.loads((self.root / 'contract.json').read_text())[
+                        'review_timeout_seconds'], review_callback,
                     effort=node['effort'])
                 if self.state.cancellation_requested(task_id):
                     self.state.transition_node(task_id, 'review', 'cancelled', execution_id=execution_id,
@@ -995,6 +1232,22 @@ class Phase4Workflow:
                    'provider': node['provider'],
                    'requested_configuration': {'model': node['model'], 'effort': node['effort']}}
                   for node in snapshot['nodes'] if node['status'] in ('running', 'authentication_required')]
+        node_statuses = {node['node_id']: node['status'] for node in snapshot['nodes']}
+        assignments = {'ready': [], 'active': [], 'waiting': [], 'completed': []}
+        for node in snapshot['nodes']:
+            if node['kind'] != 'implementation':
+                continue
+            item = {'node_id': node['node_id'], 'status': node['status'],
+                    'dependencies': node['dependencies'], 'provider': node['provider'],
+                    'routing_reason': node['routing_reason']}
+            if node['status'] == 'succeeded':
+                assignments['completed'].append(item)
+            elif node['status'] in ('running', 'authentication_required'):
+                assignments['active'].append(item)
+            elif all(node_statuses.get(dep) == 'succeeded' for dep in node['dependencies']):
+                assignments['ready'].append(item)
+            else:
+                assignments['waiting'].append(item)
         blocker = None
         attention = None
         if task['state'] == 'authentication_required':
@@ -1008,9 +1261,17 @@ class Phase4Workflow:
             attention = 'Review the local package; publication remains separately authorized.'
         return {'task_id': task_id, 'state': task['state'], 'stage': task['state'],
                 'next_action': task['next_action'], 'active_assignments': active,
+                'assignments': assignments,
                 'routing': plan['routes'], 'skills': snapshot['skills'],
                 'budget': {'max_calls': budget['max_calls'], 'completed_calls': budget['completed_calls'],
                            'active_calls': budget['active_calls'],
+                           'max_provider_calls': budget['max_provider_calls'],
+                           'completed_provider_calls': budget['provider_completed_calls'],
+                           'remaining_provider_calls': budget['max_provider_calls'] -
+                                                       budget['provider_completed_calls'] -
+                                                       budget['provider_reserved_calls'],
+                           'max_planning_calls': budget['max_planning_calls'],
+                           'completed_planning_calls': budget['planning_completed_calls'],
                            'remaining_calls': budget['max_calls'] - budget['completed_calls'] -
                                               budget['reserved_calls'],
                            'verification_reserve': budget['verification_reserve'],
