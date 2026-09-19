@@ -55,6 +55,15 @@ def main(argv=None):
     auth_login.add_argument("--timeout", type=float, default=600)
     auth_login.add_argument("--workflow", help="existing workflow root with an authentication checkpoint")
     auth_login.add_argument("--task-id", default="phase3-demo")
+    auth_reconcile = commands.add_parser(
+        "auth-reconcile", help="record process-evidence resolution for an interrupted login owner")
+    auth_reconcile.add_argument("--workflow", required=True)
+    auth_reconcile.add_argument("--task-id", default="phase3-demo")
+    auth_reconcile.add_argument("--resolution",
+                                choices=("confirmed_ended", "uncertain"), required=True)
+    auth_reconcile.add_argument("--basis", required=True,
+                                choices=("process_exit_confirmed", "process_termination_unconfirmed"),
+                                help="sanitized process evidence; free-form terminal output is not accepted")
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -125,19 +134,67 @@ def main(argv=None):
                     claim = store.claim_authentication_login(args.task_id, args.provider,
                                                               authority=store.authority)
                     if not claim['claimed'] and claim['status'] == 'in_progress':
-                        print(json.dumps({'provider': args.provider, 'status': 'login_in_progress',
-                                          'machine': 'this host'}, indent=2))
+                        print(json.dumps({
+                            'provider': args.provider,
+                            'status': 'login_ownership_requires_reconciliation',
+                            'machine': 'this host',
+                            'session_id': claim['session_id'],
+                            'next_action': ('Confirm whether the prior official login process is still running. '
+                                            'If it ended, use auth-reconcile --resolution confirmed_ended; '
+                                            'if termination cannot be established, use --resolution uncertain.')
+                        }, indent=2))
                         return 1
-            result = guided_login(args.provider, args.method, timeout_seconds=args.timeout)
+                    if not claim['claimed'] and claim['status'] == 'succeeded':
+                        print(json.dumps({'provider': args.provider, 'status': 'already_authenticated',
+                                          'machine': 'this host'}, indent=2))
+                        return 0
+            try:
+                result = guided_login(args.provider, args.method, timeout_seconds=args.timeout)
+            except KeyboardInterrupt:
+                if store is not None and claim is not None and claim['claimed']:
+                    store.reconcile_authentication_login(
+                        claim['session_id'], 'uncertain',
+                        'controller_interrupted',
+                        authority=store.authority)
+                print(json.dumps({'provider': args.provider, 'status': 'cancelled',
+                                  'termination': 'uncertain'}, indent=2))
+                return 130
+            except Exception:
+                if store is not None and claim is not None and claim['claimed']:
+                    store.reconcile_authentication_login(
+                        claim['session_id'], 'uncertain',
+                        'launcher_exception',
+                        authority=store.authority)
+                raise
             if store is not None and claim is not None and claim['claimed']:
-                outcome = 'succeeded' if result.status in ('succeeded', 'already_authenticated') else (
-                    'timed_out' if result.status == 'timed_out' else
-                    'cancelled' if result.status == 'cancelled' else 'failed')
-                store.finish_authentication_login(
-                    claim['session_id'], outcome, auth_mode=result.authentication.mode,
-                    reason=safe_login_reason(result), authority=store.authority)
+                if result.termination == 'uncertain':
+                    store.reconcile_authentication_login(
+                        claim['session_id'], 'uncertain',
+                        'process_termination_unconfirmed',
+                        authority=store.authority)
+                else:
+                    outcome = 'succeeded' if result.status in ('succeeded', 'already_authenticated') else (
+                        'timed_out' if result.status == 'timed_out' else
+                        'cancelled' if result.status == 'cancelled' else 'failed')
+                    store.finish_authentication_login(
+                        claim['session_id'], outcome, auth_mode=result.authentication.mode,
+                        reason=safe_login_reason(result), owner_nonce=claim['owner_nonce'],
+                        authority=store.authority)
             print(json.dumps(result.to_dict(), indent=2))
             return 0 if result.status in ('succeeded', 'already_authenticated') else 1
+        elif args.command == "auth-reconcile":
+            from .controller import ControllerStore
+            root = Path(args.workflow).resolve()
+            store = ControllerStore(root / 'controller')
+            checkpoint = store.authentication_checkpoint(args.task_id)
+            if not checkpoint:
+                raise ValueError('task has no active authentication checkpoint')
+            status = store.reconcile_authentication_login(
+                checkpoint['login_session_id'], args.resolution, args.basis,
+                authority=store.authority)
+            print(json.dumps({'task_id': args.task_id, 'session_id': checkpoint['login_session_id'],
+                              'status': status}, indent=2))
+            return 0
         else:
             print(json.dumps(check_pack(), indent=2))
         return 0

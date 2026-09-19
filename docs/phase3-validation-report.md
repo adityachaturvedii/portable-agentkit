@@ -89,3 +89,17 @@ Observed live resources were:
 The Claude dollar field is the CLI's estimate, not a billing measurement. Cached and cache-creation categories remain separate and are not added to input totals. Evidence is archived under [phase3-auth-recovery](../evidence/phase3-auth-recovery/manifest.json).
 
 The bounded cross-provider gate for trusted controller-created disposable macOS workspaces is now satisfied. Phase 3 authentication recovery is ready for this same scope. Phase 4 may begin only within that scope; other platforms, untrusted repositories, remote login, detached-process containment, remote cancellation, tool-network separation and comprehensive credential isolation remain unsupported or unverified.
+
+## Authentication-recovery corrective review — 2026-09-19
+
+An independent review against `cc7d7587b6f282a8220df1cf159eb04b55314eea` reproduced three defects: a second checkpoint for the same task violated a database uniqueness constraint, an interrupted login retained unowned `in_progress` state, and resume trusted the database revision without inspecting the actual Git worktree. The fixes are isolated on `implementation/phase-3-auth-recovery-fixes`.
+
+Schema version 3 retains every authentication checkpoint and uses a partial unique index for one active checkpoint per task. A transactional v2 migration removes the old per-task history constraint. Disposable workflow coverage now pauses first on Codex implementation auth and later on Claude review auth, resumes each exact stage, retains both historical rows and reaches the local package without consuming a repair attempt.
+
+Login claims persist process ownership. A second claimant cannot launch another process. The current owner can affirm that its process is still running; a replacement requires an explicit confirmed-ended resolution. Uncertain termination becomes `reconciliation_required` and remains blocked. Ctrl+C attempts group termination and reaping, while launcher exceptions with unproved cleanup retain uncertainty. Reconciliation records only categorical reasons and never terminal transcripts or free-form authorization data.
+
+Authentication checkpoints now bind the controller-owned repository and worktree paths, branch, Git HEAD, clean status and complete file-manifest digest. Resume recomputes that identity before changing task state, then rechecks the interrupted execution and referenced revision-bound evidence transactionally. The reproduction that edits `calculator.py` during reviewer authentication now raises stale-evidence, leaves the task at `authentication_required` and emits no approval package.
+
+The complete offline suite passes 114 tests. In the managed test context, the macOS Seatbelt boundary case skips because nested sandbox initialization is unavailable; the host-context rerun passed all 114 tests, including that boundary case. Package checks, bytecode compilation and whitespace checks also passed. This corrective pass performed no live inference.
+
+The previously archived live Codex implementation, constrained verification and Claude review remains the evidence for successful cross-provider delivery. Both subscriptions were already authenticated in that run, so it did not exercise interactive recovery. Browser/device login, manual browser-code handoff, sequential authentication checkpoints and interrupted-login reconciliation remain fixture-tested capabilities rather than live-validated login behavior.

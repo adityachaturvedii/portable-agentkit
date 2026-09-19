@@ -23,8 +23,8 @@ Execution roles are state-bound: `implementer` to `implementing`, `repair` to `r
 | Evidence | ID, task, exact revision, kind, status, content hash, details, stale flag and timestamp. Evidence for a noncurrent revision is rejected. |
 | Approval | ID, task, repository, branch, exact head, action, expiry, source and stale flag. It can be written only through controller authority after `awaiting_pr_approval`. |
 | Failure signature | Stable signature, count and concrete details. A repeated signature or exhausted repair count blocks the task. |
-| Authentication checkpoint | Provider/account context, interrupted role/state, failed execution, exact candidate, evidence references, bounded attempt count and sanitized status. No secrets or transcripts. |
-| Authentication session | One active interactive login per provider/account context, shared by waiting tasks and resolved only from an official sanitized status probe. |
+| Authentication checkpoint | Historical provider/account context, interrupted role/state, failed execution, exact repository/worktree/branch/HEAD/manifest identity, evidence references, bounded attempt count and sanitized status. A partial unique constraint permits one active checkpoint per task. No secrets or transcripts. |
+| Authentication session | One active interactive login per provider/account context, shared by waiting tasks, bound to one process owner and resolved only from an official sanitized status probe or explicit process reconciliation. |
 
 ## Usage and limits
 
@@ -46,4 +46,4 @@ When a check fails, the next repair prompt includes controller-generated JSON. V
 
 On restart, the controller inspects reserved, running and cancellation-requested rows before any replacement launch. Without independently established process ownership, it marks them `reconciliation_required`, records a reconciliation event and blocks the task. SQLite durability alone is not process containment. Detached descendants and remote cancellation remain unsupported.
 
-An `authentication_required` task is already free of active execution reservations and survives restart as a recoverable checkpoint. Login waiting does not consume calls, elapsed allocation, concurrency or repair count. Resume rejects any subsequently discovered `reconciliation_required` execution, changed candidate, stale referenced evidence, non-subscription login or arbitrary blocked state. See [guided authentication recovery](authentication-recovery.md).
+An `authentication_required` task is already free of active execution reservations and survives restart as a recoverable checkpoint. Login waiting does not consume calls, elapsed allocation, concurrency or repair count. A controller restart does not release an `in_progress` login based on elapsed time. The owner can confirm it is still running; a trusted controller can record confirmed process exit and permit a bounded replacement, or preserve uncertain termination as `reconciliation_required`. Resume recomputes the controller-owned repository/worktree identity and rejects a wrong path, branch, HEAD, dirty tree, changed manifest, stale referenced evidence, non-subscription login, unresolved execution or arbitrary blocked state before changing task state. See [guided authentication recovery](authentication-recovery.md).

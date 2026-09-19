@@ -41,11 +41,25 @@ python3 -m agentkit controller-demo \
   --authorize-subscription-smoke --resume
 ```
 
+If a controller or terminal ended while a login was marked in progress, a second login is not started. First establish process state. A confirmed-ended process can be released with a sanitized, categorical record:
+
+```sh
+python3 -m agentkit auth-reconcile \
+  --workflow /absolute/path/to/workflow \
+  --task-id phase3-demo \
+  --resolution confirmed_ended \
+  --basis process_exit_confirmed
+```
+
+Use `--resolution uncertain --basis process_termination_unconfirmed` when termination cannot be established. That keeps the checkpoint blocked until process evidence is available. A timeout by itself never releases login ownership, and free-form terminal output is not accepted into the reconciliation record.
+
 ## Recovery contract
 
-An authentication checkpoint contains the task, provider, subscription account context, interrupted role/state, failed execution ID, candidate revision and relevant evidence IDs. It contains no account identifier, URL, authorization code, token, raw login output or credential path.
+An authentication checkpoint contains the task, provider, subscription account context, interrupted role/state, failed execution ID, candidate revision, controller-owned repository/worktree identity, clean manifest digest and relevant evidence IDs. It contains no account identifier, URL, authorization code, token, raw login output or credential path. Checkpoints are historical records: one task can encounter sequential Codex and Claude failures or repeat expiry, while a partial unique constraint permits only one active checkpoint for that task.
 
-The failed inference is finalized before the checkpoint is created. Its observed elapsed time and provider-reported usage remain recorded; missing usage remains unknown. Waiting for login consumes no execution reservation or repair attempt. One active login session is allowed per provider/account context, and each checkpoint permits at most two interactive attempts.
+Schema v2 stores migrate transactionally and retain their checkpoint history, but an active v2 checkpoint has no checkpoint-time worktree manifest. It therefore cannot satisfy the new resume proof and fails closed; completed task state and evidence remain intact. A replacement run must establish a new fully bound checkpoint rather than retroactively inventing identity evidence.
+
+The failed inference is finalized before the checkpoint is created. Its observed elapsed time and provider-reported usage remain recorded; missing usage remains unknown. Waiting for login consumes no execution reservation or repair attempt. One active login session is allowed per provider/account context, and each checkpoint permits at most two interactive attempts. The login owner has a process identity and controller-only ownership nonce that is excluded from events, evidence, snapshots and model input. `in_progress`, `reconciliation_required`, confirmed-ended and terminal outcomes are distinct durable states.
 
 Resume requires all of the following:
 
@@ -53,10 +67,11 @@ Resume requires all of the following:
 - the failed execution is durably finished;
 - no execution is active or awaiting reconciliation;
 - task state is exactly `authentication_required`;
-- candidate revision and referenced evidence are unchanged and current; and
+- the actual controller-owned repository path, worktree path, branch, Git HEAD, clean status and complete file-manifest digest still match the checkpoint;
+- candidate revision and referenced evidence are unchanged and current, and each referenced artifact still matches its content hash; and
 - the checkpoint names an implementer, repair, or reviewer stage.
 
-Cancelled, failed, or timed-out login leaves a recoverable checkpoint. Network, quota, rate-limit, permission, sandbox and ordinary execution failures do not create authentication checkpoints. A changed candidate, stale evidence, non-subscription login or unresolved execution blocks resume. PR approval remains separate and revision-bound.
+Cancelled, failed, or timed-out login leaves a recoverable checkpoint. Ctrl+C terminates and reaps the official login process group where this can be established; launcher failures with uncertain termination enter explicit reconciliation instead of reopening login. Network, quota, rate-limit, permission, sandbox and ordinary execution failures do not create authentication checkpoints. A changed candidate, dirty worktree, wrong branch or repository, stale evidence, non-subscription login or unresolved execution blocks resume before task state changes or approval packaging. PR approval remains separate and revision-bound.
 
 ## Security boundary
 
@@ -64,4 +79,4 @@ Login is a trusted controller-side operation outside the worker sandbox. The sub
 
 Interactive login transcripts are deliberately not captured, redacted, hashed, persisted or sent to a model. This is stronger than recording first and redacting later. Fixture tests use synthetic secrets and confirm that durable events, evidence, controller snapshots, result objects and resumed prompts exclude them.
 
-The live recovery path is validated only on the tested macOS host and installed CLI versions. Other platforms, remote login terminals, custom credential stores, enterprise policies and non-subscription authentication remain unverified.
+The completed live delivery used existing working subscription authentication on the tested macOS host; no interactive login was needed. The browser/device login flow, manual browser-code handoff, sequential checkpoints, interruption handling and stage-specific resume are fixture-tested only. This corrective pass spent no live inference quota. Other platforms, remote login terminals, custom credential stores, enterprise policies and non-subscription authentication remain unverified.

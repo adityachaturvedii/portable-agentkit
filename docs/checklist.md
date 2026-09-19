@@ -94,6 +94,19 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [x] Complete the bounded live Codex implementation → constrained verification → Claude review → local approval package demonstration without repeating a successful inference for evidence.
 - [ ] Other platforms, remote terminal handoff, custom credential stores and complete login-process credential isolation: **unverified/unsupported**.
 
+## Phase 3 authentication recovery corrective review
+
+- [x] Start from exact `cc7d7587b6f282a8220df1cf159eb04b55314eea` on `implementation/phase-3-auth-recovery-fixes` in a dedicated worktree.
+- [x] Replace the per-task checkpoint uniqueness constraint with historical checkpoints plus one active checkpoint per task; migrate schema v2 transactionally.
+- [x] Exercise sequential Codex implementation and Claude review authentication failures, preserving both checkpoints and bounded attempts.
+- [x] Persist login process ownership and require explicit still-running, confirmed-ended or uncertain reconciliation; never reclaim on elapsed time alone.
+- [x] Handle Ctrl+C and launcher failure without starting a duplicate login, preserving uncertain termination when cleanup cannot be established.
+- [x] Bind checkpoints to the controller-owned repository, worktree, branch, HEAD, clean status and file-manifest digest and recompute them before resume.
+- [x] Reject a dirty candidate before restoring reviewer state or producing an approval package.
+- [x] Preserve completed work, resource accounting, secret exclusion and the existing worker/verifier sandbox boundaries.
+- [x] Run disposable fixture regressions only; spend no live inference quota.
+- [ ] Interactive provider login recovery remains fixture-tested; the successful live delivery reused existing authentication and did not exercise browser login.
+
 ## Later phases (planned, not implemented)
 
 - [ ] Phase 4: cross-provider roles and measured routing.

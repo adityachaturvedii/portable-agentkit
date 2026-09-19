@@ -36,6 +36,7 @@ class LoginResult:
     authentication: AuthenticationStatus
     command: str
     machine: str
+    termination: str = 'not_started'
 
     def to_dict(self):
         return {**asdict(self), 'authentication': self.authentication.to_dict()}
@@ -91,10 +92,45 @@ def probe_authentication(provider, *, executable=None, runner=run_process,
     return AuthenticationStatus(provider, capability.state, mode, reason, executable)
 
 
+@dataclass(frozen=True)
+class LoginLaunchResult:
+    status: str
+    termination: str
+
+
+def _terminate_login_process(process):
+    """Try to terminate and reap the whole official-login process group."""
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    except OSError:
+        return 'uncertain'
+    try:
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        except OSError:
+            return 'uncertain'
+        try:
+            process.wait(timeout=2)
+        except (OSError, subprocess.TimeoutExpired):
+            return 'uncertain'
+    except OSError:
+        return 'uncertain'
+    return 'confirmed_ended' if process.poll() is not None else 'uncertain'
+
+
 def _interactive_launch(argv, env, cwd, timeout, cancel_event=None):
     """Attach the official CLI directly to the terminal; never pipe or retain its output."""
-    process = subprocess.Popen(argv, cwd=cwd, env=env, stdin=None, stdout=None, stderr=None,
-                               start_new_session=True)
+    try:
+        process = subprocess.Popen(argv, cwd=cwd, env=env, stdin=None, stdout=None, stderr=None,
+                                   start_new_session=True)
+    except OSError:
+        return LoginLaunchResult('failed', 'not_started')
     deadline = time.monotonic() + timeout
     outcome = 'failed'
     try:
@@ -107,27 +143,14 @@ def _interactive_launch(argv, env, cwd, timeout, cancel_event=None):
                 break
             time.sleep(.1)
         else:
-            return 'succeeded' if process.returncode == 0 else 'failed'
-        try:
-            os.killpg(process.pid, signal.SIGTERM)
-        except ProcessLookupError:
-            pass
-        try:
-            process.wait(timeout=2)
-        except subprocess.TimeoutExpired:
-            try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            process.wait(timeout=2)
-        return outcome
-    finally:
-        if process.poll() is None:
-            try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            process.wait()
+            return LoginLaunchResult('succeeded' if process.returncode == 0 else 'failed',
+                                     'confirmed_ended')
+    except KeyboardInterrupt:
+        outcome = 'cancelled'
+    except Exception:
+        outcome = 'failed'
+    termination = _terminate_login_process(process)
+    return LoginLaunchResult(outcome, termination)
 
 
 def guided_login(provider, method='browser', *, timeout_seconds=600, cancel_event=None,
@@ -142,15 +165,16 @@ def guided_login(provider, method='browser', *, timeout_seconds=600, cancel_even
     resolved = current.executable or executable or shutil.which(provider)
     if current.state == 'verified' and current.mode == 'subscription':
         command = shlex.join(login_argv(provider, resolved, method))
-        return LoginResult(provider, 'already_authenticated', current, command, platform.node())
+        return LoginResult(provider, 'already_authenticated', current, command, platform.node(),
+                           'not_started')
     if not resolved:
-        return LoginResult(provider, 'failed', current, provider, platform.node())
+        return LoginResult(provider, 'failed', current, provider, platform.node(), 'not_started')
     argv = login_argv(provider, resolved, method)
     command = shlex.join([provider] + argv[1:])
     if terminal_available is None:
         terminal_available = sys.stdin.isatty() and sys.stdout.isatty() and sys.stderr.isatty()
     if not terminal_available:
-        return LoginResult(provider, 'handoff_required', current, command, platform.node())
+        return LoginResult(provider, 'handoff_required', current, command, platform.node(), 'not_started')
     print('Authenticating ' + provider + ' subscription on ' + platform.node() + '.', flush=True)
     if provider == 'claude':
         print('Complete the official Claude page. If it shows a code, paste it only into the CLI prompt.', flush=True)
@@ -158,12 +182,26 @@ def guided_login(provider, method='browser', *, timeout_seconds=600, cancel_even
         print('Open the official URL shown by Codex and enter its one-time device code there.', flush=True)
     else:
         print('Complete the official ChatGPT browser flow; passwords and MFA stay in the browser.', flush=True)
-    result = launcher(argv, clean_environment(), '/private/tmp', timeout_seconds, cancel_event)
-    if result in ('cancelled', 'timed_out'):
-        return LoginResult(provider, result, current, command, platform.node())
-    verified = status_probe(provider, executable=resolved)
-    final = 'succeeded' if result == 'succeeded' and verified.state == 'verified' and verified.mode == 'subscription' else 'failed'
-    return LoginResult(provider, final, verified, command, platform.node())
+    try:
+        launch = launcher(argv, clean_environment(), '/private/tmp', timeout_seconds, cancel_event)
+    except KeyboardInterrupt:
+        return LoginResult(provider, 'cancelled', current, command, platform.node(), 'uncertain')
+    except Exception:
+        return LoginResult(provider, 'failed', current, command, platform.node(), 'uncertain')
+    if isinstance(launch, str):
+        launch = LoginLaunchResult(launch, 'confirmed_ended')
+    if (not isinstance(launch, LoginLaunchResult) or
+            launch.termination not in ('confirmed_ended', 'uncertain', 'not_started')):
+        return LoginResult(provider, 'failed', current, command, platform.node(), 'uncertain')
+    if launch.status in ('cancelled', 'timed_out'):
+        return LoginResult(provider, launch.status, current, command, platform.node(), launch.termination)
+    try:
+        verified = status_probe(provider, executable=resolved)
+    except Exception:
+        return LoginResult(provider, 'failed', current, command, platform.node(), launch.termination)
+    final = ('succeeded' if launch.status == 'succeeded' and verified.state == 'verified' and
+             verified.mode == 'subscription' else 'failed')
+    return LoginResult(provider, final, verified, command, platform.node(), launch.termination)
 
 
 def safe_login_reason(result):

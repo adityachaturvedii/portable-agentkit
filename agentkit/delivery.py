@@ -378,7 +378,23 @@ class DeliveryWorkflow:
             self.store.snapshot(task_id)['executions'][-1]['engine'],
             evidence_refs=evidence_refs,
             auth_reason=outcome.details.get('authentication_failure') or 'missing_or_expired',
+            candidate_identity=self._candidate_identity(task_id),
             authority=self.store.authority)
+
+    def _candidate_identity(self, task_id):
+        """Bind recovery to the controller-owned repository and exact clean worktree bytes."""
+        task = self.store.task(task_id)
+        repository = (self.broker.repositories / task_id).resolve()
+        expected_worktree = (self.broker.worktrees / task_id).resolve()
+        worktree = Path(task['worktree']).resolve()
+        if worktree != expected_worktree:
+            raise ControllerError('task worktree is not the controller-owned task worktree')
+        identity = self.broker.worktree_identity(repository, worktree)
+        manifest_sha256 = hashlib.sha256(
+            json.dumps(identity['manifest'], sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        return {'repository': str(repository), 'worktree': str(worktree),
+                'branch': identity['branch'], 'revision': identity['revision'],
+                'clean': identity['clean'], 'manifest_sha256': manifest_sha256}
 
     def run(self, task_id='phase3-demo'):
         contract = {
@@ -407,7 +423,9 @@ class DeliveryWorkflow:
 
     def resume(self, task_id='phase3-demo'):
         """Resume exactly the stage retained in an authentication checkpoint."""
-        self.store.resume_after_authentication(task_id, authority=self.store.authority)
+        identity = self._candidate_identity(task_id)
+        self.store.resume_after_authentication(task_id, candidate_identity=identity,
+                                               authority=self.store.authority)
         return self._drive(task_id)
 
     def recover_review_format(self, task_id='phase3-demo'):
