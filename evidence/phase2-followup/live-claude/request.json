@@ -1,0 +1,12 @@
+{
+  "engine": "claude",
+  "task_id": "phase2-owned-code-followup",
+  "cwd": "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-owned-check-14kjl8n7/workspace",
+  "timeout_seconds": 90,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "mode": "owned-code",
+  "schema_version": 1,
+  "prompt_sha256": "4476d8a1a718ca667be746ca968af56be0880a78b4708cf6d9e4395c8b8380ad",
+  "prompt_bytes": 316
+}

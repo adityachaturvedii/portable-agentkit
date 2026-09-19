@@ -1,0 +1,55 @@
+{
+  "engine": "claude",
+  "task_id": "phase3-live-reviewer",
+  "status": "failed",
+  "error_class": "authentication",
+  "exit_code": 1,
+  "elapsed_seconds": 1.037567,
+  "session_id": null,
+  "model": null,
+  "structured_output": null,
+  "final_text": null,
+  "usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "cached_input_tokens": null,
+    "cache_creation_tokens": null,
+    "reasoning_tokens": null,
+    "estimated_cost_usd": null,
+    "billed_cost_usd": null,
+    "source": "unavailable",
+    "final": false,
+    "provider_details": {}
+  },
+  "cancellation": {
+    "requested": true,
+    "reason": "authentication",
+    "term_sent": true,
+    "kill_sent": false,
+    "leader_reaped": true,
+    "process_group_gone": true,
+    "scope": "POSIX process group; detached descendants and remote effects are not covered"
+  },
+  "artifacts": {
+    "request.json": "04289659f0ceb50be758bbe82a93208e381fa58382f035dd786c19849e2217f4",
+    "stdout.redacted.jsonl": "8e2278b27fa431d3b954d5d62d3d5924112aa49fe756f0b0f49218483b021df7",
+    "stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "provider_details": {
+    "version": "2.1.220",
+    "executable_sha256": "8addc857f3fe64d5a0368af9ee50321b50afb4a6918ba3ef018ab84f5dbbe081",
+    "authentication": "subscription-reported",
+    "paid_overflow": "unknown",
+    "authorization": "Operator authorized a bounded Phase 3 disposable end-to-end demonstration; no auth/billing changes.",
+    "managed_mode": "model-only"
+  },
+  "limitations": [
+    "Provider events and final text are claims; fixture acceptance is independently computed.",
+    "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+    "Process groups cannot prove detached-descendant or remote cancellation.",
+    "Whole-process guard denies global writes; parent provider network and auth access remain available.",
+    "Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.",
+    "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry."
+  ],
+  "schema_version": 1
+}

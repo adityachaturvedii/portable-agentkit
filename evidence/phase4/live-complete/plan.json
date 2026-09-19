@@ -1,0 +1,234 @@
+{
+  "edges": [
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source": "intake",
+      "target": "plan"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source": "plan",
+      "target": "implement-calculator-core"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source": "implement-calculator-core",
+      "target": "verify"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source": "verify",
+      "target": "review"
+    },
+    {
+      "edge_type": "bounded_repair",
+      "max_iterations": 2,
+      "source": "verify",
+      "target": "repair"
+    },
+    {
+      "edge_type": "bounded_repair",
+      "max_iterations": 2,
+      "source": "review",
+      "target": "repair"
+    },
+    {
+      "edge_type": "bounded_repair",
+      "max_iterations": 2,
+      "source": "repair",
+      "target": "verify"
+    },
+    {
+      "edge_type": "dependency",
+      "max_iterations": 0,
+      "source": "review",
+      "target": "package"
+    }
+  ],
+  "management_calls": 0,
+  "mode": "single",
+  "nodes": [
+    {
+      "allowed_paths": [],
+      "dependencies": [],
+      "effort": null,
+      "initial_status": "succeeded",
+      "kind": "intake",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "intake",
+      "objective": "Normalize user intent without expanding authority.",
+      "provider": null,
+      "role": "chief_of_staff",
+      "routing_reason": null
+    },
+    {
+      "allowed_paths": [],
+      "dependencies": [
+        "intake"
+      ],
+      "effort": null,
+      "initial_status": "succeeded",
+      "kind": "plan",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "plan",
+      "objective": "Define interfaces, decomposition, and immutable acceptance.",
+      "provider": null,
+      "role": "tech_lead",
+      "routing_reason": null
+    },
+    {
+      "allowed_paths": [
+        "calculator.py"
+      ],
+      "dependencies": [
+        "plan"
+      ],
+      "effort": null,
+      "initial_status": "pending",
+      "kind": "implementation",
+      "max_attempts": 2,
+      "model": null,
+      "node_id": "implement-calculator-core",
+      "objective": "Correct total without changing its public interface.",
+      "provider": "codex",
+      "role": "implementer",
+      "routing_reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added."
+    },
+    {
+      "allowed_paths": [],
+      "dependencies": [
+        "implement-calculator-core"
+      ],
+      "effort": null,
+      "initial_status": "pending",
+      "kind": "verification",
+      "max_attempts": 3,
+      "model": null,
+      "node_id": "verify",
+      "objective": "Run controller-owned acceptance under the tested execution profile.",
+      "provider": null,
+      "role": "verifier",
+      "routing_reason": null
+    },
+    {
+      "allowed_paths": [],
+      "dependencies": [
+        "verify"
+      ],
+      "effort": null,
+      "initial_status": "pending",
+      "kind": "review",
+      "max_attempts": 3,
+      "model": null,
+      "node_id": "review",
+      "objective": "Independently review the integrated candidate against the contract.",
+      "provider": "claude",
+      "role": "reviewer",
+      "routing_reason": "Configured account-default profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added."
+    },
+    {
+      "allowed_paths": [
+        "calculator.py"
+      ],
+      "dependencies": [],
+      "effort": null,
+      "initial_status": "dormant",
+      "kind": "repair",
+      "max_attempts": 2,
+      "model": null,
+      "node_id": "repair",
+      "objective": "Apply only controller-supplied failed-check or review feedback.",
+      "provider": "codex",
+      "role": "implementer",
+      "routing_reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added."
+    },
+    {
+      "allowed_paths": [],
+      "dependencies": [
+        "review"
+      ],
+      "effort": null,
+      "initial_status": "pending",
+      "kind": "package",
+      "max_attempts": 1,
+      "model": null,
+      "node_id": "package",
+      "objective": "Prepare a revision-bound local approval package.",
+      "provider": null,
+      "role": "chief_of_staff",
+      "routing_reason": null
+    }
+  ],
+  "routes": [
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "implement-calculator-core",
+      "profile_id": "codex-account-default",
+      "provider": "codex",
+      "reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "implementer"
+    },
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "review",
+      "profile_id": "claude-account-default",
+      "provider": "claude",
+      "reason": "Configured account-default profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "reviewer"
+    },
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "repair",
+      "profile_id": "codex-account-default",
+      "provider": "codex",
+      "reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "repair"
+    }
+  ],
+  "schema_version": 1,
+  "selected_skills": [
+    {
+      "id": "task-contract",
+      "path": "skills/task-contract/SKILL.md",
+      "reason": "Selected for calculator routine workflow.",
+      "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d"
+    },
+    {
+      "id": "behavioral-testing",
+      "path": "skills/behavioral-testing/SKILL.md",
+      "reason": "Selected for calculator routine workflow.",
+      "sha256": "f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473"
+    },
+    {
+      "id": "independent-review",
+      "path": "skills/independent-review/SKILL.md",
+      "reason": "Selected for calculator routine workflow.",
+      "sha256": "5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb"
+    },
+    {
+      "id": "delivery-evidence",
+      "path": "skills/delivery-evidence/SKILL.md",
+      "reason": "Selected for calculator routine workflow.",
+      "sha256": "c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0"
+    },
+    {
+      "id": "domain:backend-database",
+      "path": "domains/backend-database.md",
+      "reason": "Fixture domain context only.",
+      "sha256": "758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e"
+    }
+  ],
+  "task_id": "phase4-live"
+}

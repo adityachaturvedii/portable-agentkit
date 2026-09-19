@@ -8,12 +8,14 @@ import threading
 import unittest
 from unittest.mock import patch
 
-from agentkit.adapters import ADAPTERS, execute, normalize, persist_result, stop_on_limit
-from agentkit.doctor import auth_summary, clean_environment, detect_engine
+from agentkit.adapters import (ADAPTERS, execute, normalize, persist_result,
+                               stop_on_limit, structured_json_text)
+from agentkit.doctor import auth_summary, clean_environment, detect_engine, owned_code_profile
 from agentkit.process import ProcessOutcome, run_process
 from agentkit.redaction import redact, redacted_stream
 from agentkit.runtime_contracts import Capability, CancellationStatus, ExecutionRequest, LivePolicy, EngineCapabilities
 from agentkit.smoke import acceptance
+from agentkit.execution_check import _provider_test_evidence
 
 FIXTURE = str(Path(__file__).parent / 'fixtures/runtime/fake_cli.py')
 
@@ -68,6 +70,13 @@ class RuntimeTests(unittest.TestCase):
                     b'{"type":"error","type":"turn.completed"}\n', b'[]\n'):
             out = ProcessOutcome(raw, b'', 0, .01, None, CancellationStatus())
             self.assertEqual(normalize(self.request(), out).error_class, 'malformed_output')
+
+    def test_single_json_fence_is_accepted_without_relaxing_json_validation(self):
+        self.assertEqual(structured_json_text('```json\n{"verdict":"no_findings","findings":[]}\n```'),
+                         {'verdict': 'no_findings', 'findings': []})
+        for value in ('before ```json\n{}\n```', '```JSON\n{}\n```', '```json\n{}\n``` after',
+                      '```json\n{"x":1,"x":2}\n```', '```json\nNaN\n```'):
+            self.assertIsNone(structured_json_text(value))
 
     def test_simulated_errors_both_providers(self):
         for engine in ADAPTERS:
@@ -155,6 +164,48 @@ class RuntimeTests(unittest.TestCase):
             out = ProcessOutcome(raw, b'', 0, .01, None, CancellationStatus())
             self.assertEqual(normalize(self.request(engine), out).error_class, 'unexpected_tools')
 
+    def test_owned_code_allows_only_reviewed_tool_events(self):
+        request = self.request('codex', mode='owned-code')
+        events = [
+            {'type': 'item.completed', 'item': {'type': 'command_execution', 'command': 'python3 -B -m unittest -v'}},
+            {'type': 'turn.completed', 'usage': {}}
+        ]
+        raw = ''.join(json.dumps(event) + '\n' for event in events).encode()
+        self.assertIsNone(stop_on_limit(raw, b'', allow_tools=True))
+        self.assertEqual(normalize(request, ProcessOutcome(raw, b'', 0, .01, None, CancellationStatus())).status, 'succeeded')
+        events[0]['item']['type'] = 'mcp_tool_call'
+        raw = ''.join(json.dumps(event) + '\n' for event in events).encode()
+        self.assertEqual(stop_on_limit(raw, b'', allow_tools=True), 'unexpected_tools')
+
+    def test_owned_acceptance_requires_successful_provider_test_record(self):
+        artifact = self.root / 'stdout.redacted.jsonl'
+        failed = [
+            {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'id': 'test-1',
+             'name': 'Bash', 'input': {'command': 'python3 -B -m unittest -v'}}]}},
+            {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'tool_use_id': 'test-1',
+             'is_error': True, 'content': 'EPERM'}]}}
+        ]
+        artifact.write_text(''.join(json.dumps(event) + '\n' for event in failed))
+        self.assertFalse(_provider_test_evidence('claude', self.root)['passed'])
+        failed[1]['message']['content'][0].update(is_error=False, content='Ran 1 test\nOK')
+        artifact.write_text(''.join(json.dumps(event) + '\n' for event in failed))
+        self.assertTrue(_provider_test_evidence('claude', self.root)['passed'])
+
+    def test_owned_profile_is_narrow(self):
+        workspace = self.root / 'workspace'
+        runtime = self.root / 'runtime'
+        denied = self.root / 'protected'
+        lock = self.root / 'installation_id'
+        for path in (workspace, runtime, denied):
+            path.mkdir()
+        lock.write_text('fixture')
+        profile = owned_code_profile(runtime, workspace, (denied,), (lock,), network=True)
+        self.assertIn('(deny file-write*)', profile)
+        self.assertIn('(subpath ' + json.dumps(str(workspace)) + ')', profile)
+        self.assertIn('(literal ' + json.dumps(str(lock)) + ')', profile)
+        self.assertIn('(deny file-read*', profile)
+        self.assertNotIn('(allow file-write* (subpath ' + json.dumps(str(self.root)) + '))', profile)
+
     def test_request_rejects_policy_injection_and_invalid_bounds(self):
         args = dict(engine='codex', task_id='fixture', prompt='test', cwd=str(self.root))
         for key, value in [('timeout_seconds', float('nan')), ('timeout_seconds', 301),
@@ -163,6 +214,22 @@ class RuntimeTests(unittest.TestCase):
                 ExecutionRequest.from_dict(dict(args, **{key: value}))
         with self.assertRaises(TypeError):
             ExecutionRequest.from_dict(dict(args, subscription_smoke_authorized=True))
+
+    def test_model_and_supported_effort_are_explicit_cli_arguments(self):
+        runtime = self.root / 'runtime-model-options'
+        runtime.mkdir()
+        claude = self.request('claude', model='claude-fixture-model', effort='high')
+        argv = ADAPTERS['claude'].argv('claude', claude, runtime)
+        self.assertEqual(argv[argv.index('--model') + 1], 'claude-fixture-model')
+        self.assertEqual(argv[argv.index('--effort') + 1], 'high')
+        codex = self.request('codex', model='codex-fixture-model')
+        argv = ADAPTERS['codex'].argv('codex', codex, runtime)
+        self.assertEqual(argv[argv.index('--model') + 1], 'codex-fixture-model')
+        self.assertNotIn('--effort', argv)
+        with self.assertRaisesRegex(ValueError, 'unsupported by the tested Codex'):
+            self.request('codex', effort='high')
+        with self.assertRaisesRegex(ValueError, 'unsupported Claude effort'):
+            self.request('claude', effort='ultra')
 
     def test_live_is_default_denied_without_even_doctor(self):
         with patch('agentkit.adapters.native_sandbox_capability', side_effect=AssertionError('must not probe')):
@@ -231,6 +298,28 @@ class RuntimeTests(unittest.TestCase):
                 self.assertIn('features.shell_tool=false', args)
             else:
                 self.assertEqual(args[args.index('--tools') + 1], '')
+
+    def test_owned_adapter_arguments_enable_bounded_tools(self):
+        from agentkit.runtime_contracts import ExecutionBoundary
+        workspace = self.root / 'workspace'
+        workspace.mkdir()
+        boundary = ExecutionBoundary(str(workspace), (str(self.root / 'canary'),))
+        for engine in ADAPTERS:
+            request = ExecutionRequest(engine, 'owned', 'fixture task', str(workspace), mode='owned-code')
+            args = ADAPTERS[engine].argv('/fake/cli', request, self.root, boundary,
+                                         session_id='00000000-0000-4000-8000-000000000000')
+            self.assertNotIn('--dangerously-skip-permissions', args)
+            if engine == 'codex':
+                self.assertEqual(args[args.index('--sandbox') + 1], 'danger-full-access')
+                self.assertNotIn('features.shell_tool=false', args)
+            else:
+                self.assertEqual(args[args.index('--tools') + 1], 'Read,Edit,Bash')
+                settings = json.loads(args[args.index('--settings') + 1])
+                self.assertFalse(settings['sandbox']['enabled'])
+                self.assertFalse(settings['sandbox']['failIfUnavailable'])
+                self.assertFalse(settings['sandbox']['allowUnsandboxedCommands'])
+                self.assertTrue(settings['permissions']['blockReadsOutsideWorkingDirectories'])
+                self.assertIn('--session-id', args)
 
     def test_allowed_rate_metadata_and_identifier_digits_are_not_errors(self):
         event = {'type': 'rate_limit_event', 'rate_limit_info': {'status': 'allowed',

@@ -29,11 +29,49 @@ def clean_environment():
     return env
 
 
-def readonly_profile(runtime, network=False):
+def readonly_profile(runtime, network=False, literal_write_paths=()):
     text = '(version 1)(allow default)(deny file-write*)'
     if not network:
         text += '(deny network*)'
-    return text + '(allow file-write* (subpath ' + json.dumps(str(Path(runtime).resolve())) + '))'
+    text += '(allow file-write* (subpath ' + json.dumps(str(Path(runtime).resolve())) + '))'
+    for path in literal_write_paths:
+        text += '(allow file-write* (literal ' + json.dumps(str(Path(path).resolve())) + '))'
+    return text
+
+
+def owned_code_profile(runtime, workspace, denied_read_paths, startup_write_paths=(), network=True):
+    """Whole-process guard for a disposable workspace.
+
+    Startup exceptions exist for a literal file or preselected fresh directory.
+    Callers must independently verify or remove that state after execution.
+    """
+    runtime = Path(runtime).resolve()
+    workspace = Path(workspace).resolve()
+    text = '(version 1)(allow default)(deny file-write*)'
+    if not network:
+        text += '(deny network*)'
+    text += '(allow file-write* (subpath ' + json.dumps(str(runtime)) + '))'
+    text += '(allow file-write* (subpath ' + json.dumps(str(workspace)) + '))'
+    for path in startup_write_paths:
+        resolved = Path(path).resolve()
+        selector = 'literal' if resolved.is_file() else 'subpath'
+        text += '(allow file-write* (' + selector + ' ' + json.dumps(str(resolved)) + '))'
+    for path in denied_read_paths:
+        resolved = Path(path).resolve()
+        selector = 'literal' if resolved.is_file() else 'subpath'
+        text += '(deny file-read* (' + selector + ' ' + json.dumps(str(resolved)) + '))'
+    return text
+
+
+def verification_profile(runtime, denied_read_paths):
+    """Read-only, no-network profile for independently controlled acceptance tests."""
+    text = '(version 1)(allow default)(deny file-write*)(deny network*)(deny mach-lookup)'
+    text += '(allow file-write* (subpath ' + json.dumps(str(Path(runtime).resolve())) + '))'
+    for path in denied_read_paths:
+        resolved = Path(path).resolve()
+        selector = 'literal' if resolved.is_file() else 'subpath'
+        text += '(deny file-read* (' + selector + ' ' + json.dumps(str(resolved)) + '))'
+    return text
 
 
 def native_sandbox_capability():
@@ -60,12 +98,14 @@ def auth_summary(engine, outcome):
     else:
         try:
             data = json.loads(outcome.stdout)
-            if not isinstance(data, dict) or outcome.exit_code != 0:
-                raise ValueError("auth status failed or is not an object")
+            if not isinstance(data, dict):
+                raise ValueError("auth status is not an object")
+            if data.get("loggedIn") is False:
+                return Capability("unavailable", "Official CLI reports no login in this execution context."), "none", {}
+            if outcome.exit_code != 0:
+                raise ValueError("authenticated status command failed")
             if data.get("loggedIn") is True and data.get("authMethod") == "claude.ai" and data.get("apiProvider") == "firstParty":
                 return Capability("verified", "Official CLI reports first-party Claude subscription login."), "subscription", {"subscription_type": data.get("subscriptionType")}
-            if data.get("loggedIn") is False:
-                return Capability("unavailable", "No authentication visible to the CLI in this execution context; Keychain restrictions may hide an existing login."), "none", {}
             if data.get("loggedIn") is True:
                 return Capability("verified", "Non-subscription authentication reported; managed execution blocked."), "other", {}
         except (ValueError, TypeError):

@@ -1,0 +1,76 @@
+{
+  "classification": "Phase 3 disposable validation evidence",
+  "files": [
+    {
+      "bytes": 14937,
+      "path": "evidence/phase3/live-partial/controller-state.json",
+      "sha256": "76cbff9582a36f478494c17856ed7893a1987eae24661b7453c802134cff0d47"
+    },
+    {
+      "bytes": 385,
+      "path": "evidence/phase3/live-partial/implementer-0/request.json",
+      "sha256": "2e1729d2dde9823d2fa147b2bb692d8ddf85977c98b4983e7992a92d16f3a3cc"
+    },
+    {
+      "bytes": 3710,
+      "path": "evidence/phase3/live-partial/implementer-0/result.json",
+      "sha256": "b4621f8a70f7f22bc8359c52039621e55851ced9d966072fa1fe578682a1c79a"
+    },
+    {
+      "bytes": 236,
+      "path": "evidence/phase3/live-partial/implementer-0/stderr.redacted.txt",
+      "sha256": "c48fe2befaef2ec21ded2e90ae34299feee2e05bdcf1852aadaa61e6bf222357"
+    },
+    {
+      "bytes": 2728,
+      "path": "evidence/phase3/live-partial/implementer-0/stdout.redacted.jsonl",
+      "sha256": "1f0c5a3a36ce1961ead97d389cfdbe02d3850dc5373a8fe7311df79848c9bce5"
+    },
+    {
+      "bytes": 392,
+      "path": "evidence/phase3/live-partial/reviewer-0/request.json",
+      "sha256": "04289659f0ceb50be758bbe82a93208e381fa58382f035dd786c19849e2217f4"
+    },
+    {
+      "bytes": 2184,
+      "path": "evidence/phase3/live-partial/reviewer-0/result.json",
+      "sha256": "7492f751a0c5c0a7b66e93023c2260eaf4005a6deb1fcae2246725ce17292dbe"
+    },
+    {
+      "bytes": 0,
+      "path": "evidence/phase3/live-partial/reviewer-0/stderr.redacted.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2680,
+      "path": "evidence/phase3/live-partial/reviewer-0/stdout.redacted.jsonl",
+      "sha256": "8e2278b27fa431d3b954d5d62d3d5924112aa49fe756f0b0f49218483b021df7"
+    },
+    {
+      "bytes": 4888,
+      "path": "evidence/phase3/live-partial/summary.json",
+      "sha256": "3f155b54da67b88362370012e6b23fefd0470f76d7cf653c1006245833236f6d"
+    },
+    {
+      "bytes": 3536,
+      "path": "evidence/phase3/simulated-complete/approval-package.json",
+      "sha256": "efefde6266ea234096a4f331eec4ed0832a524bec0f7d7b12c3bccec4b950561"
+    },
+    {
+      "bytes": 687,
+      "path": "evidence/phase3/simulated-complete/approval-package.md",
+      "sha256": "800f8ab3e494f92e35238252591db0eafab3885dc9cf42ee5fa66cb8e5bc250c"
+    },
+    {
+      "bytes": 13645,
+      "path": "evidence/phase3/simulated-complete/controller-state.json",
+      "sha256": "67be4b4568d06453ff8c18fe6d8f4746c888e7b5607738eb677ac52ba0372992"
+    },
+    {
+      "bytes": 398,
+      "path": "evidence/phase3/simulated-complete/summary.json",
+      "sha256": "3af5c5d9a8ce946edc471f8848f043253cd3e8ee866e98c49d62bf722c554e2a"
+    }
+  ],
+  "schema_version": 1
+}

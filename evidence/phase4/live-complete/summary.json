@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "task_id": "phase4-live",
+  "result": "awaiting_pr_approval",
+  "execution_profile": "trusted-disposable-macos",
+  "routing": {
+    "implementer": "codex-account-default",
+    "reviewer": "claude-account-default",
+    "model_identifiers": null,
+    "relative_cost": "unknown"
+  },
+  "candidate": {
+    "base_revision": "84b48c207d7afdeeebb98d1b4ec3c50a83555813",
+    "head_revision": "6c3074a5ee12a2577cf20fd7a2a45c0a8f638b73",
+    "verification": "passed",
+    "review_findings": [],
+    "approval_recorded": false
+  },
+  "budget": {
+    "maximum_calls": 5,
+    "completed_calls": 3,
+    "inference_calls": 2,
+    "local_verification_calls": 1,
+    "maximum_elapsed_seconds": 180,
+    "observed_elapsed_seconds": 42.260266291,
+    "remaining_calls": 2
+  },
+  "usage_observations": {
+    "codex": {
+      "input_tokens": 47785,
+      "output_tokens": 600,
+      "cached_input_tokens": 37120,
+      "cache_creation_tokens": null,
+      "reasoning_tokens": 0,
+      "estimated_cost_usd": null,
+      "billed_cost_usd": null,
+      "source": "codex.turn.completed"
+    },
+    "claude": {
+      "input_tokens": 2,
+      "output_tokens": 304,
+      "cached_input_tokens": 0,
+      "cache_creation_tokens": 3007,
+      "reasoning_tokens": null,
+      "estimated_cost_usd": 0.03768,
+      "billed_cost_usd": null,
+      "source": "claude.result"
+    },
+    "aggregate": {
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached_input_tokens": null,
+      "cache_creation_tokens": null,
+      "reasoning_tokens": null,
+      "estimated_cost_usd": null,
+      "billed_cost_usd": null,
+      "note": "Unknown local and provider categories remain unknown; the Claude estimate is not billing."
+    }
+  },
+  "authentication_recovery_used": false,
+  "repair_cycles": 0,
+  "publication_performed": false
+}

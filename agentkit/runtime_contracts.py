@@ -3,7 +3,7 @@
 from dataclasses import asdict, dataclass, field
 import math
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 SCHEMA_VERSION = 1
@@ -43,6 +43,7 @@ class ExecutionRequest:
     timeout_seconds: float = 30.0
     max_output_bytes: int = 1048576
     model: Optional[str] = None
+    effort: Optional[str] = None
     mode: str = "model-only"
     schema_version: int = SCHEMA_VERSION
 
@@ -65,6 +66,11 @@ class ExecutionRequest:
             raise ValueError("cwd must be absolute")
         if self.model is not None and (not isinstance(self.model, str) or not self.model or self.model.startswith("-") or len(self.model) > 128):
             raise ValueError("invalid model identifier")
+        if self.effort is not None:
+            if self.engine != "claude":
+                raise ValueError("effort is unsupported by the tested Codex CLI contract")
+            if self.effort not in ("low", "medium", "high", "xhigh", "max"):
+                raise ValueError("unsupported Claude effort level")
 
     @classmethod
     def from_dict(cls, value):
@@ -83,6 +89,21 @@ class LivePolicy:
     """
     subscription_smoke_authorized: bool = False
     evidence: str = "No trusted operator authorization supplied."
+
+
+@dataclass(frozen=True)
+class ExecutionBoundary:
+    """Trusted, controller-created boundary for a disposable owned-code run."""
+    workspace: str
+    denied_read_paths: Tuple[str, ...]
+    schema_version: int = SCHEMA_VERSION
+
+    def __post_init__(self):
+        if self.schema_version != SCHEMA_VERSION:
+            raise ValueError("unsupported boundary schema version")
+        paths = (self.workspace,) + tuple(self.denied_read_paths)
+        if not self.denied_read_paths or any(not isinstance(p, str) or not Path(p).is_absolute() for p in paths):
+            raise ValueError("boundary paths must be absolute and include denied paths")
 
 
 @dataclass
