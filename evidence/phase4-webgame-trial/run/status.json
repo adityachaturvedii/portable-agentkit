@@ -1,0 +1,27 @@
+{
+  "approval_package": null,
+  "executions": [
+    {
+      "allocation_seconds": 180.0,
+      "effort": null,
+      "elapsed_seconds": 29.313421,
+      "engine": "claude",
+      "execution_id": "0896405d-0edc-4576-ae33-0950ef0a8144",
+      "finished_at": "2026-09-19T04:44:09.303710+00:00",
+      "model": null,
+      "pid": 76449,
+      "process_token": "phase4-controller-supervised:76449:a100609a09b445f89486c8f18338e865",
+      "reconciliation_note": null,
+      "result_json": "{\"artifacts\":{\"request.json\":\"4d784109de5e4390aac81839bbd9fdb504d4f31386a659024e65846d76b3ed76\",\"stderr.redacted.txt\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"stdout.redacted.jsonl\":\"6f9f7d405b4855931494f63117dbb9012db297f11b43b8815084633355372350\"},\"authentication_failure\":null,\"error_class\":\"rate_limit\",\"limitations\":[\"Provider events and final text are claims; fixture acceptance is independently computed.\",\"Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.\",\"Process groups cannot prove detached-descendant or remote cancellation.\",\"Whole-process guard denies global writes; parent provider network and auth access remain available.\",\"Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.\",\"No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.\"],\"proposal_document\":null,\"provider_reported_configuration\":{\"effort\":null,\"model\":\"claude-opus-5[1m]\"},\"requested_configuration\":{\"effort\":null,\"model\":null}}",
+      "role": "planning",
+      "started_at": "2026-09-19T04:43:39.110353+00:00",
+      "status": "failed",
+      "task_id": "breakout-live",
+      "usage_json": "{\"billed_cost_usd\":null,\"cache_creation_tokens\":9678,\"cached_input_tokens\":25570,\"estimated_cost_usd\":0.160805,\"input_tokens\":8,\"output_tokens\":2048,\"reasoning_tokens\":null,\"source\":\"claude.result\"}"
+    }
+  ],
+  "next_action": "inspect bounded product planning failure",
+  "stage": "planning",
+  "state": "blocked",
+  "task_id": "breakout-live"
+}

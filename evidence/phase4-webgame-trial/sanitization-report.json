@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "result": "passed",
+  "included": [
+    "user brief and protected acceptance inputs",
+    "sanitized provider request metadata and prompt hash",
+    "redacted provider JSONL and stderr",
+    "normalized provider result and usage",
+    "controller snapshot, registry and status",
+    "read-only authentication summaries and CLI versions"
+  ],
+  "excluded": [
+    "controller SQLite database and WAL files",
+    "credentials and credential files",
+    "authorization codes and login transcripts",
+    "environment values",
+    "unredacted provider streams"
+  ],
+  "checks": {
+    "credential_values_recorded": false,
+    "authorization_codes_recorded": false,
+    "raw_login_transcripts_recorded": false,
+    "sensitive_environment_recorded": false,
+    "publication_approval_recorded": false
+  }
+}

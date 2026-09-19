@@ -1,0 +1,42 @@
+[
+  {
+    "id": "build-start",
+    "expected": "The dependency-free application passes the documented Node syntax build, loads from the loopback preview, and reaches a startable ready state."
+  },
+  {
+    "id": "keyboard-controls",
+    "expected": "Arrow keys or A/D move the paddle, Space or Enter starts and pauses or resumes as documented, with browser focus behavior that does not trap the user."
+  },
+  {
+    "id": "touch-controls",
+    "expected": "Visible touch controls or direct touch/pointer input move the paddle and expose start/pause/restart on a mobile viewport."
+  },
+  {
+    "id": "collisions-scoring-life",
+    "expected": "The protected pure mechanics API demonstrates wall, paddle and brick collisions, score gain after breaking a brick, and one-life loss when the ball leaves the playfield."
+  },
+  {
+    "id": "pause-resume",
+    "expected": "Pausing freezes mechanics progression and resuming continues from the preserved state in both the protected API and visible UI."
+  },
+  {
+    "id": "restart",
+    "expected": "Restart consistently restores ready status, score zero, three lives, the initial ball and paddle, and all bricks."
+  },
+  {
+    "id": "win-lose",
+    "expected": "Breaking the last live brick reaches a clear won state; losing the last life reaches a clear lost state; both visible states offer restart."
+  },
+  {
+    "id": "responsive-layout",
+    "expected": "The game, status, instructions and controls remain usable without horizontal overflow at desktop and 390x844 mobile viewports."
+  },
+  {
+    "id": "accessible-controls",
+    "expected": "Instructions are concise and readable; interactive controls have accessible names, visible focus, adequate target size and sensible keyboard order."
+  },
+  {
+    "id": "no-console-errors",
+    "expected": "Primary start, play, pause/resume, life-loss, win/lose and restart flows produce no unexplained browser errors."
+  }
+]

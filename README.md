@@ -47,7 +47,7 @@ Run these commands from this directory. To move machines, copy the entire direct
 | Guided subscription-auth recovery | Implemented with uncaptured official CLI terminal handoff, durable stage checkpoint, bounded retries and revision/evidence revalidation |
 | Cross-provider disposable delivery workflow | Corrected single-assignment path live-tested at executable `342423e`; the concurrent `b22020c` attempt proved two live workers overlap but blocked before integration because of a narrow shell-runtime guard incompatibility |
 | Phase 4 task CLI, request-driven graph, concurrent scheduler, routing and quality reserves | Implemented and fixture-tested for controller-created disposable projects; maximum two supervised provider workers |
-| Provider-planned static web products | Implemented and fixture-tested for fresh dependency-free controller repositories; live game trial pending |
+| Provider-planned static web products | Implemented and fixture-tested for fresh dependency-free controller repositories; the first live game trial stopped at the planner output limit |
 | Browser acceptance gate | Implemented as exact-revision evidence and owned preview lifecycle; browser interaction is externally driven and host validation is pending |
 | General browser automation, CUDA/GPU worker, GitHub publication, installer/update | Not implemented; separate later gates |
 
@@ -84,6 +84,8 @@ The execution graph is bounded to two implementation assignments, two repair cyc
 ## Static web product trial
 
 `product submit` is a separate, tightly bounded provider-planning path for a fresh dependency-free static web project. It accounts one planner call, validates the proposal against the brief, protected acceptance, inventory, authority and budget, then reuses the existing scheduler and adapters. Controller verification runs the documented Node syntax build and a protected mechanics test in a separate candidate copy. Exact-revision browser evidence is required after review and before packaging. See the [bounded product workflow](docs/product-workflow.md) for complete commands and limitations.
+
+The first bounded Breakout trial against executable `70070e2` stopped after its sole Claude planning call exceeded the adapter's 512 generated-output-token allocation. No plan, repository, game, verification, review, preview or approval package was produced, and no retry or provider substitution occurred. The retained archive distinguishes that output-allocation defect from subscription quota and billing observations.
 
 ## Inspect the work
 

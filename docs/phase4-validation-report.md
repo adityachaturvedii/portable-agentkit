@@ -20,7 +20,7 @@ Offline-corrected executable: `b9df1ad8af93f9d62124859b30246d971f273e83`
 
 Dependency/claim/request correction: `dd8da0ed2eaf973a646bb5f2e95fcd543fddb3b9`
 
-Static-web executable milestone: pending local commit
+Static-web executable milestone: `70070e293c890a5c47bbb448b99a9b7cf34f8237`
 
 ## Bounded static-web product acceptance path
 
@@ -31,6 +31,16 @@ Validated assignments reuse the existing atomic scheduler and broker. The contro
 Passing mechanics and independent review stop at `review_complete`. Packaging requires a clean exact-revision browser evidence object covering every protected acceptance ID, browser identity, hashed screenshots where retained, explicit final visual judgment, and a recorded preview session with confirmed process cleanup. The supported preview stays in one foreground controller process until Ctrl+C and records cleanup in `finally`. Detached descendants, browser credential isolation, browser egress control and crash-safe process recovery are not claimed.
 
 Nine focused product tests use deterministic planning/provider fixtures and one external-transport-only planner stub. They cover real model-only request construction, malicious scope/cycle/acceptance rejection, mandatory budget infeasibility, immutable product-spec binding, generated-project isolation, protected Node mechanics acceptance, unchanged-candidate evidence, stale candidate rejection, screenshot hash checking, browser gating and local package binding. The preview lifecycle test is skipped inside the managed outer sandbox because loopback `bind` returns `PermissionError`; it passes separately at host level with the foreground owner recording confirmed cleanup. The 166-test repository suite passes with the expected nested-Seatbelt and managed-loopback skips. No live inference was used for this implementation evidence.
+
+## Bounded Breakout trial
+
+The trial tested exact executable `70070e293c890a5c47bbb448b99a9b7cf34f8237`. Read-only preflight reported Codex CLI 0.154.0 and Claude Code 2.1.220 using existing first-party subscription authentication. The controller recorded account-default Claude planning, Codex implementation and cross-provider Claude review routes; requested model and effort were `null`. The declared ceiling was eight provider calls, two simultaneous workers, two repairs, 180 seconds per provider call, 10 seconds per local verification and 1,200 seconds overall.
+
+Only the planning invocation ran. It ended after 29.313421 seconds with no structured proposal. Claude Code's terminal message says the response exceeded the configured 512 output-token maximum. The stream also included an allowed rate-limit metadata event with overage disabled, causing the existing broad classifier to label the combined failure `rate_limit`; this is a classification defect. The direct terminal cause was the adapter's planner output allocation, not an observed subscription usage-limit or payment demand. The controller made no retry, provider substitution or authentication change.
+
+The task remains `blocked` before contract/plan persistence, repository creation or candidate revision. Therefore no generated task graph, game, build, mechanics verification, review, repair, preview, browser check, screenshot or local approval package exists. This failed trial does not validate any subsequently corrected code.
+
+Claude reported 8 input, 2,048 output, 25,570 cached-input and 9,678 cache-creation tokens. Reasoning tokens are unknown. It reported a USD 0.160805 estimate; billed cost and account billing impact are unknown. The [trial archive](../evidence/phase4-webgame-trial/manifest.json) retains the brief, protected criteria/test, request hash, redacted stream, normalized result, controller snapshot, status, versions, usage and diagnosis without the SQLite database, credentials, login transcripts, authorization codes or environment values.
 
 ## Request-driven planning and concurrency increment
 
