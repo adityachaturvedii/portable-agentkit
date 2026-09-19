@@ -43,6 +43,7 @@ class ExecutionRequest:
     timeout_seconds: float = 30.0
     max_output_bytes: int = 1048576
     model: Optional[str] = None
+    effort: Optional[str] = None
     mode: str = "model-only"
     schema_version: int = SCHEMA_VERSION
 
@@ -65,6 +66,11 @@ class ExecutionRequest:
             raise ValueError("cwd must be absolute")
         if self.model is not None and (not isinstance(self.model, str) or not self.model or self.model.startswith("-") or len(self.model) > 128):
             raise ValueError("invalid model identifier")
+        if self.effort is not None:
+            if self.engine != "claude":
+                raise ValueError("effort is unsupported by the tested Codex CLI contract")
+            if self.effort not in ("low", "medium", "high", "xhigh", "max"):
+                raise ValueError("unsupported Claude effort level")
 
     @classmethod
     def from_dict(cls, value):

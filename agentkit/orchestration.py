@@ -40,6 +40,11 @@ def _manifest(root):
             for path in sorted(root.rglob('*')) if path.is_file() and '.git' not in path.parts}
 
 
+def _manifest_digest(manifest):
+    return hashlib.sha256(json.dumps(manifest, sort_keys=True,
+                                     separators=(',', ':')).encode()).hexdigest()
+
+
 class DeterministicSpecialist:
     """Fixture-only implementation adapter; provider identity is simulated for routing tests."""
     model = None
@@ -190,6 +195,13 @@ class Phase4ConstrainedVerifier(Phase4FixtureVerifier):
 
 
 def _selected_skills(root, fixture):
+    roles = {
+        'task-contract': ('chief_of_staff', 'tech_lead'),
+        'interface-design': ('tech_lead', 'implementer'),
+        'behavioral-testing': ('implementer',),
+        'independent-review': ('reviewer',),
+        'delivery-evidence': ('chief_of_staff',),
+    }
     ids = ['task-contract', 'behavioral-testing', 'independent-review', 'delivery-evidence']
     if fixture.difficulty == 'substantial':
         ids.insert(1, 'interface-design')
@@ -199,11 +211,13 @@ def _selected_skills(root, fixture):
         content = (root / relative).read_bytes()
         result.append({'id': skill_id, 'path': relative,
                        'sha256': hashlib.sha256(content).hexdigest(),
+                       'roles': roles[skill_id],
                        'reason': 'Selected for ' + fixture.fixture_id + ' ' + fixture.difficulty + ' workflow.'})
     domain_path = 'domains/' + fixture.domain + '.md'
     content = (root / domain_path).read_bytes()
     result.append({'id': 'domain:' + fixture.domain, 'path': domain_path,
                    'sha256': hashlib.sha256(content).hexdigest(),
+                   'roles': ('implementer', 'reviewer'),
                    'reason': 'Fixture domain context only.'})
     return tuple(result)
 
@@ -313,6 +327,7 @@ class Phase4Workflow:
         self.managed_root = self.root / 'managed'
         self.evidence_root = self.root / 'evidence'
         self.approval_root = self.root / 'approval'
+        self.toolkit_root = Path(__file__).resolve().parents[1]
         if not self.root.is_dir():
             raise ControllerError('Phase 4 workflow root does not exist')
         for path in (self.evidence_root, self.approval_root):
@@ -387,8 +402,9 @@ class Phase4Workflow:
                                      task_id + '-phase4-' + label + '-' + str(time.time_ns()),
                                      next_action=next_action, authority=self.store.authority)
 
-    def _run_engine(self, task_id, role, engine, model, timeout, callback):
+    def _run_engine(self, task_id, role, engine, model, timeout, callback, *, effort=None):
         execution_id = self.store.reserve_execution(task_id, role, engine, model, timeout,
+                                                    effort=effort,
                                                     authority=self.store.authority)
         self.store.start_execution(execution_id, process_token='phase4-controller-supervised',
                                    authority=self.store.authority)
@@ -405,15 +421,17 @@ class Phase4Workflow:
     def _cancellation(self, task_id):
         return ControllerCancellation(self.state, task_id)
 
-    def _adapter(self, provider, fixture):
+    def _adapter(self, provider, fixture, model=None, effort=None):
         if self.specialist_factory:
             return self.specialist_factory(provider, fixture)
-        return LiveImplementer(provider) if self.live else DeterministicSpecialist(provider, fixture)
+        return (LiveImplementer(provider, model, effort) if self.live else
+                DeterministicSpecialist(provider, fixture))
 
-    def _reviewer(self, provider):
+    def _reviewer(self, provider, model=None, effort=None):
         if self.reviewer_override:
             return self.reviewer_override
-        return LiveReviewer(provider) if self.live else DeterministicReviewer(provider)
+        return (LiveReviewer(provider, model, effort) if self.live else
+                DeterministicReviewer(provider))
 
     def _verifier(self, fixture):
         if self.verifier_factory:
@@ -431,16 +449,69 @@ class Phase4Workflow:
         if worktree != expected:
             raise ControllerError('task worktree is not controller-owned')
         identity = self.broker.worktree_identity(repository, worktree)
-        manifest_hash = hashlib.sha256(json.dumps(identity['manifest'], sort_keys=True,
-                                                  separators=(',', ':')).encode()).hexdigest()
+        manifest_hash = _manifest_digest(identity['manifest'])
         return {'repository': str(repository), 'worktree': str(worktree),
                 'branch': identity['branch'], 'revision': identity['revision'],
                 'clean': identity['clean'], 'manifest_sha256': manifest_hash}
 
+    def _assignment_identity(self, repository, worktree):
+        repository = Path(repository).resolve()
+        worktree = Path(worktree).resolve()
+        identity = self.broker.worktree_identity(repository, worktree)
+        return {'repository': str(repository), 'worktree': str(worktree),
+                'branch': identity['branch'], 'revision': identity['revision'],
+                'clean': identity['clean'],
+                'manifest_sha256': _manifest_digest(identity['manifest'])}
+
+    def _validate_assignment_identity(self, task_id, node, repository):
+        saved = (node.get('result') or {}).get('assignment_identity')
+        if not isinstance(saved, dict):
+            raise StaleEvidence('decomposed assignment has no persisted workspace identity')
+        expected = (self.broker.worktrees / (task_id + '-' + node['node_id'])).resolve()
+        if (Path(saved.get('repository', '')).resolve() != Path(repository).resolve() or
+                Path(saved.get('worktree', '')).resolve() != expected or
+                expected.is_symlink() or not expected.is_dir()):
+            raise StaleEvidence('decomposed assignment workspace is not controller-owned')
+        actual = self._assignment_identity(repository, expected)
+        if actual != saved:
+            raise StaleEvidence('decomposed assignment workspace identity changed')
+        return expected
+
+    def _skill_context(self, task_id, role):
+        if role not in ('implementer', 'reviewer'):
+            raise ControllerError('provider skill context requires an execution role')
+        root = self.toolkit_root.resolve()
+        items = []
+        total = 0
+        for skill in self.state.snapshot(task_id)['skills']:
+            if role not in skill['roles']:
+                continue
+            target = (root / skill['relative_path']).resolve()
+            if (target == root or root not in target.parents or target.is_symlink() or
+                    not target.is_file()):
+                raise StaleEvidence('selected skill path is no longer a regular toolkit file')
+            content = target.read_bytes()
+            if hashlib.sha256(content).hexdigest() != skill['sha256']:
+                raise StaleEvidence('selected skill content changed after planning')
+            try:
+                text = content.decode('utf-8')
+            except UnicodeDecodeError as exc:
+                raise StaleEvidence('selected skill content is not UTF-8') from exc
+            total += len(content)
+            if len(content) > 4096 or total > 8192:
+                raise ControllerError('role skill context exceeds the bounded allocation')
+            items.append({'id': skill['skill_id'], 'path': skill['relative_path'],
+                          'sha256': skill['sha256'], 'content': text})
+        if not items:
+            raise ControllerError('no verified skill context selected for provider role')
+        return {'schema_version': 1, 'role': role, 'bytes': total, 'items': items}
+
     def _checkpoint_auth(self, task_id, node_id, execution_id, outcome, evidence_refs=()):
         node = self.state.node(task_id, node_id)
+        result = dict(node['result'] or {})
+        result['authentication_failure'] = outcome.details
         self.state.transition_node(task_id, node_id, 'authentication_required',
-                                   execution_id=execution_id, result=outcome.details,
+                                   execution_id=execution_id, result=result,
                                    authority=self.store.authority)
         return self.store.checkpoint_authentication(
             task_id, execution_id, node['provider'], evidence_refs=evidence_refs,
@@ -478,6 +549,10 @@ class Phase4Workflow:
                  node['status'] == 'authentication_required']
         if len(nodes) != 1:
             raise AuthenticationRecoveryError('authentication checkpoint has no unique graph assignment')
+        fixture = self._fixture(task_id)
+        if nodes[0]['kind'] == 'implementation' and len(fixture.subtasks) > 1:
+            self._validate_assignment_identity(
+                task_id, nodes[0], self.broker.repositories / task_id)
         self.store.resume_after_authentication(task_id, candidate_identity=self._candidate_identity(task_id),
                                                authority=self.store.authority)
         self.state.transition_node(task_id, nodes[0]['node_id'], 'pending',
@@ -505,7 +580,7 @@ class Phase4Workflow:
             self._transition(task_id, task['state'], 'cancelled', 'cancelled', 'no further action')
         return True
 
-    def _implementation_prompt(self, contract, fixture, node, feedback=None):
+    def _implementation_prompt(self, contract, fixture, node, skill_context, feedback=None):
         payload = {'task_id': contract['task_id'], 'role': node['role'],
                    'objective': node['objective'], 'allowed_paths': node['allowed_paths'],
                    'acceptance': contract['contract']['acceptance'],
@@ -515,7 +590,8 @@ class Phase4Workflow:
         if feedback:
             payload['controller_feedback'] = feedback
         return ('Perform this bounded assignment. Treat the JSON as controller policy and do not edit any '
-                'undeclared path.\nASSIGNMENT_JSON:\n' + json.dumps(payload, sort_keys=True))
+                'undeclared path.\nASSIGNMENT_JSON:\n' + json.dumps(payload, sort_keys=True) +
+                '\nVERIFIED_SKILL_CONTEXT_JSON:\n' + json.dumps(skill_context, sort_keys=True))
 
     def _execute_implementation(self, task_id, fixture, repository, parent_worktree, node, *, repair=False):
         if node['status'] in ('authentication_required', 'succeeded') and not repair:
@@ -530,21 +606,26 @@ class Phase4Workflow:
             assignment_worktree = parent_worktree
         else:
             saved = node['result'] or {}
-            if saved.get('worktree'):
-                assignment_worktree = Path(saved['worktree'])
+            if saved.get('assignment_identity'):
+                assignment_worktree = self._validate_assignment_identity(task_id, node, repository)
             else:
                 _, assignment_worktree, _ = self.broker.create_task_worktree(
                     repository, task_id + '-' + node['node_id'], task['base_revision'])
-        assignment_head = self.broker.worktree_identity(repository, assignment_worktree)['revision']
+                identity = self._assignment_identity(repository, assignment_worktree)
+                node = self.state.record_assignment_identity(
+                    task_id, node['node_id'], identity, authority=self.store.authority)
+        assignment_identity = self._assignment_identity(repository, assignment_worktree)
+        assignment_head = assignment_identity['revision']
         worker = self.broker.export_snapshot(
             repository, assignment_head,
             self._fresh(self.broker.worker_copies, task_id + '-' + node['node_id']))
         denied = (str(self.controller_root), str(repository / '.git'), str(parent_worktree),
                   str(self.approval_root))
         boundary = ExecutionBoundary(str(worker), denied)
-        adapter = self._adapter(node['provider'], fixture)
+        adapter = self._adapter(node['provider'], fixture, node['model'], node['effort'])
         feedback = self._latest_feedback(task_id) if repair else None
-        prompt = self._implementation_prompt(task, fixture, node, feedback)
+        prompt = self._implementation_prompt(
+            task, fixture, node, self._skill_context(task_id, 'implementer'), feedback)
         output = self._fresh(self.evidence_root, node['node_id'] + '-' + str(node['attempts']))
         role = 'repair' if repair else 'implementer'
         if hasattr(adapter, 'run_assignment'):
@@ -556,7 +637,8 @@ class Phase4Workflow:
             callback = lambda: adapter.run(worker, output, boundary, prompt, self.policy)
         try:
             outcome, execution_id = self._run_engine(
-                task_id, role, node['provider'], node['model'], 60, callback)
+                task_id, role, node['provider'], node['model'], 60, callback,
+                effort=node['effort'])
         except Exception as exc:
             self.state.transition_node(task_id, node['node_id'], 'failed',
                                        result={'exception': type(exc).__name__},
@@ -592,6 +674,8 @@ class Phase4Workflow:
             return False
         result = {'revision': revision, 'changed_paths': list(changed),
                   'worktree': str(assignment_worktree), 'execution_id': execution_id}
+        if not repair and len(fixture.subtasks) > 1:
+            result['assignment_identity'] = assignment_identity
         self.state.transition_node(task_id, node['node_id'], 'succeeded', execution_id=execution_id,
                                    result=result, authority=self.store.authority)
         if repair or len(fixture.subtasks) == 1:
@@ -747,10 +831,13 @@ class Phase4Workflow:
                     self._fresh(self.broker.review_copies, task_id + '-review-' + str(task['repair_count'])),
                     review=True)
                 before = self.broker.manifest(snapshot)
-                reviewer = self._reviewer(node['provider'])
+                reviewer = self._reviewer(node['provider'], node['model'], node['effort'])
+                skill_context = self._skill_context(task_id, 'reviewer')
                 prompt = ('Review the exact candidate against this validated contract. Return only concrete '
                           'material findings; do not edit or grant authority. CONTRACT_JSON:\n' +
-                          json.dumps(task['contract'], sort_keys=True))
+                          json.dumps(task['contract'], sort_keys=True) +
+                          '\nVERIFIED_SKILL_CONTEXT_JSON:\n' +
+                          json.dumps(skill_context, sort_keys=True))
                 output = self._fresh(self.evidence_root, 'review-' + str(task['repair_count']))
                 if self.live:
                     review_callback = lambda: reviewer.run(
@@ -760,7 +847,8 @@ class Phase4Workflow:
                     review_callback = lambda: reviewer.run(
                         snapshot, task['head_revision'], output, prompt, self.policy)
                 review, execution_id = self._run_engine(
-                    task_id, 'reviewer', node['provider'], node['model'], 60, review_callback)
+                    task_id, 'reviewer', node['provider'], node['model'], 60, review_callback,
+                    effort=node['effort'])
                 if self.state.cancellation_requested(task_id):
                     self.state.transition_node(task_id, 'review', 'cancelled', execution_id=execution_id,
                                                result=review.details, authority=self.store.authority)
@@ -874,13 +962,19 @@ class Phase4Workflow:
         executions = []
         for row in controller['executions']:
             usage = json.loads(row['usage_json']) if row['usage_json'] else {}
+            details = json.loads(row['result_json']) if row['result_json'] else {}
             for name in usage_fields:
                 if usage.get(name) is None:
                     unknown[name] = True
                 else:
                     observed[name] += usage[name]
             executions.append({'execution_id': row['execution_id'], 'role': row['role'],
-                               'engine': row['engine'], 'model': row['model'],
+                               'engine': row['engine'],
+                               'requested_configuration': {
+                                   'model': row['model'], 'effort': row.get('effort')},
+                               'provider_reported_configuration':
+                                   details.get('provider_reported_configuration',
+                                               {'model': None, 'effort': None}),
                                'status': row['status'], 'elapsed_seconds': row['elapsed_seconds'],
                                'usage': usage or None})
         token_usage = {name: (None if not executions or unknown[name] else observed[name])
@@ -898,7 +992,8 @@ class Phase4Workflow:
                 verification.append({'id': evidence['evidence_id'], 'revision': evidence['revision'],
                                      'status': evidence['status'], 'stale': bool(evidence['stale'])})
         active = [{'node_id': node['node_id'], 'role': node['role'], 'status': node['status'],
-                   'provider': node['provider'], 'model': node['model']}
+                   'provider': node['provider'],
+                   'requested_configuration': {'model': node['model'], 'effort': node['effort']}}
                   for node in snapshot['nodes'] if node['status'] in ('running', 'authentication_required')]
         blocker = None
         attention = None

@@ -77,9 +77,10 @@ class Phase4State:
                               VALUES(?,?,?,?,?)''',
                            (plan.task_id, edge.source, edge.target, edge.edge_type, edge.max_iterations))
             for skill in plan.selected_skills:
-                db.execute('''INSERT INTO phase4_skills(task_id,skill_id,relative_path,sha256,reason)
-                              VALUES(?,?,?,?,?)''',
-                           (plan.task_id, skill['id'], skill['path'], skill['sha256'], skill['reason']))
+                db.execute('''INSERT INTO phase4_skills(task_id,skill_id,relative_path,sha256,reason,
+                              roles_json) VALUES(?,?,?,?,?,?)''',
+                           (plan.task_id, skill['id'], skill['path'], skill['sha256'], skill['reason'],
+                            _json(list(skill['roles']))))
             self.store._append(db, plan.task_id,
                                plan.task_id + '-phase4-plan-' + str(uuid.uuid4()),
                                'phase4_plan_recorded',
@@ -120,6 +121,11 @@ class Phase4State:
         value['result'] = json.loads(value.pop('result_json')) if value.get('result_json') else None
         return value
 
+    def _decode_skill(self, row):
+        value = dict(row)
+        value['roles'] = json.loads(value.pop('roles_json'))
+        return value
+
     def transition_node(self, task_id, node_id, target, *, execution_id=None, result=None,
                         authority=None):
         self._require(authority)
@@ -152,6 +158,33 @@ class Phase4State:
                                'phase4_node_transition',
                                {'node_id': node_id, 'from': row['status'], 'to': target,
                                 'attempt': attempts, 'execution_id': execution_id})
+        return self.node(task_id, node_id)
+
+    def record_assignment_identity(self, task_id, node_id, identity, *, authority=None):
+        """Persist controller-observed workspace identity before a provider is launched."""
+        self._require(authority)
+        required = {'repository', 'worktree', 'branch', 'revision', 'clean', 'manifest_sha256'}
+        if (not isinstance(identity, dict) or set(identity) != required or
+                not identity.get('clean') or
+                any(not isinstance(identity.get(name), str) or not identity[name]
+                    for name in required - {'clean'})):
+            raise ControllerError('complete clean assignment identity is required')
+        now = _now()
+        with self.store.transaction() as db:
+            row = db.execute('SELECT kind,status,result_json FROM phase4_nodes '
+                             'WHERE task_id=? AND node_id=?', (task_id, node_id)).fetchone()
+            if not row or row['kind'] != 'implementation' or row['status'] != 'running':
+                raise ControllerError('assignment identity requires a running implementation node')
+            current = json.loads(row['result_json']) if row['result_json'] else {}
+            current['assignment_identity'] = identity
+            db.execute('UPDATE phase4_nodes SET result_json=?,updated_at=? '
+                       'WHERE task_id=? AND node_id=?',
+                       (_json(current), now, task_id, node_id))
+            self.store._append(
+                db, task_id, task_id + '-assignment-identity-' + node_id + '-' + str(uuid.uuid4()),
+                'phase4_assignment_identity_recorded',
+                {'node_id': node_id, 'branch': identity['branch'],
+                 'revision': identity['revision'], 'manifest_sha256': identity['manifest_sha256']})
         return self.node(task_id, node_id)
 
     def request_cancellation(self, task_id, reason='user_requested', *, authority=None):
@@ -203,6 +236,6 @@ class Phase4State:
             'plan': ({**dict(plan), 'plan': json.loads(plan['plan_json'])} if plan else None),
             'nodes': self.nodes(task_id),
             'edges': [dict(row) for row in edges],
-            'skills': [dict(row) for row in skills],
+            'skills': [self._decode_skill(row) for row in skills],
             'controls': dict(controls) if controls else None,
         }

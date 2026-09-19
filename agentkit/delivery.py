@@ -209,26 +209,32 @@ def _usage_from_result(result):
 
 
 class LiveImplementer:
-    def __init__(self, engine='codex', model=None):
+    def __init__(self, engine='codex', model=None, effort=None):
         self.engine = engine
         self.model = model
+        self.effort = effort
 
-    def run(self, workspace, output, boundary, prompt, policy):
+    def run(self, workspace, output, boundary, prompt, policy, cancel_event=None):
         request = ExecutionRequest(self.engine, 'phase3-live-implementer', prompt, str(Path(workspace).resolve()),
                                    timeout_seconds=60, max_output_bytes=1048576,
-                                   model=self.model, mode='owned-code')
+                                   model=self.model, effort=self.effort, mode='owned-code')
         result = execute_owned_code(request, output, boundary, policy=policy,
                                     cancel_event=cancel_event)
         return EngineOutcome(result.status, result.elapsed_seconds, _usage_from_result(result),
                              {'error_class': result.error_class, 'artifacts': result.artifacts,
                               'limitations': result.limitations,
+                              'requested_configuration': {'model': self.model, 'effort': self.effort},
+                              'provider_reported_configuration': {
+                                  'model': result.model,
+                                  'effort': result.provider_details.get('effort')},
                               'authentication_failure': result.provider_details.get('authentication_failure')})
 
 
 class LiveReviewer:
-    def __init__(self, engine='claude', model=None):
+    def __init__(self, engine='claude', model=None, effort=None):
         self.engine = engine
         self.model = model
+        self.effort = effort
 
     def run(self, snapshot, revision, output, prompt, policy, cancel_event=None):
         files = {}
@@ -241,7 +247,7 @@ class LiveReviewer:
         with tempfile.TemporaryDirectory(prefix='agentkit-review-empty-') as tmp:
             request = ExecutionRequest(self.engine, 'phase3-live-reviewer', review_prompt, str(Path(tmp).resolve()),
                                        timeout_seconds=60, max_output_bytes=1048576,
-                                       model=self.model, mode='model-only')
+                                       model=self.model, effort=self.effort, mode='model-only')
             result = execute(request, output, policy=policy, cancel_event=cancel_event)
         findings = ()
         parse_error = None
@@ -257,6 +263,10 @@ class LiveReviewer:
                              {'error_class': result.error_class, 'parse_error': parse_error,
                               'artifacts': result.artifacts, 'limitations': result.limitations,
                               'candidate_revision': revision,
+                              'requested_configuration': {'model': self.model, 'effort': self.effort},
+                              'provider_reported_configuration': {
+                                  'model': result.model,
+                                  'effort': result.provider_details.get('effort')},
                               'authentication_failure': result.provider_details.get('authentication_failure')}, findings)
 
 

@@ -10,6 +10,7 @@ PHASE4_SCHEMA_VERSION = 1
 MAX_GRAPH_NODES = 12
 MAX_IMPLEMENTATION_NODES = 2
 MAX_REPAIR_ATTEMPTS = 2
+CLAUDE_EFFORT_LEVELS = ('low', 'medium', 'high', 'xhigh', 'max')
 
 
 @dataclass(frozen=True)
@@ -172,6 +173,8 @@ class ModelProfile:
             _bounded_text(self.model, 'model identifier', 128)
         if self.effort is not None:
             _bounded_text(self.effort, 'effort', 32)
+            if self.provider != 'claude' or self.effort not in CLAUDE_EFFORT_LEVELS:
+                raise ValueError('effort is supported only for tested Claude levels')
         if self.relative_cost not in ('unknown', 'lower', 'higher'):
             raise ValueError('invalid relative cost evidence')
         if not self.roles or not self.capabilities:
@@ -221,6 +224,9 @@ class GraphNode:
             raise ValueError('invalid initial node status')
         if self.kind in ('implementation', 'repair', 'review') and self.provider not in ('codex', 'claude'):
             raise ValueError('model nodes require a supported provider')
+        if self.effort is not None and (self.provider != 'claude' or
+                                        self.effort not in CLAUDE_EFFORT_LEVELS):
+            raise ValueError('graph effort is unsupported for this provider')
         if self.kind in ('implementation', 'repair') and not self.allowed_paths:
             raise ValueError('implementation nodes require bounded paths')
         for value in self.allowed_paths:
@@ -305,6 +311,16 @@ class ExecutionPlan:
             raise ValueError('ordinary graph dependencies must be acyclic')
         if type(self.management_calls) is not int or self.management_calls != 0:
             raise ValueError('Phase 4 planning roles are deterministic and consume no model calls')
+        for skill in self.selected_skills:
+            if (not isinstance(skill, dict) or set(skill) !=
+                    {'id', 'path', 'sha256', 'reason', 'roles'} or
+                    not all(isinstance(skill[name], str) and skill[name]
+                            for name in ('id', 'path', 'sha256', 'reason')) or
+                    len(skill['sha256']) != 64 or
+                    any(character not in '0123456789abcdef' for character in skill['sha256']) or
+                    not isinstance(skill['roles'], (tuple, list)) or not skill['roles'] or
+                    any(role not in ROLE_CONTRACTS for role in skill['roles'])):
+                raise ValueError('invalid selected skill provenance or role scope')
 
     def to_dict(self):
         return asdict(self)

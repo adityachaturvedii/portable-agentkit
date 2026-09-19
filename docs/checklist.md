@@ -123,6 +123,20 @@ See [detailed Phase 2 checklist](phase2-plan.md) and [validation report](phase2-
 - [x] Complete and archive one bounded Codex implementation → constrained verification → Claude review demonstration at the exact integrated candidate, with two inference calls and no repair.
 - [ ] General repository onboarding, Linux/GPU workers, dashboards, GitHub publication and broad autonomous execution remain unsupported.
 
+## Phase 4 corrective review
+
+- [x] Start from exact `af807914dc39ef3f9527461ef97e888b860b494d` on `implementation/phase-4-review-fixes` in a dedicated worktree.
+- [x] Align the live implementer cancellation interface and exercise actual adapter/request construction with only external transports stubbed.
+- [x] Persist decomposed assignment identity before provider launch; validate and reuse it after authentication while preserving completed siblings.
+- [x] Cover authentication failure in either text-metrics subtask and reject a changed assignment before restoring task state.
+- [x] Propagate requested model and supported Claude effort through implementer, repair and reviewer paths; reject unsupported effort settings.
+- [x] Separate requested configuration from nullable provider-reported configuration in execution status and evidence.
+- [x] Rehash and assemble bounded role-relevant skill/domain contents into actual provider prompts; reject changed sources and omit unrelated skills.
+- [x] Correct scope claims: decomposition is fixture-defined, execution is sequential, management roles are deterministic and routing is not calibrated optimization.
+- [x] Preserve the prior live archive unchanged and label it historical evidence for `af80791` rather than validation of the corrected revision.
+- [x] Complete the 137-test repository suite with status `OK` and one expected nested-Seatbelt skip, pass that boundary regression separately at host level and pass `agentkit check`.
+- [ ] Run a new bounded live workflow for the corrected revision only under separate authorization; no live inference is spent in this corrective pass.
+
 ## Later phases (planned, not implemented)
 
 - [ ] Phase 5: hardware domain validation and optional GPU worker.
@@ -140,5 +154,7 @@ Phase 3 now implements the minimum local delivery graph for that narrow mode. Af
 The authentication-recovery follow-up supersedes that live gate: guided first-party subscription recovery is implemented and 107 tests pass, including the host macOS boundary test. One fresh bounded live workflow reached `awaiting_pr_approval` with Codex implementation, constrained local verification and Claude review. Existing authentication worked, so no interactive login was launched. A strict offline correction accepted Claude's single fenced JSON result after verifying its archived stream hash, provider-success terminal, candidate and snapshot, avoiding any repeat inference. Phase 4 may begin only for the same trusted disposable macOS mode; all broader limitations remain.
 
 Phase 4 now provides fixture-only natural-language intake, a reviewable plan, selective persisted role graphs, configurable account-default provider routing, separate verification/review reserves, active cancellation and a terminal status/package experience. The final suite passed 131 tests with one nested-sandbox skip, and the host boundary regression passed separately. One live two-inference-call workflow reached a clean revision-bound local package. General repositories, additional platforms, GPU/remote workers, dashboards and publication remain future gates.
+
+The Phase 4 corrective review fixes the live cancellation interface, decomposed authentication resume, requested model/effort propagation and verified worker skill context. The corrected revision completes its 137-test repository suite with status `OK` and one expected nested-Seatbelt skip; the skipped boundary test passes separately at host level. The earlier live package remains historical evidence for `af80791`. No live inference was used for the correction, so the corrected live implementation → verification → review path still needs one future bounded validation.
 
 Publication follow-up, 2026-09-19: the user subsequently authorized creating a private GitHub repository and pushing all committed toolkit branches. This supersedes the local-only publication restriction without changing the Phase 2 findings or granting PR/merge permission. See D025 in the [decision log](decisions.md).

@@ -13,7 +13,7 @@ import threading
 import uuid
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 TRANSITIONS = {
     'received': {'contracted', 'blocked', 'cancelled'},
     'contracted': {'workspace_ready', 'blocked', 'cancelled'},
@@ -167,7 +167,7 @@ class ControllerStore:
             );
             CREATE TABLE IF NOT EXISTS executions(
               execution_id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(task_id),
-              role TEXT NOT NULL, engine TEXT NOT NULL, model TEXT,
+              role TEXT NOT NULL, engine TEXT NOT NULL, model TEXT, effort TEXT,
               allocation_seconds REAL NOT NULL, status TEXT NOT NULL,
               pid INTEGER, process_token TEXT, started_at TEXT, finished_at TEXT,
               elapsed_seconds REAL, usage_json TEXT, result_json TEXT,
@@ -245,6 +245,7 @@ class ControllerStore:
             CREATE TABLE IF NOT EXISTS phase4_skills(
               task_id TEXT NOT NULL REFERENCES tasks(task_id), skill_id TEXT NOT NULL,
               relative_path TEXT NOT NULL, sha256 TEXT NOT NULL, reason TEXT NOT NULL,
+              roles_json TEXT NOT NULL DEFAULT '[]',
               PRIMARY KEY(task_id,skill_id)
             );
             CREATE TABLE IF NOT EXISTS phase4_controls(
@@ -260,8 +261,24 @@ class ControllerStore:
                 'PRAGMA table_info(budgets)').fetchall()}
             if 'review_reserve' not in budget_columns:
                 db.execute('ALTER TABLE budgets ADD COLUMN review_reserve INTEGER NOT NULL DEFAULT 0')
+            execution_columns = {row['name'] for row in db.execute(
+                'PRAGMA table_info(executions)').fetchall()}
+            if 'effort' not in execution_columns:
+                db.execute('ALTER TABLE executions ADD COLUMN effort TEXT')
+            skill_columns = {row['name'] for row in db.execute(
+                'PRAGMA table_info(phase4_skills)').fetchall()}
+            if 'roles_json' not in skill_columns:
+                db.execute("ALTER TABLE phase4_skills ADD COLUMN roles_json TEXT NOT NULL DEFAULT '[]'")
+            db.execute("""UPDATE phase4_skills SET roles_json=CASE
+                       WHEN skill_id='task-contract' THEN '[\"chief_of_staff\",\"tech_lead\"]'
+                       WHEN skill_id='interface-design' THEN '[\"tech_lead\",\"implementer\"]'
+                       WHEN skill_id='behavioral-testing' THEN '[\"implementer\"]'
+                       WHEN skill_id='independent-review' THEN '[\"reviewer\"]'
+                       WHEN skill_id='delivery-evidence' THEN '[\"chief_of_staff\"]'
+                       WHEN skill_id LIKE 'domain:%' THEN '[\"implementer\",\"reviewer\"]'
+                       ELSE roles_json END WHERE roles_json='[]'""")
             existing = db.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
-            if existing and int(existing['value']) not in (1, 2, 3, SCHEMA_VERSION):
+            if existing and int(existing['value']) not in (1, 2, 3, 4, SCHEMA_VERSION):
                 raise ControllerError('unsupported controller schema')
             if existing and int(existing['value']) == 2:
                 db.execute('BEGIN IMMEDIATE')
@@ -463,13 +480,16 @@ class ControllerStore:
             db.execute('UPDATE tasks SET head_revision=?,version=version+1,updated_at=? WHERE task_id=?',
                        (revision, _now(), task_id))
 
-    def reserve_execution(self, task_id, role, engine, model, timeout_seconds, *, authority=None):
+    def reserve_execution(self, task_id, role, engine, model, timeout_seconds, *, effort=None,
+                          authority=None):
         self._require(authority)
         if role not in ROLE_STATES:
             raise ControllerError('invalid execution role')
         if (type(timeout_seconds) not in (int, float) or not math.isfinite(timeout_seconds) or
                 timeout_seconds <= 0):
             raise ControllerError('execution timeout must be a finite positive number')
+        if effort is not None and (not isinstance(effort, str) or not effort or len(effort) > 32):
+            raise ControllerError('execution effort must be a bounded string or unknown')
         execution_id = str(uuid.uuid4())
         with self.transaction() as db:
             budget = db.execute('''SELECT budgets.*,tasks.state AS task_state FROM budgets
@@ -503,11 +523,12 @@ class ControllerStore:
             db.execute('''UPDATE budgets SET reserved_calls=reserved_calls+1,active_calls=active_calls+1,
                           reserved_elapsed_seconds=reserved_elapsed_seconds+? WHERE task_id=?''',
                        (timeout_seconds, task_id))
-            db.execute('''INSERT INTO executions(execution_id,task_id,role,engine,model,
-                          allocation_seconds,status) VALUES(?,?,?,?,?,?,?)''',
-                       (execution_id, task_id, role, engine, model, timeout_seconds, 'reserved'))
+            db.execute('''INSERT INTO executions(execution_id,task_id,role,engine,model,effort,
+                          allocation_seconds,status) VALUES(?,?,?,?,?,?,?,?)''',
+                       (execution_id, task_id, role, engine, model, effort, timeout_seconds, 'reserved'))
             self._append(db, task_id, 'reserve-' + execution_id, 'execution_reserved',
-                         {'execution_id': execution_id, 'role': role, 'timeout_seconds': timeout_seconds})
+                         {'execution_id': execution_id, 'role': role, 'timeout_seconds': timeout_seconds,
+                          'requested_configuration': {'model': model, 'effort': effort}})
         return execution_id
 
     def start_execution(self, execution_id, pid=None, process_token=None, *, authority=None):

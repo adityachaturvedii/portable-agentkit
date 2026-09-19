@@ -164,6 +164,8 @@ class ClaudeAdapter:
             argv.extend(['--session-id', session_id])
         if request.model:
             argv.extend(['--model', request.model])
+        if request.effort:
+            argv.extend(['--effort', request.effort])
         return argv
 
     def parse(self, events, result, allow_tools=False):
@@ -213,7 +215,7 @@ ADAPTERS = {'codex': CodexAdapter(), 'claude': ClaudeAdapter()}
 
 def normalize(request, outcome):
     result = ExecutionResult(request.engine, request.task_id, 'succeeded', None, outcome.exit_code,
-                             outcome.elapsed_seconds, model=request.model, cancellation=outcome.cancellation)
+                             outcome.elapsed_seconds, model=None, cancellation=outcome.cancellation)
     if outcome.stop_reason:
         result.status = 'cancelled' if outcome.stop_reason in ('cancelled', 'interrupted') else 'failed'
         result.error_class = outcome.stop_reason

@@ -3,19 +3,22 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import shutil
 import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 from agentkit.controller import (AuthenticationRecoveryError, BudgetExceeded, ControllerError,
                                  ReconciliationRequired, StaleEvidence, UsageRecord)
-from agentkit.delivery import EngineOutcome
+from agentkit.delivery import EngineOutcome, LiveImplementer, LiveReviewer
 from agentkit.orchestration import (DeterministicReviewer, DeterministicSpecialist,
-                                    Phase4Workflow, build_contract, build_plan)
+                                    Phase4FixtureVerifier, Phase4Workflow, build_contract, build_plan)
 from agentkit.phase4_contracts import (ExecutionPlan, GraphEdge, GraphNode, ModelProfile,
                                        ModelRegistry, ROLE_CONTRACTS, TaskContract)
 from agentkit.phase4_fixtures import CALCULATOR, TEXT_METRICS
+from agentkit.runtime_contracts import ExecutionBoundary, ExecutionResult, LivePolicy
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -109,6 +112,26 @@ class CancellableSpecialist:
             time.sleep(.02)
         status = 'cancelled' if cancel_event.is_set() else 'failed'
         return EngineOutcome(status, .1, UsageRecord(source='fake'), {'simulated': True})
+
+
+class AuthByNodeSpecialist:
+    engine = 'codex'
+    model = None
+
+    def __init__(self, target):
+        self.target = target
+        self.calls = {}
+
+    def run_assignment(self, workspace, assignment, output, boundary, prompt, policy):
+        node_id = assignment['node_id']
+        self.calls[node_id] = self.calls.get(node_id, 0) + 1
+        if node_id == self.target and self.calls[node_id] == 1:
+            return EngineOutcome('failed', .001, UsageRecord(source='unavailable'),
+                                 {'error_class': 'authentication',
+                                  'authentication_failure': 'expired'})
+        for relative in assignment['allowed_paths']:
+            (Path(workspace) / relative).write_text(TEXT_METRICS.final_files[relative])
+        return EngineOutcome('succeeded', .001, UsageRecord(source='fake'), {'simulated': True})
 
 
 class Phase4Tests(unittest.TestCase):
@@ -224,6 +247,149 @@ class Phase4Tests(unittest.TestCase):
         decision = cost_aware.route('node', 'implementer', 'owned-code')
         self.assertEqual(decision.profile_id, 'measured-lower')
         self.assertIn('lower relative cost', decision.reason)
+        with self.assertRaisesRegex(ValueError, 'effort'):
+            ModelProfile('unsupported-effort', 'codex', None, 'high', ('implementer',),
+                         ('owned-code',), 'unknown', 'fixture')
+        with self.assertRaisesRegex(ValueError, 'effort'):
+            ModelProfile('unknown-effort', 'claude', None, 'ultra', ('implementer',),
+                         ('owned-code',), 'unknown', 'fixture')
+
+    def test_live_adapters_propagate_model_effort_cancellation_and_verified_skills(self):
+        registry = ModelRegistry((
+            ModelProfile('claude-implementation', 'claude', 'claude-fixture-model', 'high',
+                         ('implementer', 'repair'), ('owned-code',), 'unknown', 'fixture'),
+            ModelProfile('codex-review', 'codex', 'codex-fixture-model', None,
+                         ('reviewer',), ('model-only',), 'unknown', 'fixture'),
+        ), {'implementer': 'claude-implementation', 'repair': 'claude-implementation',
+            'reviewer': 'codex-review'})
+        submitted = self.workflow('configured-live', registry=registry)
+        workflow = Phase4Workflow(
+            submitted.root, live=True, authorized=True,
+            verifier_factory=lambda broker, fixture: Phase4FixtureVerifier(broker, fixture))
+        owned_requests = []
+        review_requests = []
+        cancellation_objects = []
+
+        def owned_transport(request, output, boundary, *, policy, cancel_event):
+            owned_requests.append(request)
+            cancellation_objects.append(cancel_event)
+            source = CALCULATOR.final_files['calculator.py']
+            if len(owned_requests) == 1:
+                source = source.replace('return left + right',
+                                        'return left + right  # TODO remove marker')
+            Path(request.cwd, 'calculator.py').write_text(source)
+            return ExecutionResult('claude', request.task_id, 'succeeded', None, 0, .01,
+                                   model='claude-reported-model')
+
+        finding = {'id': 'remove-marker', 'severity': 'material', 'path': 'calculator.py',
+                   'criterion': 'production-ready source',
+                   'description': 'Remove the provisional marker.'}
+
+        def review_transport(request, output, *, policy, cancel_event):
+            review_requests.append(request)
+            cancellation_objects.append(cancel_event)
+            structured = ({'verdict': 'findings', 'findings': [finding]}
+                          if len(review_requests) == 1 else
+                          {'verdict': 'no_findings', 'findings': []})
+            return ExecutionResult('codex', request.task_id, 'succeeded', None, 0, .01,
+                                   model='codex-reported-model', structured_output=structured)
+
+        with patch('agentkit.delivery.execute_owned_code', side_effect=owned_transport), \
+             patch('agentkit.delivery.execute', side_effect=review_transport):
+            result = workflow.start('configured-live')
+        self.assertEqual(result['task']['state'], 'awaiting_pr_approval')
+        self.assertEqual(result['task']['repair_count'], 1)
+        self.assertEqual([(item.model, item.effort) for item in owned_requests],
+                         [('claude-fixture-model', 'high'),
+                          ('claude-fixture-model', 'high')])
+        self.assertEqual([(item.model, item.effort) for item in review_requests],
+                         [('codex-fixture-model', None),
+                          ('codex-fixture-model', None)])
+        self.assertTrue(all(item is not None for item in cancellation_objects))
+        for request in owned_requests:
+            self.assertIn('name: behavioral-testing', request.prompt)
+            self.assertIn('# Backend database', request.prompt)
+            self.assertNotIn('name: independent-review', request.prompt)
+        for request in review_requests:
+            self.assertIn('name: independent-review', request.prompt)
+            self.assertIn('# Backend database', request.prompt)
+            self.assertNotIn('name: behavioral-testing', request.prompt)
+        provider_executions = [item for item in result['status']['executions']
+                               if item['engine'] in ('codex', 'claude')]
+        self.assertTrue(any(item['role'] == 'repair' for item in provider_executions))
+        for item in provider_executions:
+            expected_model = ('claude-fixture-model' if item['engine'] == 'claude'
+                              else 'codex-fixture-model')
+            reported_model = ('claude-reported-model' if item['engine'] == 'claude'
+                              else 'codex-reported-model')
+            self.assertEqual(item['requested_configuration']['model'], expected_model)
+            self.assertEqual(item['provider_reported_configuration']['model'], reported_model)
+
+    def test_real_live_adapter_request_construction_forwards_cancellation(self):
+        workspace = self.root / 'adapter-workspace'
+        output = self.root / 'adapter-output'
+        denied = self.root / 'adapter-denied'
+        workspace.mkdir()
+        denied.mkdir()
+        Path(workspace, 'source.py').write_text('value = 1\n')
+        boundary = ExecutionBoundary(str(workspace), (str(denied),))
+        cancellation = threading.Event()
+        captured = []
+
+        def owned_transport(request, directory, received_boundary, *, policy, cancel_event):
+            captured.append(('implementation', request, cancel_event))
+            return ExecutionResult('codex', request.task_id, 'succeeded', None, 0, .01)
+
+        with patch('agentkit.delivery.execute_owned_code', side_effect=owned_transport):
+            outcome = LiveImplementer('codex', 'codex-fixture-model').run(
+                workspace, output, boundary, 'bounded prompt', LivePolicy(True),
+                cancel_event=cancellation)
+        self.assertEqual(outcome.status, 'succeeded')
+        self.assertIs(captured[0][2], cancellation)
+        self.assertEqual(captured[0][1].model, 'codex-fixture-model')
+        self.assertIsNone(captured[0][1].effort)
+        self.assertEqual(outcome.details['requested_configuration'],
+                         {'model': 'codex-fixture-model', 'effort': None})
+        self.assertEqual(outcome.details['provider_reported_configuration'],
+                         {'model': None, 'effort': None})
+
+        snapshot = self.root / 'review-snapshot'
+        snapshot.mkdir()
+        Path(snapshot, 'source.py').write_text('value = 1\n')
+
+        def review_transport(request, directory, *, policy, cancel_event):
+            captured.append(('review', request, cancel_event))
+            return ExecutionResult(
+                'claude', request.task_id, 'succeeded', None, 0, .01,
+                model='claude-reported-model',
+                structured_output={'verdict': 'no_findings', 'findings': []})
+
+        with patch('agentkit.delivery.execute', side_effect=review_transport):
+            outcome = LiveReviewer('claude', 'claude-fixture-model', 'xhigh').run(
+                snapshot, 'a' * 40, self.root / 'review-output', 'review prompt',
+                LivePolicy(True), cancel_event=cancellation)
+        self.assertEqual(outcome.status, 'succeeded')
+        self.assertIs(captured[1][2], cancellation)
+        self.assertEqual((captured[1][1].model, captured[1][1].effort),
+                         ('claude-fixture-model', 'xhigh'))
+        self.assertEqual(outcome.details['requested_configuration'],
+                         {'model': 'claude-fixture-model', 'effort': 'xhigh'})
+        self.assertEqual(outcome.details['provider_reported_configuration'],
+                         {'model': 'claude-reported-model', 'effort': None})
+
+    def test_changed_selected_skill_content_is_rejected_before_provider_input(self):
+        workflow = self.workflow('changed-skill')
+        copied = self.root / 'copied-toolkit'
+        for skill in workflow.state.snapshot('changed-skill')['skills']:
+            source = ROOT / skill['relative_path']
+            target = copied / skill['relative_path']
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+        workflow.toolkit_root = copied
+        changed = copied / 'skills/behavioral-testing/SKILL.md'
+        changed.write_text(changed.read_text() + '\nchanged after planning\n')
+        with self.assertRaisesRegex(StaleEvidence, 'content changed'):
+            workflow._skill_context('changed-skill', 'implementer')
 
     def test_budget_contract_rejects_invalid_types_ranges_and_nonfinite_values(self):
         valid = build_contract('valid', 'repair fixture', CALCULATOR)
@@ -318,6 +484,62 @@ class Phase4Tests(unittest.TestCase):
         self.assertEqual(resumed['task']['repair_count'], 0)
         self.assertEqual(specialist.calls, 2)
         self.assertEqual(resumed['status']['budget']['completed_calls'], before + 3)
+
+    def test_decomposed_authentication_resume_reuses_each_assignment_workspace(self):
+        node_ids = ('implement-word-metric', 'implement-line-metric')
+        for index, target in enumerate(node_ids):
+            with self.subTest(target=target):
+                specialist = AuthByNodeSpecialist(target)
+                workflow = self.workflow('decomposed-auth-' + str(index), fixture='text-metrics')
+                workflow.specialist_factory = lambda provider, fixture: specialist
+                first = workflow.start('decomposed-auth-' + str(index))
+                self.assertEqual(first['task']['state'], 'authentication_required')
+                paused = workflow.state.node('decomposed-auth-' + str(index), target)
+                assignment = paused['result']['assignment_identity']
+                self.assertTrue(Path(assignment['worktree']).is_dir())
+                self.assertEqual(assignment['revision'], first['task']['base_revision'])
+                self.assertTrue(assignment['clean'])
+                sibling = node_ids[1 - index]
+                sibling_before = workflow.state.node('decomposed-auth-' + str(index), sibling)
+                if index == 1:
+                    self.assertEqual(sibling_before['status'], 'succeeded')
+                    sibling_revision = sibling_before['result']['revision']
+                else:
+                    self.assertEqual(sibling_before['status'], 'pending')
+                    sibling_revision = None
+                claim = workflow.store.claim_authentication_login(
+                    'decomposed-auth-' + str(index), 'codex', authority=workflow.store.authority)
+                workflow.store.finish_authentication_login(
+                    claim['session_id'], 'succeeded', auth_mode='subscription', reason='authenticated',
+                    owner_nonce=claim['owner_nonce'], authority=workflow.store.authority)
+                resumed = workflow.resume('decomposed-auth-' + str(index))
+                self.assertEqual(resumed['task']['state'], 'awaiting_pr_approval')
+                self.assertEqual(specialist.calls[target], 2)
+                self.assertEqual(specialist.calls[sibling], 1)
+                if sibling_revision:
+                    self.assertEqual(workflow.state.node(
+                        'decomposed-auth-' + str(index), sibling)['result']['revision'],
+                        sibling_revision)
+
+    def test_changed_decomposed_assignment_identity_blocks_authentication_resume(self):
+        task_id = 'changed-assignment'
+        specialist = AuthByNodeSpecialist('implement-word-metric')
+        workflow = self.workflow(task_id, fixture='text-metrics')
+        workflow.specialist_factory = lambda provider, fixture: specialist
+        first = workflow.start(task_id)
+        self.assertEqual(first['task']['state'], 'authentication_required')
+        paused = workflow.state.node(task_id, 'implement-word-metric')
+        assignment = paused['result']['assignment_identity']
+        Path(assignment['worktree'], 'words.py').write_text('def word_count(text):\n    return 999\n')
+        claim = workflow.store.claim_authentication_login(
+            task_id, 'codex', authority=workflow.store.authority)
+        workflow.store.finish_authentication_login(
+            claim['session_id'], 'succeeded', auth_mode='subscription', reason='authenticated',
+            owner_nonce=claim['owner_nonce'], authority=workflow.store.authority)
+        with self.assertRaisesRegex(StaleEvidence, 'identity changed'):
+            workflow.resume(task_id)
+        self.assertEqual(workflow.store.task(task_id)['state'], 'authentication_required')
+        self.assertEqual(specialist.calls['implement-word-metric'], 1)
 
     def test_actual_candidate_change_rejects_authentication_resume_and_package(self):
         reviewer = AuthOnceReviewer()

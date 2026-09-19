@@ -215,6 +215,22 @@ class RuntimeTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             ExecutionRequest.from_dict(dict(args, subscription_smoke_authorized=True))
 
+    def test_model_and_supported_effort_are_explicit_cli_arguments(self):
+        runtime = self.root / 'runtime-model-options'
+        runtime.mkdir()
+        claude = self.request('claude', model='claude-fixture-model', effort='high')
+        argv = ADAPTERS['claude'].argv('claude', claude, runtime)
+        self.assertEqual(argv[argv.index('--model') + 1], 'claude-fixture-model')
+        self.assertEqual(argv[argv.index('--effort') + 1], 'high')
+        codex = self.request('codex', model='codex-fixture-model')
+        argv = ADAPTERS['codex'].argv('codex', codex, runtime)
+        self.assertEqual(argv[argv.index('--model') + 1], 'codex-fixture-model')
+        self.assertNotIn('--effort', argv)
+        with self.assertRaisesRegex(ValueError, 'unsupported by the tested Codex'):
+            self.request('codex', effort='high')
+        with self.assertRaisesRegex(ValueError, 'unsupported Claude effort'):
+            self.request('claude', effort='ultra')
+
     def test_live_is_default_denied_without_even_doctor(self):
         with patch('agentkit.adapters.native_sandbox_capability', side_effect=AssertionError('must not probe')):
             result = execute(self.request(), self.root / 'blocked')
