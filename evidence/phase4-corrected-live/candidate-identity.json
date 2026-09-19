@@ -1,0 +1,16 @@
+{
+  "base_revision": "deaf9edaf37cdf954c9af0b480ff4bbf71327ea3",
+  "branch": "agentkit/phase4-live-342423e",
+  "changed_paths": [
+    "calculator.py"
+  ],
+  "clean": true,
+  "diff_sha256": "c4258ff7b17d60c59c799f7070cfa95e9e9b445930d5e0ea0d1007dbda40591f",
+  "head_revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+  "manifest": {
+    "README.md": "baefdba90f4e10f487ff17ab865f4187b49f6858ceb32e8b89d5696396cc22ca",
+    "calculator.py": "44e4313e4b8a20f0e56b5c1c36245c4b42b64df4d747673eaec651dc98d00928"
+  },
+  "repository": "/private/tmp/portable-agentkit-phase4-live-342423e-20260919/managed/repositories/phase4-live-342423e",
+  "worktree": "/private/tmp/portable-agentkit-phase4-live-342423e-20260919/managed/worktrees/phase4-live-342423e"
+}

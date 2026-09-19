@@ -1,0 +1,7 @@
+{
+  "provider": "claude",
+  "state": "verified",
+  "mode": "subscription",
+  "reason": "authenticated",
+  "executable": "/opt/homebrew/bin/claude"
+}

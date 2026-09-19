@@ -1,0 +1,55 @@
+{
+  "engine": "claude",
+  "task_id": "phase2-subscription-smoke",
+  "status": "failed",
+  "error_class": "rate_limit",
+  "exit_code": 0,
+  "elapsed_seconds": 2.024122,
+  "session_id": null,
+  "model": null,
+  "structured_output": null,
+  "final_text": null,
+  "usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "cached_input_tokens": null,
+    "cache_creation_tokens": null,
+    "reasoning_tokens": null,
+    "estimated_cost_usd": null,
+    "billed_cost_usd": null,
+    "source": "unavailable",
+    "final": false,
+    "provider_details": {}
+  },
+  "cancellation": {
+    "requested": false,
+    "reason": "rate_limit",
+    "term_sent": true,
+    "kill_sent": false,
+    "leader_reaped": true,
+    "process_group_gone": true,
+    "scope": "POSIX process group; detached descendants and remote effects are not covered"
+  },
+  "artifacts": {
+    "request.json": "744a45ead4097044c5675c8cc57432b002a6fb31b3670e5e53e2a9af50d6b1eb",
+    "stdout.redacted.jsonl": "66a4f81fb797eb9aa1b9bfeaac0a2e2359ddf600aafaf708b1793ca70608499f",
+    "stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "provider_details": {
+    "version": "2.1.220",
+    "executable_sha256": "8addc857f3fe64d5a0368af9ee50321b50afb4a6918ba3ef018ab84f5dbbe081",
+    "authentication": "subscription-reported",
+    "paid_overflow": "unknown",
+    "authorization": "Operator authorized one existing-subscription smoke; stop on usage/payment limits; no billing/auth changes.",
+    "managed_mode": "model-only"
+  },
+  "limitations": [
+    "Provider events and final text are claims; fixture acceptance is independently computed.",
+    "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+    "Process groups cannot prove detached-descendant or remote cancellation.",
+    "Whole-process guard denies global writes; parent provider network and auth access remain available.",
+    "Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.",
+    "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on limits; no retry."
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,5 @@
+{"argv": ["python3", "-B", "/private/tmp/agentkit-toolkit-review/candidate_gate.py"], "returncode": 1}
+Traceback (most recent call last):
+  File "/private/tmp/agentkit-toolkit-review/candidate_gate.py", line 4, in <module>
+    assert proposed_candidate(2) == 1, 'candidate(2) must sum 0+1=1; observed %s' % proposed_candidate(2)
+AssertionError: candidate(2) must sum 0+1=1; observed 0

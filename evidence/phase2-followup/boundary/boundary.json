@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "exit_code": 0,
+  "stop_reason": null,
+  "observed": {
+    "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-boundary-8l51fguk/controller-state/state.json": "denied:PermissionError",
+    "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-boundary-8l51fguk/controller-state/state.json:write": "denied:PermissionError",
+    "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-boundary-8l51fguk/protected-canary/fake-credentials": "denied:PermissionError",
+    "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-boundary-8l51fguk/protected-canary/fake-credentials:write": "denied:PermissionError",
+    "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-boundary-8l51fguk/sibling-workspace/source.py": "denied:PermissionError",
+    "/private/var/folders/ff/msj2srcd0319csm7bnvf0tbh0000gq/T/agentkit-boundary-8l51fguk/sibling-workspace/source.py:write": "denied:PermissionError",
+    "workspace_write": "allowed"
+  },
+  "process_group_gone": true,
+  "canaries_unchanged": true,
+  "scope": "exact external Seatbelt filesystem profile; network denied for this offline probe"
+}

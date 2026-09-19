@@ -1,0 +1,8 @@
+{
+  "expected": {
+    "sum": 42
+  },
+  "passed": false,
+  "oracle": "controller integer sum and exact shape; independent of provider success claim",
+  "disposable_cwd_remained_empty": true
+}

@@ -1,0 +1,76 @@
+{
+  "protocol": {
+    "workloads": [
+      100,
+      10000
+    ],
+    "final_workload": [
+      7
+    ],
+    "warmup": 2,
+    "repetitions": 7,
+    "statistic": "median perf_counter_ns",
+    "noise_threshold": "20%; no claimed win below threshold",
+    "correctness_tolerance": 0,
+    "hardware": "arm64",
+    "synchronization": "synchronous CPU",
+    "contention": "uncontrolled host contention; no speed acceptance"
+  },
+  "baseline_correctness": "passed",
+  "baseline_raw_ns": {
+    "100": [
+      3875,
+      3333,
+      3417,
+      3208,
+      3250,
+      3208,
+      3208
+    ],
+    "10000": [
+      374083,
+      373583,
+      356250,
+      372250,
+      369041,
+      385708,
+      395375
+    ]
+  },
+  "baseline_medians_ns": {
+    "100": 3250,
+    "10000": 373583
+  },
+  "candidate_claim": "Constant-time replacement is proposed as faster; claim unmeasured.",
+  "candidate_correctness": "failed",
+  "candidate_failures": [
+    {
+      "n": 0,
+      "expected": 0,
+      "actual": 1
+    },
+    {
+      "n": 2,
+      "expected": 1,
+      "actual": 0
+    },
+    {
+      "n": 7,
+      "expected": 21,
+      "actual": 15
+    },
+    {
+      "n": 100,
+      "expected": 4950,
+      "actual": 4851
+    },
+    {
+      "n": 10000,
+      "expected": 49995000,
+      "actual": 49985001
+    }
+  ],
+  "candidate_timing": "not_run: failed correctness gate",
+  "decision": "rejected",
+  "protected_final": "not_run: no selected winner"
+}

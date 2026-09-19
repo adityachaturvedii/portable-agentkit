@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "task_id": "synthetic-invoice-promotion",
+  "kind": "delivery-evidence",
+  "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+  "status": "incomplete",
+  "summary": "API fix and local PR proposal ready; checkout acceptance remains blocked.",
+  "payload": {
+    "repository": "/private/tmp/agentkit-forward-test/project",
+    "branch": "fix/invoice-promotion",
+    "base_revision": "43f9607c1830fb374886bbbdbb00188b0a41e50c",
+    "head_revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+    "acceptance_results": [
+      {
+        "id": "AC1",
+        "expected": "[(1000,2)], shipping 500, discount 10 produces 2300",
+        "actual": "Observed matching result in green.txt",
+        "status": "passed",
+        "evidence_ids": [
+          "green"
+        ]
+      },
+      {
+        "id": "AC2",
+        "expected": "[(101,1)], shipping 0, discount 50 produces 50",
+        "actual": "Observed matching result in green.txt",
+        "status": "passed",
+        "evidence_ids": [
+          "green"
+        ]
+      },
+      {
+        "id": "AC3",
+        "expected": "ValueError for negative price/shipping, zero/negative quantity, discount -1/101",
+        "actual": "Observed matching result in green.txt",
+        "status": "passed",
+        "evidence_ids": [
+          "green"
+        ]
+      },
+      {
+        "id": "AC4",
+        "expected": "0% yields 2500; 100% yields shipping 500; empty merchandise with shipping 500 yields 500",
+        "actual": "Observed matching result in green.txt",
+        "status": "passed",
+        "evidence_ids": [
+          "green"
+        ]
+      },
+      {
+        "id": "AC5",
+        "expected": "Checkout displays API total with supplied synthetic input",
+        "actual": "Not run: browser/build prerequisites absent.",
+        "status": "blocked",
+        "evidence_ids": []
+      }
+    ],
+    "findings": [],
+    "usage": {
+      "provider_calls": null,
+      "api_money": null,
+      "compute_seconds": null,
+      "confidence": "unknown"
+    },
+    "proposed_pr": {
+      "title": "Fix merchandise-only invoice discounts and reject invalid ranges",
+      "body": "The promotion previously discounted shipping: 2000 merchandise + 500 shipping at 10% returned 2250. It now returns 2300 by flooring discounted merchandise before adding full shipping. Negative prices/shipping, nonpositive quantities and out-of-range discounts raise ValueError. The local diff changes invoice.py and adds six public behavior test methods. Red reproduction at 340549c566b6e70b5cf1516d0f5b088ef97c1221 and green tests at 0f2fd97567a2840c3698a17186ccebb0c3360703 are retained with hashes. Checkout browser verification is blocked because no browser or build was supplied. No independent review or publication has occurred."
+    }
+  },
+  "evidence": [
+    {
+      "id": "red",
+      "revision": "340549c566b6e70b5cf1516d0f5b088ef97c1221",
+      "method": "command",
+      "status": "failed",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/red.txt",
+          "sha256": "1a9d0f0abef08bf72b00de65cae28c6e599fa16b409664745a10e5891047f8b1"
+        }
+      ],
+      "observation": "Six test methods run; promotion returned 2250 instead of 2300; boundary and input-validation assertions also failed."
+    },
+    {
+      "id": "probe",
+      "revision": "340549c566b6e70b5cf1516d0f5b088ef97c1221",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-c",
+        "from invoice import invoice_total; print([(s, invoice_total([(1000,2)],s,10)) for s in [0,500]])"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/probe.txt",
+          "sha256": "c4f4561450e0735eb19eaa49d4612f15a7b3c9dfdf26e879f22ab6cd40934a40"
+        }
+      ],
+      "observation": "Changing shipping alone from 0 to 500 changes total from 1800 to 2250; only 450 added."
+    },
+    {
+      "id": "green",
+      "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/green.txt",
+          "sha256": "7cd064b7eb67086f377376471b38b4f6e47c69344fad07a419de01fca786d916"
+        }
+      ],
+      "observation": "Six test methods pass on immutable candidate."
+    },
+    {
+      "id": "diff",
+      "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "git",
+        "diff",
+        "43f9607c1830fb374886bbbdbb00188b0a41e50c",
+        "0f2fd97567a2840c3698a17186ccebb0c3360703"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/diff.txt",
+          "sha256": "2bfde36ab6609bcb23f8276c5c6d933d59e826486c1f143a5b712b9ccd827678"
+        }
+      ],
+      "observation": "Candidate diff contains invoice.py and public behavior tests only."
+    }
+  ],
+  "limitations": [
+    "No approved disposable browser, target origin, immutable checkout build or separate verifier has been supplied.",
+    "Usage quotas and total model compute are unknown; only local subprocess elapsed time was measured.",
+    "No independent reviewer supplied."
+  ],
+  "next_actions": [
+    "Supply missing checkout verification prerequisites before claiming full acceptance."
+  ]
+}

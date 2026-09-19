@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/approval/approval-package.json",
+      "bytes": 3544,
+      "sha256": "23c2c7d221edaf4539044adb8dd822aa11fe688aa18c03f63ad0ad918bf76c38"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/approval/approval-package.md",
+      "bytes": 687,
+      "sha256": "18b42d87d398aa303c44b6b9eba22600243e179fa44b6ca0cb5ced24a9f99460"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/controller-state.json",
+      "bytes": 20220,
+      "sha256": "591ee5c72f16f5c6012f9692ee2ac77a13c6f467f4fd2884c6adabdede1eeb5d"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/implementer-0/request.json",
+      "bytes": 381,
+      "sha256": "3ee0be342cbf58f19b11f550d7ea02c93118a79763ef340542adb0c84d3082c7"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/implementer-0/result.json",
+      "bytes": 3673,
+      "sha256": "4b7b7f7d3ca808d1387e08d4adf643893e07ef411727eba5e9b48d3434ed3228"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/implementer-0/stderr.redacted.txt",
+      "bytes": 500,
+      "sha256": "298815fa814024db4b3de8c171676ccbb68f11877fcadae5b97c55869f3ed369"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/implementer-0/stdout.redacted.jsonl",
+      "bytes": 2714,
+      "sha256": "7966f81b7677f770cc65cc801a1e410111c43f98f90e61c4e359d386cffde380"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/reviewer-0/request.json",
+      "bytes": 392,
+      "sha256": "b6be13fb14b30d29808ea3665bde184a4e682ebe5e99503b05c5f4a91a32d815"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/reviewer-0/result.json",
+      "bytes": 3286,
+      "sha256": "e3bcf69864ed53d3e0406e63ccc4d61daa56558239c4c9fe6732923865b51818"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/reviewer-0/stderr.redacted.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/execution-evidence/reviewer-0/stdout.redacted.jsonl",
+      "bytes": 4440,
+      "sha256": "db684697b4cf4dfca80589cbdd502121a90f905eb5a69779a9fc311b4f5109c9"
+    },
+    {
+      "path": "evidence/phase3-auth-recovery/live-complete/summary.json",
+      "bytes": 3509,
+      "sha256": "3f48c3a5c4f152114e40427b1d6c670095226e2cce88e4c1377e6266355ca7d1"
+    }
+  ]
+}

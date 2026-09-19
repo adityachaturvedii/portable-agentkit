@@ -1,0 +1,1309 @@
+{
+  "schema_version": 5,
+  "tables": {
+    "approvals": [],
+    "authentication_checkpoints": [],
+    "authentication_sessions": [],
+    "budgets": [
+      {
+        "active_calls": 0,
+        "completed_calls": 3,
+        "elapsed_seconds": 56.668539833,
+        "max_calls": 3,
+        "max_concurrency": 1,
+        "max_elapsed_seconds": 130.0,
+        "max_timeout_seconds": 60.0,
+        "reserved_calls": 0,
+        "reserved_elapsed_seconds": 0.0,
+        "review_reserve": 1,
+        "task_id": "phase4-live-342423e",
+        "verification_reserve": 1
+      }
+    ],
+    "events": [
+      {
+        "created_at": "2026-09-19T02:29:41.895066+00:00",
+        "event_id": "task-created-phase4-live-342423e",
+        "event_type": "task_created",
+        "payload": {
+          "dependencies": [],
+          "objective": "Validate the corrected Phase 4 calculator delivery workflow"
+        },
+        "sequence": 1,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:29:41.900652+00:00",
+        "event_id": "phase4-live-342423e-phase4-intake-c80a90c8-d3bb-4e8f-8766-96c71e81a24d",
+        "event_type": "phase4_intake_recorded",
+        "payload": {
+          "execution_profile": "trusted-disposable-macos",
+          "fixture_id": "calculator"
+        },
+        "sequence": 2,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:29:41.908704+00:00",
+        "event_id": "phase4-live-342423e-phase4-contracted",
+        "event_type": "transition",
+        "payload": {
+          "from": "received",
+          "to": "contracted"
+        },
+        "sequence": 3,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:29:41.913323+00:00",
+        "event_id": "phase4-live-342423e-phase4-plan-d8060d1c-e43a-485f-adee-1b67d4889f2c",
+        "event_type": "phase4_plan_recorded",
+        "payload": {
+          "implementation_nodes": 1,
+          "management_calls": 0,
+          "mode": "single",
+          "nodes": 7,
+          "plan_sha256": "ef8ded953af504d6cbb50ad5fd0629c6f642a943288e9870e448a4ef902f9906"
+        },
+        "sequence": 4,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:30:47.603783+00:00",
+        "event_id": "phase4-live-342423e-phase4-workspace-1789785047602713000",
+        "event_type": "transition",
+        "payload": {
+          "from": "contracted",
+          "to": "workspace_ready"
+        },
+        "sequence": 5,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:30:47.616125+00:00",
+        "event_id": "phase4-live-342423e-phase4-implementing-1789785047612682000",
+        "event_type": "transition",
+        "payload": {
+          "from": "workspace_ready",
+          "to": "implementing"
+        },
+        "sequence": 6,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:30:47.623042+00:00",
+        "event_id": "phase4-live-342423e-node-implement-calculator-core-running-425550f8-760b-4eff-9bd7-5571a54ac8a0",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": null,
+          "from": "pending",
+          "node_id": "implement-calculator-core",
+          "to": "running"
+        },
+        "sequence": 7,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:30:47.982407+00:00",
+        "event_id": "reserve-c0f748ea-07e2-42dd-8505-e980442019e2",
+        "event_type": "execution_reserved",
+        "payload": {
+          "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+          "requested_configuration": {
+            "effort": null,
+            "model": null
+          },
+          "role": "implementer",
+          "timeout_seconds": 60
+        },
+        "sequence": 8,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:30:47.988382+00:00",
+        "event_id": "start-c0f748ea-07e2-42dd-8505-e980442019e2",
+        "event_type": "execution_started",
+        "payload": {
+          "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+          "pid": null
+        },
+        "sequence": 9,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:40.937495+00:00",
+        "event_id": "finish-c0f748ea-07e2-42dd-8505-e980442019e2",
+        "event_type": "execution_finished",
+        "payload": {
+          "elapsed_seconds": 52.578902,
+          "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+          "status": "succeeded"
+        },
+        "sequence": 10,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.195687+00:00",
+        "event_id": "phase4-live-342423e-node-implement-calculator-core-succeeded-353efd8f-d32f-4bef-8027-1200aa45d5e0",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+          "from": "running",
+          "node_id": "implement-calculator-core",
+          "to": "succeeded"
+        },
+        "sequence": 11,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.207103+00:00",
+        "event_id": "phase4-live-342423e-phase4-implemented-1789785101206303000",
+        "event_type": "transition",
+        "payload": {
+          "from": "implementing",
+          "to": "implemented"
+        },
+        "sequence": 12,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.212975+00:00",
+        "event_id": "phase4-live-342423e-phase4-verifying-1789785101212394000",
+        "event_type": "transition",
+        "payload": {
+          "from": "implemented",
+          "to": "verifying"
+        },
+        "sequence": 13,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.219662+00:00",
+        "event_id": "phase4-live-342423e-node-verify-running-7a42fde2-dc68-4818-8a7a-d6db48d1f01a",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": null,
+          "from": "pending",
+          "node_id": "verify",
+          "to": "running"
+        },
+        "sequence": 14,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.225926+00:00",
+        "event_id": "reserve-80d6512f-c59c-4103-ae61-f18ffbba64d8",
+        "event_type": "execution_reserved",
+        "payload": {
+          "execution_id": "80d6512f-c59c-4103-ae61-f18ffbba64d8",
+          "requested_configuration": {
+            "effort": null,
+            "model": "python-unittest-seatbelt-v1"
+          },
+          "role": "verification",
+          "timeout_seconds": 10
+        },
+        "sequence": 15,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.229451+00:00",
+        "event_id": "start-80d6512f-c59c-4103-ae61-f18ffbba64d8",
+        "event_type": "execution_started",
+        "payload": {
+          "execution_id": "80d6512f-c59c-4103-ae61-f18ffbba64d8",
+          "pid": null
+        },
+        "sequence": 16,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.733918+00:00",
+        "event_id": "finish-80d6512f-c59c-4103-ae61-f18ffbba64d8",
+        "event_type": "execution_finished",
+        "payload": {
+          "elapsed_seconds": 0.34943483299999656,
+          "execution_id": "80d6512f-c59c-4103-ae61-f18ffbba64d8",
+          "status": "succeeded"
+        },
+        "sequence": 17,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.740025+00:00",
+        "event_id": "evidence-phase4-verification-0",
+        "event_type": "evidence_recorded",
+        "payload": {
+          "evidence_id": "phase4-verification-0",
+          "kind": "independent-check",
+          "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+          "status": "passed"
+        },
+        "sequence": 18,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.744182+00:00",
+        "event_id": "phase4-live-342423e-node-verify-succeeded-6806e3db-c6d1-4190-a0bc-fae90282ac56",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": "80d6512f-c59c-4103-ae61-f18ffbba64d8",
+          "from": "running",
+          "node_id": "verify",
+          "to": "succeeded"
+        },
+        "sequence": 19,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.748437+00:00",
+        "event_id": "phase4-live-342423e-phase4-verified-1789785101747775000",
+        "event_type": "transition",
+        "payload": {
+          "from": "verifying",
+          "to": "verified"
+        },
+        "sequence": 20,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.754279+00:00",
+        "event_id": "phase4-live-342423e-phase4-reviewing-1789785101753635000",
+        "event_type": "transition",
+        "payload": {
+          "from": "verified",
+          "to": "reviewing"
+        },
+        "sequence": 21,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:41.761352+00:00",
+        "event_id": "phase4-live-342423e-node-review-running-5de12c9e-0d4c-4f65-9ea2-2dd3dfd53dcf",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": null,
+          "from": "pending",
+          "node_id": "review",
+          "to": "running"
+        },
+        "sequence": 22,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:42.010478+00:00",
+        "event_id": "reserve-fd5878a1-8326-441a-94ea-6a9df894a9ef",
+        "event_type": "execution_reserved",
+        "payload": {
+          "execution_id": "fd5878a1-8326-441a-94ea-6a9df894a9ef",
+          "requested_configuration": {
+            "effort": null,
+            "model": null
+          },
+          "role": "reviewer",
+          "timeout_seconds": 60
+        },
+        "sequence": 23,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:42.015493+00:00",
+        "event_id": "start-fd5878a1-8326-441a-94ea-6a9df894a9ef",
+        "event_type": "execution_started",
+        "payload": {
+          "execution_id": "fd5878a1-8326-441a-94ea-6a9df894a9ef",
+          "pid": null
+        },
+        "sequence": 24,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.335504+00:00",
+        "event_id": "finish-fd5878a1-8326-441a-94ea-6a9df894a9ef",
+        "event_type": "execution_finished",
+        "payload": {
+          "elapsed_seconds": 3.740203,
+          "execution_id": "fd5878a1-8326-441a-94ea-6a9df894a9ef",
+          "status": "succeeded"
+        },
+        "sequence": 25,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.342134+00:00",
+        "event_id": "evidence-phase4-review-0",
+        "event_type": "evidence_recorded",
+        "payload": {
+          "evidence_id": "phase4-review-0",
+          "kind": "independent-review",
+          "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+          "status": "passed"
+        },
+        "sequence": 26,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.346444+00:00",
+        "event_id": "phase4-live-342423e-node-review-succeeded-855143bb-4b1f-44e1-9f08-89b6067cd58a",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": "fd5878a1-8326-441a-94ea-6a9df894a9ef",
+          "from": "running",
+          "node_id": "review",
+          "to": "succeeded"
+        },
+        "sequence": 27,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.352042+00:00",
+        "event_id": "phase4-live-342423e-phase4-review-complete-1789785107350921000",
+        "event_type": "transition",
+        "payload": {
+          "from": "reviewing",
+          "to": "review_complete"
+        },
+        "sequence": 28,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.358725+00:00",
+        "event_id": "phase4-live-342423e-phase4-packaging-1789785107358065000",
+        "event_type": "transition",
+        "payload": {
+          "from": "review_complete",
+          "to": "packaging"
+        },
+        "sequence": 29,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.365414+00:00",
+        "event_id": "phase4-live-342423e-node-package-running-716b3a71-7dc9-44ad-8441-22e6ccde03bd",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": null,
+          "from": "pending",
+          "node_id": "package",
+          "to": "running"
+        },
+        "sequence": 30,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.499238+00:00",
+        "event_id": "evidence-phase4-approval-package",
+        "event_type": "evidence_recorded",
+        "payload": {
+          "evidence_id": "phase4-approval-package",
+          "kind": "approval-package",
+          "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+          "status": "passed"
+        },
+        "sequence": 31,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.504602+00:00",
+        "event_id": "phase4-live-342423e-node-package-succeeded-b7f609bb-ed39-47a7-9b35-5cc189589fb2",
+        "event_type": "phase4_node_transition",
+        "payload": {
+          "attempt": 1,
+          "execution_id": null,
+          "from": "running",
+          "node_id": "package",
+          "to": "succeeded"
+        },
+        "sequence": 32,
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "created_at": "2026-09-19T02:31:47.509558+00:00",
+        "event_id": "phase4-live-342423e-phase4-awaiting-approval-1789785107508905000",
+        "event_type": "transition",
+        "payload": {
+          "from": "packaging",
+          "to": "awaiting_pr_approval"
+        },
+        "sequence": 33,
+        "task_id": "phase4-live-342423e"
+      }
+    ],
+    "evidence": [
+      {
+        "artifact_sha256": "74d9a2b37f7c683d0af8672a47962ce998e4612cba8489b6759703d45436e1ea",
+        "created_at": "2026-09-19T02:31:41.739971+00:00",
+        "details": {
+          "candidate_unchanged": true,
+          "exit_code": 0,
+          "output": "test_total (test_acceptance.Acceptance) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+          "sandbox": "Seatbelt successfully initialized for a no-write/no-network true process; not a complete isolation proof.",
+          "stop_reason": null
+        },
+        "evidence_id": "phase4-verification-0",
+        "kind": "independent-check",
+        "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+        "stale": 0,
+        "status": "passed",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "artifact_sha256": "97fb9763009292f800865079f5ca411cb2dbd01cc1fbf25919fe260f3a850906",
+        "created_at": "2026-09-19T02:31:47.342092+00:00",
+        "details": {
+          "details": {
+            "artifacts": {
+              "request.json": "5209b5358c7c9b9e288bfed838a1a61859acdf52bb669af871619dfe82fedde4",
+              "stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout.redacted.jsonl": "5952d12016ddb86dbdf3838cff34731c4c85da2419eefb105b602ca08206b53e"
+            },
+            "authentication_failure": null,
+            "candidate_revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+            "error_class": null,
+            "limitations": [
+              "Provider events and final text are claims; fixture acceptance is independently computed.",
+              "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+              "Process groups cannot prove detached-descendant or remote cancellation.",
+              "Whole-process guard denies global writes; parent provider network and auth access remain available.",
+              "Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.",
+              "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry."
+            ],
+            "parse_error": null,
+            "provider_reported_configuration": {
+              "effort": null,
+              "model": "claude-opus-5[1m]"
+            },
+            "requested_configuration": {
+              "effort": null,
+              "model": null
+            }
+          },
+          "findings": [],
+          "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+          "status": "succeeded"
+        },
+        "evidence_id": "phase4-review-0",
+        "kind": "independent-review",
+        "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+        "stale": 0,
+        "status": "passed",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "artifact_sha256": "2fb6acafbdeaa1c9ad744c755756c4063e4fa4b5d76f6d6e7c9c44ee6990c34c",
+        "created_at": "2026-09-19T02:31:47.498946+00:00",
+        "details": {
+          "base_revision": "deaf9edaf37cdf954c9af0b480ff4bbf71327ea3",
+          "head_revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff"
+        },
+        "evidence_id": "phase4-approval-package",
+        "kind": "approval-package",
+        "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+        "stale": 0,
+        "status": "passed",
+        "task_id": "phase4-live-342423e"
+      }
+    ],
+    "executions": [
+      {
+        "allocation_seconds": 60.0,
+        "effort": null,
+        "elapsed_seconds": 52.578902,
+        "engine": "codex",
+        "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+        "finished_at": "2026-09-19T02:31:40.937285+00:00",
+        "model": null,
+        "pid": null,
+        "process_token": "phase4-controller-supervised",
+        "reconciliation_note": null,
+        "result": {
+          "artifacts": {
+            "request.json": "5aa8939c88ec2e25a0d827cf45bf2cb7d7d0d64b14ff8726800a3b908eb5f184",
+            "stderr.redacted.txt": "455a9f74ee20e790ae9381222b82362bbfe937035e668fa5868f95366dd2bc53",
+            "stdout.redacted.jsonl": "4b0c5f3fe1992a168f883ef5bd7f62788cc826bd651061fd4c34f30ed7368a17"
+          },
+          "authentication_failure": null,
+          "error_class": null,
+          "limitations": [
+            "Provider events and final text are claims; fixture acceptance is independently computed.",
+            "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+            "Process groups cannot prove detached-descendant or remote cancellation.",
+            "Whole-process guard permits writes only in the disposable workspace/runtime plus the literal Codex startup lock file.",
+            "Explicit disposable read canaries are denied; comprehensive parent credential isolation is not established.",
+            "Provider and tool traffic share the parent network boundary; tool network isolation is unsupported in this mode.",
+            "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry.",
+            "Codex built-in transport retries cannot be configured to zero with its built-in subscription provider; reported reconnects stop the run and wall time bounds it. Hidden attempts remain unknown."
+          ],
+          "provider_reported_configuration": {
+            "effort": null,
+            "model": null
+          },
+          "requested_configuration": {
+            "effort": null,
+            "model": null
+          }
+        },
+        "role": "implementer",
+        "started_at": "2026-09-19T02:30:47.988333+00:00",
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "usage": {
+          "billed_cost_usd": null,
+          "cache_creation_tokens": null,
+          "cached_input_tokens": 63360,
+          "estimated_cost_usd": null,
+          "input_tokens": 76320,
+          "output_tokens": 900,
+          "reasoning_tokens": 0,
+          "source": "codex.turn.completed"
+        }
+      },
+      {
+        "allocation_seconds": 10.0,
+        "effort": null,
+        "elapsed_seconds": 0.34943483299999656,
+        "engine": "local",
+        "execution_id": "80d6512f-c59c-4103-ae61-f18ffbba64d8",
+        "finished_at": "2026-09-19T02:31:41.733744+00:00",
+        "model": "python-unittest-seatbelt-v1",
+        "pid": null,
+        "process_token": "phase4-controller-supervised",
+        "reconciliation_note": null,
+        "result": {
+          "candidate_unchanged": true,
+          "exit_code": 0,
+          "output": "test_total (test_acceptance.Acceptance) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+          "sandbox": "Seatbelt successfully initialized for a no-write/no-network true process; not a complete isolation proof.",
+          "stop_reason": null
+        },
+        "role": "verification",
+        "started_at": "2026-09-19T02:31:41.229407+00:00",
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "usage": {
+          "billed_cost_usd": null,
+          "cache_creation_tokens": null,
+          "cached_input_tokens": null,
+          "estimated_cost_usd": null,
+          "input_tokens": null,
+          "output_tokens": null,
+          "reasoning_tokens": null,
+          "source": "local-command"
+        }
+      },
+      {
+        "allocation_seconds": 60.0,
+        "effort": null,
+        "elapsed_seconds": 3.740203,
+        "engine": "claude",
+        "execution_id": "fd5878a1-8326-441a-94ea-6a9df894a9ef",
+        "finished_at": "2026-09-19T02:31:47.335356+00:00",
+        "model": null,
+        "pid": null,
+        "process_token": "phase4-controller-supervised",
+        "reconciliation_note": null,
+        "result": {
+          "artifacts": {
+            "request.json": "5209b5358c7c9b9e288bfed838a1a61859acdf52bb669af871619dfe82fedde4",
+            "stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout.redacted.jsonl": "5952d12016ddb86dbdf3838cff34731c4c85da2419eefb105b602ca08206b53e"
+          },
+          "authentication_failure": null,
+          "candidate_revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+          "error_class": null,
+          "limitations": [
+            "Provider events and final text are claims; fixture acceptance is independently computed.",
+            "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+            "Process groups cannot prove detached-descendant or remote cancellation.",
+            "Whole-process guard denies global writes; parent provider network and auth access remain available.",
+            "Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.",
+            "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry."
+          ],
+          "parse_error": null,
+          "provider_reported_configuration": {
+            "effort": null,
+            "model": "claude-opus-5[1m]"
+          },
+          "requested_configuration": {
+            "effort": null,
+            "model": null
+          }
+        },
+        "role": "reviewer",
+        "started_at": "2026-09-19T02:31:42.015443+00:00",
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "usage": {
+          "billed_cost_usd": null,
+          "cache_creation_tokens": 4644,
+          "cached_input_tokens": 0,
+          "estimated_cost_usd": 0.05084999999999999,
+          "input_tokens": 2,
+          "output_tokens": 176,
+          "reasoning_tokens": null,
+          "source": "claude.result"
+        }
+      }
+    ],
+    "phase4_controls": [
+      {
+        "cancel_requested": 0,
+        "cancellation_reason": null,
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:29:41.899866+00:00"
+      }
+    ],
+    "phase4_edges": [
+      {
+        "edge_type": "dependency",
+        "max_iterations": 0,
+        "source_node": "intake",
+        "target_node": "plan",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "edge_type": "dependency",
+        "max_iterations": 0,
+        "source_node": "plan",
+        "target_node": "implement-calculator-core",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "edge_type": "dependency",
+        "max_iterations": 0,
+        "source_node": "implement-calculator-core",
+        "target_node": "verify",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "edge_type": "dependency",
+        "max_iterations": 0,
+        "source_node": "verify",
+        "target_node": "review",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "edge_type": "bounded_repair",
+        "max_iterations": 2,
+        "source_node": "verify",
+        "target_node": "repair",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "edge_type": "bounded_repair",
+        "max_iterations": 2,
+        "source_node": "review",
+        "target_node": "repair",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "edge_type": "bounded_repair",
+        "max_iterations": 2,
+        "source_node": "repair",
+        "target_node": "verify",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "edge_type": "dependency",
+        "max_iterations": 0,
+        "source_node": "review",
+        "target_node": "package",
+        "task_id": "phase4-live-342423e"
+      }
+    ],
+    "phase4_intake": [
+      {
+        "assumptions": [
+          "The request targets only the selected controller-created fixture.",
+          "Public interfaces and controller-owned acceptance criteria remain unchanged.",
+          "No network, dependency installation, publication, deployment, or external repository access is authorized.",
+          "Provider model and relative price use account defaults and remain unknown unless reported by the CLI."
+        ],
+        "created_at": "2026-09-19T02:29:41.899866+00:00",
+        "execution_profile": "trusted-disposable-macos",
+        "fixture_id": "calculator",
+        "request_text": "Validate the corrected Phase 4 calculator delivery workflow",
+        "requirements": {
+          "user_request": "Validate the corrected Phase 4 calculator delivery workflow"
+        },
+        "task_id": "phase4-live-342423e"
+      }
+    ],
+    "phase4_nodes": [
+      {
+        "allowed_paths": [],
+        "attempts": 0,
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "dependencies": [],
+        "effort": null,
+        "execution_id": null,
+        "kind": "intake",
+        "max_attempts": 1,
+        "model": null,
+        "node_id": "intake",
+        "objective": "Normalize user intent without expanding authority.",
+        "provider": null,
+        "result_json": null,
+        "role": "chief_of_staff",
+        "routing_reason": null,
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:29:41.912528+00:00"
+      },
+      {
+        "allowed_paths": [],
+        "attempts": 0,
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "dependencies": [
+          "intake"
+        ],
+        "effort": null,
+        "execution_id": null,
+        "kind": "plan",
+        "max_attempts": 1,
+        "model": null,
+        "node_id": "plan",
+        "objective": "Define interfaces, decomposition, and immutable acceptance.",
+        "provider": null,
+        "result_json": null,
+        "role": "tech_lead",
+        "routing_reason": null,
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:29:41.912528+00:00"
+      },
+      {
+        "allowed_paths": [
+          "calculator.py"
+        ],
+        "attempts": 1,
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "dependencies": [
+          "plan"
+        ],
+        "effort": null,
+        "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+        "kind": "implementation",
+        "max_attempts": 2,
+        "model": null,
+        "node_id": "implement-calculator-core",
+        "objective": "Correct total without changing its public interface.",
+        "provider": "codex",
+        "result": {
+          "changed_paths": [
+            "calculator.py"
+          ],
+          "execution_id": "c0f748ea-07e2-42dd-8505-e980442019e2",
+          "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+          "worktree": "/private/tmp/portable-agentkit-phase4-live-342423e-20260919/managed/worktrees/phase4-live-342423e"
+        },
+        "role": "implementer",
+        "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:31:41.194327+00:00"
+      },
+      {
+        "allowed_paths": [],
+        "attempts": 1,
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "dependencies": [
+          "implement-calculator-core"
+        ],
+        "effort": null,
+        "execution_id": "80d6512f-c59c-4103-ae61-f18ffbba64d8",
+        "kind": "verification",
+        "max_attempts": 3,
+        "model": null,
+        "node_id": "verify",
+        "objective": "Run controller-owned acceptance under the tested execution profile.",
+        "provider": null,
+        "result": {
+          "candidate_unchanged": true,
+          "exit_code": 0,
+          "output": "test_total (test_acceptance.Acceptance) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+          "sandbox": "Seatbelt successfully initialized for a no-write/no-network true process; not a complete isolation proof.",
+          "stop_reason": null
+        },
+        "role": "verifier",
+        "routing_reason": null,
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:31:41.743222+00:00"
+      },
+      {
+        "allowed_paths": [],
+        "attempts": 1,
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "dependencies": [
+          "verify"
+        ],
+        "effort": null,
+        "execution_id": "fd5878a1-8326-441a-94ea-6a9df894a9ef",
+        "kind": "review",
+        "max_attempts": 3,
+        "model": null,
+        "node_id": "review",
+        "objective": "Independently review the integrated candidate against the contract.",
+        "provider": "claude",
+        "result": {
+          "details": {
+            "artifacts": {
+              "request.json": "5209b5358c7c9b9e288bfed838a1a61859acdf52bb669af871619dfe82fedde4",
+              "stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout.redacted.jsonl": "5952d12016ddb86dbdf3838cff34731c4c85da2419eefb105b602ca08206b53e"
+            },
+            "authentication_failure": null,
+            "candidate_revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+            "error_class": null,
+            "limitations": [
+              "Provider events and final text are claims; fixture acceptance is independently computed.",
+              "Usage counts are provider-reported. Missing fields stay null. Cost estimates are not billing.",
+              "Process groups cannot prove detached-descendant or remote cancellation.",
+              "Whole-process guard denies global writes; parent provider network and auth access remain available.",
+              "Tool-enabled execution is unsupported. Tool disabling is not OS credential isolation.",
+              "No API keys, paid-mode fallback, purchase or billing-setting change is performed. Stop on reported limits; no controller retry."
+            ],
+            "parse_error": null,
+            "provider_reported_configuration": {
+              "effort": null,
+              "model": "claude-opus-5[1m]"
+            },
+            "requested_configuration": {
+              "effort": null,
+              "model": null
+            }
+          },
+          "findings": [],
+          "revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+          "status": "succeeded"
+        },
+        "role": "reviewer",
+        "routing_reason": "Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:31:47.345569+00:00"
+      },
+      {
+        "allowed_paths": [
+          "calculator.py"
+        ],
+        "attempts": 0,
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "dependencies": [],
+        "effort": null,
+        "execution_id": null,
+        "kind": "repair",
+        "max_attempts": 2,
+        "model": null,
+        "node_id": "repair",
+        "objective": "Apply only controller-supplied failed-check or review feedback.",
+        "provider": "codex",
+        "result_json": null,
+        "role": "implementer",
+        "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+        "status": "dormant",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:29:41.912528+00:00"
+      },
+      {
+        "allowed_paths": [],
+        "attempts": 1,
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "dependencies": [
+          "review"
+        ],
+        "effort": null,
+        "execution_id": null,
+        "kind": "package",
+        "max_attempts": 1,
+        "model": null,
+        "node_id": "package",
+        "objective": "Prepare a revision-bound local approval package.",
+        "provider": null,
+        "result": {
+          "artifact_sha256": "2fb6acafbdeaa1c9ad744c755756c4063e4fa4b5d76f6d6e7c9c44ee6990c34c"
+        },
+        "role": "chief_of_staff",
+        "routing_reason": null,
+        "status": "succeeded",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:31:47.503614+00:00"
+      }
+    ],
+    "phase4_plans": [
+      {
+        "created_at": "2026-09-19T02:29:41.912528+00:00",
+        "plan": {
+          "edges": [
+            {
+              "edge_type": "dependency",
+              "max_iterations": 0,
+              "source": "intake",
+              "target": "plan"
+            },
+            {
+              "edge_type": "dependency",
+              "max_iterations": 0,
+              "source": "plan",
+              "target": "implement-calculator-core"
+            },
+            {
+              "edge_type": "dependency",
+              "max_iterations": 0,
+              "source": "implement-calculator-core",
+              "target": "verify"
+            },
+            {
+              "edge_type": "dependency",
+              "max_iterations": 0,
+              "source": "verify",
+              "target": "review"
+            },
+            {
+              "edge_type": "bounded_repair",
+              "max_iterations": 2,
+              "source": "verify",
+              "target": "repair"
+            },
+            {
+              "edge_type": "bounded_repair",
+              "max_iterations": 2,
+              "source": "review",
+              "target": "repair"
+            },
+            {
+              "edge_type": "bounded_repair",
+              "max_iterations": 2,
+              "source": "repair",
+              "target": "verify"
+            },
+            {
+              "edge_type": "dependency",
+              "max_iterations": 0,
+              "source": "review",
+              "target": "package"
+            }
+          ],
+          "management_calls": 0,
+          "mode": "single",
+          "nodes": [
+            {
+              "allowed_paths": [],
+              "dependencies": [],
+              "effort": null,
+              "initial_status": "succeeded",
+              "kind": "intake",
+              "max_attempts": 1,
+              "model": null,
+              "node_id": "intake",
+              "objective": "Normalize user intent without expanding authority.",
+              "provider": null,
+              "role": "chief_of_staff",
+              "routing_reason": null
+            },
+            {
+              "allowed_paths": [],
+              "dependencies": [
+                "intake"
+              ],
+              "effort": null,
+              "initial_status": "succeeded",
+              "kind": "plan",
+              "max_attempts": 1,
+              "model": null,
+              "node_id": "plan",
+              "objective": "Define interfaces, decomposition, and immutable acceptance.",
+              "provider": null,
+              "role": "tech_lead",
+              "routing_reason": null
+            },
+            {
+              "allowed_paths": [
+                "calculator.py"
+              ],
+              "dependencies": [
+                "plan"
+              ],
+              "effort": null,
+              "initial_status": "pending",
+              "kind": "implementation",
+              "max_attempts": 2,
+              "model": null,
+              "node_id": "implement-calculator-core",
+              "objective": "Correct total without changing its public interface.",
+              "provider": "codex",
+              "role": "implementer",
+              "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added."
+            },
+            {
+              "allowed_paths": [],
+              "dependencies": [
+                "implement-calculator-core"
+              ],
+              "effort": null,
+              "initial_status": "pending",
+              "kind": "verification",
+              "max_attempts": 3,
+              "model": null,
+              "node_id": "verify",
+              "objective": "Run controller-owned acceptance under the tested execution profile.",
+              "provider": null,
+              "role": "verifier",
+              "routing_reason": null
+            },
+            {
+              "allowed_paths": [],
+              "dependencies": [
+                "verify"
+              ],
+              "effort": null,
+              "initial_status": "pending",
+              "kind": "review",
+              "max_attempts": 3,
+              "model": null,
+              "node_id": "review",
+              "objective": "Independently review the integrated candidate against the contract.",
+              "provider": "claude",
+              "role": "reviewer",
+              "routing_reason": "Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added."
+            },
+            {
+              "allowed_paths": [
+                "calculator.py"
+              ],
+              "dependencies": [],
+              "effort": null,
+              "initial_status": "dormant",
+              "kind": "repair",
+              "max_attempts": 2,
+              "model": null,
+              "node_id": "repair",
+              "objective": "Apply only controller-supplied failed-check or review feedback.",
+              "provider": "codex",
+              "role": "implementer",
+              "routing_reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added."
+            },
+            {
+              "allowed_paths": [],
+              "dependencies": [
+                "review"
+              ],
+              "effort": null,
+              "initial_status": "pending",
+              "kind": "package",
+              "max_attempts": 1,
+              "model": null,
+              "node_id": "package",
+              "objective": "Prepare a revision-bound local approval package.",
+              "provider": null,
+              "role": "chief_of_staff",
+              "routing_reason": null
+            }
+          ],
+          "routes": [
+            {
+              "effort": null,
+              "model": null,
+              "node_id": "implement-calculator-core",
+              "profile_id": "codex-account-default",
+              "provider": "codex",
+              "reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+              "relative_cost": "unknown",
+              "role": "implementer"
+            },
+            {
+              "effort": null,
+              "model": null,
+              "node_id": "review",
+              "profile_id": "claude-account-default",
+              "provider": "claude",
+              "reason": "Configured profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+              "relative_cost": "unknown",
+              "role": "reviewer"
+            },
+            {
+              "effort": null,
+              "model": null,
+              "node_id": "repair",
+              "profile_id": "codex-account-default",
+              "provider": "codex",
+              "reason": "Configured profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used. No larger or second model is added.",
+              "relative_cost": "unknown",
+              "role": "repair"
+            }
+          ],
+          "schema_version": 1,
+          "selected_skills": [
+            {
+              "id": "task-contract",
+              "path": "skills/task-contract/SKILL.md",
+              "reason": "Selected for calculator routine workflow.",
+              "roles": [
+                "chief_of_staff",
+                "tech_lead"
+              ],
+              "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d"
+            },
+            {
+              "id": "behavioral-testing",
+              "path": "skills/behavioral-testing/SKILL.md",
+              "reason": "Selected for calculator routine workflow.",
+              "roles": [
+                "implementer"
+              ],
+              "sha256": "f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473"
+            },
+            {
+              "id": "independent-review",
+              "path": "skills/independent-review/SKILL.md",
+              "reason": "Selected for calculator routine workflow.",
+              "roles": [
+                "reviewer"
+              ],
+              "sha256": "5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb"
+            },
+            {
+              "id": "delivery-evidence",
+              "path": "skills/delivery-evidence/SKILL.md",
+              "reason": "Selected for calculator routine workflow.",
+              "roles": [
+                "chief_of_staff"
+              ],
+              "sha256": "c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0"
+            },
+            {
+              "id": "domain:backend-database",
+              "path": "domains/backend-database.md",
+              "reason": "Fixture domain context only.",
+              "roles": [
+                "implementer",
+                "reviewer"
+              ],
+              "sha256": "758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e"
+            }
+          ],
+          "task_id": "phase4-live-342423e"
+        },
+        "plan_sha256": "ef8ded953af504d6cbb50ad5fd0629c6f642a943288e9870e448a4ef902f9906",
+        "status": "active",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:30:47.205811+00:00"
+      }
+    ],
+    "phase4_skills": [
+      {
+        "reason": "Selected for calculator routine workflow.",
+        "relative_path": "skills/task-contract/SKILL.md",
+        "roles": [
+          "chief_of_staff",
+          "tech_lead"
+        ],
+        "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d",
+        "skill_id": "task-contract",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "reason": "Selected for calculator routine workflow.",
+        "relative_path": "skills/behavioral-testing/SKILL.md",
+        "roles": [
+          "implementer"
+        ],
+        "sha256": "f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473",
+        "skill_id": "behavioral-testing",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "reason": "Selected for calculator routine workflow.",
+        "relative_path": "skills/independent-review/SKILL.md",
+        "roles": [
+          "reviewer"
+        ],
+        "sha256": "5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb",
+        "skill_id": "independent-review",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "reason": "Selected for calculator routine workflow.",
+        "relative_path": "skills/delivery-evidence/SKILL.md",
+        "roles": [
+          "chief_of_staff"
+        ],
+        "sha256": "c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0",
+        "skill_id": "delivery-evidence",
+        "task_id": "phase4-live-342423e"
+      },
+      {
+        "reason": "Fixture domain context only.",
+        "relative_path": "domains/backend-database.md",
+        "roles": [
+          "implementer",
+          "reviewer"
+        ],
+        "sha256": "758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e",
+        "skill_id": "domain:backend-database",
+        "task_id": "phase4-live-342423e"
+      }
+    ],
+    "tasks": [
+      {
+        "base_revision": "deaf9edaf37cdf954c9af0b480ff4bbf71327ea3",
+        "branch": "agentkit/phase4-live-342423e",
+        "contract": {
+          "acceptance": [
+            {
+              "expected": "total returns arithmetic sum for positive, negative, and zero inputs",
+              "id": "total"
+            }
+          ],
+          "assumptions": [
+            "The request targets only the selected controller-created fixture.",
+            "Public interfaces and controller-owned acceptance criteria remain unchanged.",
+            "No network, dependency installation, publication, deployment, or external repository access is authorized.",
+            "Provider model and relative price use account defaults and remain unknown unless reported by the CLI."
+          ],
+          "execution_profile": "trusted-disposable-macos",
+          "non_goals": [
+            "personal repositories",
+            "dependency installation",
+            "publication",
+            "merge",
+            "deployment",
+            "GPU or remote execution"
+          ],
+          "objective": "Validate the corrected Phase 4 calculator delivery workflow",
+          "requirements": {
+            "user_request": "Validate the corrected Phase 4 calculator delivery workflow"
+          },
+          "risk": "routine",
+          "scope": [
+            "calculator.py"
+          ]
+        },
+        "created_at": "2026-09-19T02:29:41.894106+00:00",
+        "dependencies": [],
+        "head_revision": "ee3f6ffc260f6cf1ee5537db1913debb0f4168ff",
+        "implementer_engine": "codex",
+        "implementer_model": null,
+        "max_repairs": 2,
+        "next_action": "await explicit publication approval bound to this revision",
+        "objective": "Validate the corrected Phase 4 calculator delivery workflow",
+        "repair_count": 0,
+        "reviewer_engine": "claude",
+        "reviewer_model": null,
+        "state": "awaiting_pr_approval",
+        "task_id": "phase4-live-342423e",
+        "updated_at": "2026-09-19T02:31:47.509598+00:00",
+        "version": 11,
+        "worktree": "/private/tmp/portable-agentkit-phase4-live-342423e-20260919/managed/worktrees/phase4-live-342423e"
+      }
+    ]
+  }
+}

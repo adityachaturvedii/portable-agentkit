@@ -1,0 +1,43 @@
+{
+  "acceptance": [
+    {
+      "expected": "total returns arithmetic sum for positive, negative, and zero inputs",
+      "id": "total"
+    }
+  ],
+  "assumptions": [
+    "The request targets only the selected controller-created fixture.",
+    "Public interfaces and controller-owned acceptance criteria remain unchanged.",
+    "No network, dependency installation, publication, deployment, or external repository access is authorized.",
+    "Provider model and relative price use account defaults and remain unknown unless reported by the CLI."
+  ],
+  "context_allocation": "provider-managed-unknown",
+  "dependencies": [],
+  "difficulty": "routine",
+  "execution_profile": "trusted-disposable-macos",
+  "max_calls": 3,
+  "max_concurrency": 1,
+  "max_elapsed_seconds": 130.0,
+  "max_output_bytes_per_call": 1048576,
+  "max_repairs": 2,
+  "max_subtasks": 1,
+  "max_timeout_seconds": 60,
+  "non_goals": [
+    "personal repositories",
+    "dependency installation",
+    "publication",
+    "merge",
+    "deployment",
+    "GPU or remote execution"
+  ],
+  "objective": "Validate the corrected Phase 4 calculator delivery workflow",
+  "review_reserve": 1,
+  "risk": "routine",
+  "schema_version": 1,
+  "scope": [
+    "calculator.py"
+  ],
+  "task_id": "phase4-live-342423e",
+  "user_request": "Validate the corrected Phase 4 calculator delivery workflow",
+  "verification_reserve": 1
+}

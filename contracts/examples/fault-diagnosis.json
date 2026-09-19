@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "task_id": "example-fault-diagnosis",
+  "kind": "fault-diagnosis",
+  "revision": "0000000000000000000000000000000000000000",
+  "status": "blocked",
+  "summary": "Example shape only; no verification has run.",
+  "payload": {
+    "symptom": "Example only; replace with task evidence.",
+    "reproduction": "Example only; replace with task evidence.",
+    "hypotheses": [],
+    "experiments": [],
+    "root_cause": "Example only; replace with task evidence.",
+    "regression": "Example only; replace with task evidence."
+  },
+  "evidence": [],
+  "limitations": [
+    "Template only; no capability or evidence supplied."
+  ],
+  "next_actions": [
+    "Supply task-specific observations and validate."
+  ]
+}

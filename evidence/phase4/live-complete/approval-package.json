@@ -1,0 +1,131 @@
+{
+  "approval": {
+    "bound_head": "6c3074a5ee12a2577cf20fd7a2a45c0a8f638b73",
+    "recorded": false,
+    "required_action": "push_and_create_pr"
+  },
+  "artifact_sha256": "6c0caa376e3eef66d649973b9d274012c3b4c1618792a78fcebd6b4608de4ac0",
+  "base_revision": "84b48c207d7afdeeebb98d1b4ec3c50a83555813",
+  "branch": "agentkit/phase4-live",
+  "diff": "diff --git a/calculator.py b/calculator.py\nindex 1fcbd09..06164e9 100644\n--- a/calculator.py\n+++ b/calculator.py\n@@ -1,3 +1,3 @@\n def total(left, right):\n     \"\"\"Return the arithmetic sum.\"\"\"\n-    return left - right\n+    return left + right",
+  "head_revision": "6c3074a5ee12a2577cf20fd7a2a45c0a8f638b73",
+  "limitations": [
+    "Trusted controller-created disposable macOS fixtures only.",
+    "Interactive login recovery is fixture-tested, not live-tested.",
+    "No publication, merge, deployment, detached-process containment, or remote cancellation."
+  ],
+  "proposed_pr": {
+    "body": "Implements the validated fixture contract and passes independent checks.",
+    "title": "Repair calculator disposable fixture"
+  },
+  "repository": "/private/tmp/agentkit-phase4-live-20260919/managed/repositories/phase4-live",
+  "resolved_findings": [],
+  "resources": {
+    "active_calls": 0,
+    "billed_cost_usd": null,
+    "completed_calls": 3,
+    "context_allocation": "provider-managed-unknown",
+    "cost_note": "Unknown remains unknown; CLI estimates are not billing.",
+    "elapsed_seconds": 42.260266291,
+    "estimated_cost_usd": null,
+    "max_calls": 5,
+    "max_elapsed_seconds": 180.0,
+    "max_output_bytes_per_call": 1048576,
+    "remaining_calls": 2,
+    "remaining_elapsed_seconds": 137.739733709,
+    "review_reserve": 1,
+    "token_usage": {
+      "cache_creation_tokens": null,
+      "cached_input_tokens": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "reasoning_tokens": null
+    },
+    "verification_reserve": 1
+  },
+  "review_findings": [],
+  "routing": [
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "implement-calculator-core",
+      "profile_id": "codex-account-default",
+      "provider": "codex",
+      "reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "implementer"
+    },
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "review",
+      "profile_id": "claude-account-default",
+      "provider": "claude",
+      "reason": "Configured account-default profile satisfies the tested model-only capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "reviewer"
+    },
+    {
+      "effort": null,
+      "model": null,
+      "node_id": "repair",
+      "profile_id": "codex-account-default",
+      "provider": "codex",
+      "reason": "Configured account-default profile satisfies the tested owned-code capability. Exact availability is checked by the read-only provider preflight at execution. Relative price and quality are unknown, so the explicit default is used and no larger or second model is added.",
+      "relative_cost": "unknown",
+      "role": "repair"
+    }
+  ],
+  "schema_version": 1,
+  "skills": [
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/behavioral-testing/SKILL.md",
+      "sha256": "f962c13010d4a1a2cd7f1ba92f5584a48767c698b6857a2b752c617c93f7d473",
+      "skill_id": "behavioral-testing",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/delivery-evidence/SKILL.md",
+      "sha256": "c49aaff2135d50c3a203d7762edae690743b265bd0bf8ebcae895306290938a0",
+      "skill_id": "delivery-evidence",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Fixture domain context only.",
+      "relative_path": "domains/backend-database.md",
+      "sha256": "758429538fe9986de4224c127c0ad44a1dffa1fa7f67afb4b33f74d2d4bda03e",
+      "skill_id": "domain:backend-database",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/independent-review/SKILL.md",
+      "sha256": "5c368fc9e20c0f5ff8926fdec2d44f6f22c754bf7b2362106ec19e2086c22ebb",
+      "skill_id": "independent-review",
+      "task_id": "phase4-live"
+    },
+    {
+      "reason": "Selected for calculator routine workflow.",
+      "relative_path": "skills/task-contract/SKILL.md",
+      "sha256": "fef894f5d1f90b3533725508ec6747bb769a5d231bafc081acf3d544873eed8d",
+      "skill_id": "task-contract",
+      "task_id": "phase4-live"
+    }
+  ],
+  "status": "awaiting_pr_approval",
+  "summary": "Repair the controller-created calculator fixture and verify the exact candidate.",
+  "task_id": "phase4-live",
+  "verification": [
+    {
+      "id": "phase4-verification-0",
+      "revision": "6c3074a5ee12a2577cf20fd7a2a45c0a8f638b73",
+      "stale": false,
+      "status": "passed"
+    }
+  ],
+  "why": {
+    "user_request": "Repair the controller-created calculator fixture and verify the exact candidate."
+  }
+}

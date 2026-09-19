@@ -1,0 +1,1 @@
+{"candidate_unchanged": true, "exit_code": 0, "output": "test_total (test_acceptance.Acceptance) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n", "sandbox": "Seatbelt successfully initialized for a no-write/no-network true process; not a complete isolation proof.", "stop_reason": null}

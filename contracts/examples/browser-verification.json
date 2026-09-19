@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "task_id": "example-browser-verification",
+  "kind": "browser-verification",
+  "revision": "0000000000000000000000000000000000000000",
+  "status": "blocked",
+  "summary": "Example shape only; no verification has run.",
+  "payload": {
+    "target": "Example only; replace with task evidence.",
+    "browser": "Example only; replace with task evidence.",
+    "verifier": "Example only; replace with task evidence.",
+    "implementation_authors": [],
+    "flows": [],
+    "viewports": [],
+    "observations": []
+  },
+  "evidence": [],
+  "limitations": [
+    "Template only; no capability or evidence supplied."
+  ],
+  "next_actions": [
+    "Supply task-specific observations and validate."
+  ]
+}

@@ -1,0 +1,654 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "pstack",
+      "repository": "https://github.com/backnotprop/pstack",
+      "commit": "157aae39a733135e93d8b5b19ff62c6a84b0ad56",
+      "commit_date": "2026-09-14T15:57:09Z",
+      "retrieved_at": "2026-09-18T04:49:35.310056+00:00",
+      "archive_sha256": "dd280c240cde0b70492c506dc89d985cf4013d02c2480e8183a45f39f0ab4e64",
+      "license": "MIT",
+      "notice": "notices/pstack-LICENSE.txt",
+      "candidates": [
+        {
+          "path": "skills/how/SKILL.md",
+          "decision": "adapt",
+          "target": "system-investigation",
+          "adaptation": "Trace execution paths; replace host delegates with scoped evidence collection."
+        },
+        {
+          "path": "skills/why/SKILL.md",
+          "decision": "adapt",
+          "target": "system-investigation",
+          "adaptation": "Separate history evidence from hypotheses; remove mandatory broad MCP searches."
+        },
+        {
+          "path": "skills/architect/SKILL.md",
+          "decision": "adapt",
+          "target": "interface-design",
+          "adaptation": "Caller-first contracts and ownership; remove mandatory multi-model arena."
+        },
+        {
+          "path": "skills/blast-radius/SKILL.md",
+          "decision": "adapt",
+          "target": "change-impact",
+          "adaptation": "Check consumers beyond symbols; record unproven invariants, remove automatic arena and unslop dependency."
+        },
+        {
+          "path": "skills/poteto-mode/playbooks/hillclimb.md",
+          "decision": "adapt",
+          "target": "measured-optimisation",
+          "adaptation": "Freeze protocol, retain rejects; remove automatic PR, minimum attempt floor, model IDs and unbounded plateau pushing."
+        },
+        {
+          "path": "skills/interrogate/SKILL.md",
+          "decision": "adapt",
+          "target": "independent-review",
+          "adaptation": "Concrete findings on fixed revision; replace voting/model defaults and model-fix PRs with falsifiable checks."
+        }
+      ],
+      "files": [
+        {
+          "path": ".cursor-plugin/plugin.json",
+          "sha256": "dd2170282d5b3c0e4cba33948b5294bb58ab561bee5de0011e7713c70f28d6bd",
+          "bytes": 721,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "bc957ca6bee02792566a1a028d105e02e247c6e77cf057061674273da77b200e",
+          "bytes": 1067,
+          "disposition": "adopt-notice"
+        },
+        {
+          "path": "README.md",
+          "sha256": "29caa640dcd6aec5f826e0a9272d3ea385b3bc2c23a55756c28f94fc019e3c08",
+          "bytes": 24538,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/architect/SKILL.md",
+          "sha256": "897a59beaa3cab107d98c256206e062cc4a5e9421a45b9d462fbded19291fea5",
+          "bytes": 5383,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/architect/references/design-red-flags.md",
+          "sha256": "905066f9bbac81c573c2b325be47751d2c0f9325e0a0772bd4384e82dafe9336",
+          "bytes": 1944,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/architect/references/rationale-template.md",
+          "sha256": "0cedfccdc7b47fc881febd5a8293eecbc542c20f8df825639904a8102d2eb5d3",
+          "bytes": 3050,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/architect/references/runner-prompt.md",
+          "sha256": "983bf2820cc14ed8ecab6e448e1033e5cfe6031967d0a9287b48c7fa9c33d925",
+          "bytes": 3087,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/blast-radius/SKILL.md",
+          "sha256": "20cb2945f5fe62055166f745107274af5f19428ca033e53a9b8bc69650d3ded1",
+          "bytes": 4016,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/how/SKILL.md",
+          "sha256": "a3619781188331a3d61136d14abd1386cfe3a76e671aeb03f0c01cbd61434302",
+          "bytes": 3380,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/how/references/explainer-prompt.md",
+          "sha256": "ddb89cebefc24e2b54517a331aedfe045b6971e101f45c71b8cef4cccff45bff",
+          "bytes": 3085,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/how/references/explorer-prompt.md",
+          "sha256": "3a6965276d23be7d8da6c305bfd5d7bf29d2aef09e5dae4119463ac72022a02d",
+          "bytes": 2684,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/interrogate/SKILL.md",
+          "sha256": "a032d652d67575f20a03eeb7aeec27a504b5c7d905f9e9daaad48534dc6a86e8",
+          "bytes": 5496,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/interrogate/references/code-quality-review.md",
+          "sha256": "623d3d8122d075c303b562783b471a732992e84166b318f85ab6d6c118b13304",
+          "bytes": 5372,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/interrogate/references/lead-judgment.md",
+          "sha256": "6e5bdf5670eb34017692e9b6c546f36ac7552e6bb9f3f2f3429164fcc46a9361",
+          "bytes": 3465,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/interrogate/references/reviewer-prompt.md",
+          "sha256": "a397cc61102add709803d917fb23d726920525bf23e7c06dc4ed0b5cbeb00e54",
+          "bytes": 2756,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/interrogate/references/rubric.md",
+          "sha256": "59e9b7cc4556e735e1b859a7dd1f7637b013a2426a84825ac1c51979942c158a",
+          "bytes": 5096,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/poteto-mode/playbooks/hillclimb.md",
+          "sha256": "4637fb1537288f6c26c69425045f01b725bb6fa8a7b444bf98b6eaa9a1e9fb5f",
+          "bytes": 4081,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/poteto-mode/scripts/bun.lock",
+          "sha256": "667d9cf7222e9aae3fa42a4be383e657784216e9df115da02227fbc5ac7bbe46",
+          "bytes": 6679,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/poteto-mode/scripts/package.json",
+          "sha256": "d1f815091209d49763775cc188e8e06ff32d5fec648bffd2272bc25a165e87c3",
+          "bytes": 352,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/SKILL.md",
+          "sha256": "7bcccc3b6fe14e8b32578e0a396665d5d617200f0427f121f0e1b08f3981f7bd",
+          "bytes": 10809,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/why/references/epistemics.md",
+          "sha256": "fcc0f559c072832c869a5ada72434b4849320a637ae63c09e8ee14f7ad787059",
+          "bytes": 7749,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/investigator-prompt.md",
+          "sha256": "6892956a7ab0b5ee6c4babaf4f793703abe89b350ea7cb9463b4a56eea1c8266",
+          "bytes": 6985,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/source-playbook.md",
+          "sha256": "9ae9dcb9d09111c9facc68510331c5aba4aed9b1b057314ff1fc0e166ad3993a",
+          "bytes": 1363,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/code-archaeology.md",
+          "sha256": "8c14aa382f0de40829b2668d43e3f54814480bb93a486c9282ada4003f6b9dbd",
+          "bytes": 3489,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/databricks.md",
+          "sha256": "236ede7aab6454662a992db088a5393537a5233a4c26719c93188f9e174488f6",
+          "bytes": 6994,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/datadog.md",
+          "sha256": "ebe9c07bac28e47757ee7f16fb93b0c01d427a08c501957d047f395a2f37b7e7",
+          "bytes": 5323,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/incident-postmortem.md",
+          "sha256": "a899470f05f86029630a13a2696491cc708ca7b56a6e822a69ff6e954d6ff8cf",
+          "bytes": 1973,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/linear.md",
+          "sha256": "01304e7f1badfcfb78babbb0edcadeb3cc8dd3f713793420cdff24ba190f907c",
+          "bytes": 2996,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/notion.md",
+          "sha256": "3bcfa695c49dfad4ac036d5d7181c12585f55ac04f1936198d16ab75a2788997",
+          "bytes": 2853,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/sentry.md",
+          "sha256": "6f292bc4fb1548e956f95e1900b9481abf5134254419f1cd9edec95428c82d73",
+          "bytes": 4947,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/sources/slack.md",
+          "sha256": "58fee61d024b3700b407e7acbed367944720ff05adfddb6954d36c88368f3ba7",
+          "bytes": 3105,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/why/references/synthesizer-prompt.md",
+          "sha256": "733a3e9cf897b1aca56aaddeae01a3832e4bfed024c2f602db2d1bf807d7a73b",
+          "bytes": 7984,
+          "disposition": "reference-only-excluded"
+        }
+      ],
+      "excluded_closure": "All upstream executables, plugin manifests, hooks, external services and further transitive dependencies are rejected as runtime dependencies. Reference-only hashes record audit identity, not a claim of line-by-line code security review."
+    },
+    {
+      "id": "matt-skills",
+      "repository": "https://github.com/mattpocock/skills",
+      "commit": "74ca5fe077456a0b3b2f5310cf9430999fd0b5fd",
+      "commit_date": "2026-09-17T11:10:45Z",
+      "retrieved_at": "2026-09-18T04:49:36.332506+00:00",
+      "archive_sha256": "f7ec9ff61af8b04bb16d0e4c055d709e88edb81c8b58c1842ede2c6f9a9e4daf",
+      "license": "MIT",
+      "notice": "notices/matt-skills-LICENSE.txt",
+      "candidates": [
+        {
+          "path": "skills/engineering/grill-with-docs/SKILL.md",
+          "decision": "adapt",
+          "target": "task-contract",
+          "adaptation": "Synthesize known context; replace mandatory grill/domain-modeling calls and exhaustive interview with material questions."
+        },
+        {
+          "path": "skills/engineering/to-spec/SKILL.md",
+          "decision": "adapt",
+          "target": "task-contract",
+          "adaptation": "Technical acceptance contract; remove tracker publication, setup dependency and extensive mandatory stories."
+        },
+        {
+          "path": "skills/engineering/tdd/SKILL.md",
+          "decision": "adapt",
+          "target": "behavioral-testing",
+          "adaptation": "Public behavior and independent expectations; accept established seams without repeated confirmation."
+        },
+        {
+          "path": "skills/engineering/diagnosing-bugs/SKILL.md",
+          "decision": "adapt",
+          "target": "fault-diagnosis",
+          "adaptation": "Reproduction and competing hypotheses; allow bounded slow/intermittent experiments and blocked outcomes; omit HITL shell script."
+        }
+      ],
+      "files": [
+        {
+          "path": ".claude-plugin/plugin.json",
+          "sha256": "e531ddc6560515397ac32d93334fa3eb586b6b6bcc2e472c3646641fd3d2b951",
+          "bytes": 1636,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+          "bytes": 1068,
+          "disposition": "adopt-notice"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4079d981bc2ac0a52aaf2c76d1c1476f4297937a8ff3a2e2322b6b730dc2d4f6",
+          "bytes": 15587,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "b89967d44b654ceb7b9fcc7e0d6c3f74fb110bb96eb66c65bac14099c729338d",
+          "bytes": 49290,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "package.json",
+          "sha256": "167010d1c535a085be165835a4cc89e1de2760c2bf3b6e43c6ae045e41d0587b",
+          "bytes": 597,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/codebase-design/DEEPENING.md",
+          "sha256": "f3dd099ce99289bd213914d8ee3e2429b78309c3957ca4583f7659551b1d53c1",
+          "bytes": 2553,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/codebase-design/DESIGN-IT-TWICE.md",
+          "sha256": "8e740bf98446dbd4dfdc132ac4346d9a7eedaf93de6a495889171cf7f99f16bd",
+          "bytes": 2664,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/codebase-design/SKILL.md",
+          "sha256": "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2",
+          "bytes": 6446,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/codebase-design/agents/openai.yaml",
+          "sha256": "edebc9e4fcfe102114012575eaa9600b9b5fd08c311664f389c36e7bc717740f",
+          "bytes": 102,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/diagnosing-bugs/SKILL.md",
+          "sha256": "77f3cf31bc99b2f49af943222526531fcc9fc41d047626d3640e875e85af3e84",
+          "bytes": 8529,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/engineering/diagnosing-bugs/agents/openai.yaml",
+          "sha256": "3e430dbe4334a87597488c060cb3dc3786bb00c9182877d6f5ec41f62490e90b",
+          "bytes": 103,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/diagnosing-bugs/scripts/hitl-loop.template.sh",
+          "sha256": "35103539fc36873eea36074769ad454f9379d6fc8b2dc0e26ce987fd3bfe5503",
+          "bytes": 1316,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/domain-modeling/ADR-FORMAT.md",
+          "sha256": "944c92aa790e8fbdc9199640b170979abb8a34ba8d0fe18c2a01a63bce140ca0",
+          "bytes": 2733,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/domain-modeling/CONTEXT-FORMAT.md",
+          "sha256": "17ab16ce783e4d2801ee52fd9acdf550cbf44de65ae76797a93943bbedf22a13",
+          "bytes": 2290,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/domain-modeling/SKILL.md",
+          "sha256": "327a2b50620e2fd70abc6893cd6965e76b20f8d0adb0dc2c8d5eb3845efb643e",
+          "bytes": 3331,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/domain-modeling/agents/openai.yaml",
+          "sha256": "f6bf2aa996c6e6f53fdd0708e18a0d16a56aed8322cca59fedbe3c0d2c75f06b",
+          "bytes": 101,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/grill-with-docs/SKILL.md",
+          "sha256": "7de372c13488f1ee96cc11cd8907b56b6809cc93eef776eeddd37de6b6cbe3fe",
+          "bytes": 247,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/engineering/grill-with-docs/agents/openai.yaml",
+          "sha256": "94cd0ab161fb468a836349f5ed482ba58ce8e709a05c57ce533d739dbd35cca9",
+          "bytes": 145,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/tdd/SKILL.md",
+          "sha256": "cb01f66bebfaa25fa1f88e6b7e769cd9fd9f35b1120b8563749820738814c927",
+          "bytes": 3549,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/engineering/tdd/agents/openai.yaml",
+          "sha256": "ea6f01cf1b8c06a4b0f5b649d74b1b8ce8685e72af1b38d70d877693e092af0b",
+          "bytes": 87,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/tdd/mocking.md",
+          "sha256": "3ceb807fdf4a47d6a93d4d9a891e5ba6d362a6247bd08adc451feebfc17361ef",
+          "bytes": 1481,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/tdd/tests.md",
+          "sha256": "859f9e592c188fda4fc7277dd180e4ce9c7a2e13f6efe1f6f29eccc9d28c106a",
+          "bytes": 2214,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/engineering/to-spec/SKILL.md",
+          "sha256": "43ad9cf318e5e7d3d1fa360253a37021796dc87a0c2e595ad262661a10f85088",
+          "bytes": 3043,
+          "disposition": "adapt"
+        },
+        {
+          "path": "skills/engineering/to-spec/agents/openai.yaml",
+          "sha256": "1c5b4d1e3d8e52287ef19cc2742fdbbfae1914ac75d33af3e4c8174f08cc55bb",
+          "bytes": 135,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/productivity/grilling/SKILL.md",
+          "sha256": "10ff989e7498b23b5acb49d5048f11dcd906757d2f79c5cdf8a00001381296f2",
+          "bytes": 1987,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "skills/productivity/grilling/agents/openai.yaml",
+          "sha256": "1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b",
+          "bytes": 113,
+          "disposition": "reference-only-excluded"
+        }
+      ],
+      "excluded_closure": "All upstream executables, plugin manifests, hooks, external services and further transitive dependencies are rejected as runtime dependencies. Reference-only hashes record audit identity, not a claim of line-by-line code security review."
+    },
+    {
+      "id": "gstack",
+      "repository": "https://github.com/garrytan/gstack",
+      "commit": "a6b3a57512ca6d5c6aa5b68f74f736195021f96e",
+      "commit_date": "2026-09-16T04:35:11Z",
+      "retrieved_at": "2026-09-18T04:49:39.609896+00:00",
+      "archive_sha256": "9cf322d94c287575eaf84632a2839afbbdf6a55eee013cb87f77c7d43eaee9d3",
+      "license": "MIT",
+      "notice": "notices/gstack-LICENSE.txt",
+      "candidates": [
+        {
+          "path": "review/SKILL.md",
+          "decision": "adapt",
+          "target": "independent-review",
+          "adaptation": "Reuse selected review categories; remove setup, telemetry, global learning, fixer and external-review orchestration."
+        },
+        {
+          "path": "qa-only/SKILL.md",
+          "decision": "adapt",
+          "target": "browser-verification",
+          "adaptation": "Separate report-only user-flow verification; remove cookie import, personal browser discovery, global learning, bundled browser, scoring and setup."
+        }
+      ],
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "e56fbb5b3d95756f3fa1cfefa24732ec79f18ece1ad08a4e79e00df57e8b198c",
+          "bytes": 1066,
+          "disposition": "adopt-notice"
+        },
+        {
+          "path": "README.md",
+          "sha256": "288ac031be00fbfaaa7958840dc397035d3f48a5631512e7dcdea3c86f41e8bc",
+          "bytes": 69250,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "bun.lock",
+          "sha256": "3a70ad7d23a24160bfab62f8125197972a642e01bfe5e54f10cd46c600741f3b",
+          "bytes": 60459,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "package.json",
+          "sha256": "f33941ff65740255ff7e8106b0261d5f265784bb74c74cc47e1d7a770d808825",
+          "bytes": 6181,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "qa/references/issue-taxonomy.md",
+          "sha256": "af7fa568ca49316f60ed0919316b914fcd137f7abe2e75e7b296924aaaab0862",
+          "bytes": 3832,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "qa/templates/qa-report-template.md",
+          "sha256": "fa252c4f41a4e096fd54cf98e88c1cbcf21ca05cc84d5974d09e3408ab166833",
+          "bytes": 2992,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "qa-only/SKILL.md",
+          "sha256": "1bf714b7831885a86cd3c4bcea1f7f184bd0c15cce40e8be8c65ce297d80dc79",
+          "bytes": 65897,
+          "disposition": "adapt"
+        },
+        {
+          "path": "qa-only/SKILL.md.tmpl",
+          "sha256": "41e1833ac95badf4bceae440bf88036cfeb43e24c730874e5d07ad4a5471c104",
+          "bytes": 4075,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/SKILL.md",
+          "sha256": "259f896c7bfd79fc747d20cdc96f26127fdb62c11803393ac415f70e1da98d60",
+          "bytes": 60940,
+          "disposition": "adapt"
+        },
+        {
+          "path": "review/SKILL.md.tmpl",
+          "sha256": "c9719fef2deb27fd7c96a4715af7e8e843ba8443e7c14e56b7553e39343c4bda",
+          "bytes": 14280,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/TODOS-format.md",
+          "sha256": "faf7774c45356ee7990cba0289ca71bf77491394608052e4f711f5436046613c",
+          "bytes": 1656,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/checklist.md",
+          "sha256": "55712427735c67bb942de7c00238c80a09ccefaf8c09c2f81ba913650af16718",
+          "bytes": 12411,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/design-checklist.md",
+          "sha256": "70fe4372c44f3b1cda0741058cd69aff09ea850d204bd6643ebf5c6dfd9b7833",
+          "bytes": 14007,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/greptile-triage.md",
+          "sha256": "49d5713db780f11ee2e217d2024e84f48199b7dc531a7c779a5d857ab78b3971",
+          "bytes": 9771,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/sections/adversarial.md",
+          "sha256": "b0255335df6c6811b2f42f6534b044e2efdd4d4aef821a434b01b3bbfe6a3e61",
+          "bytes": 22507,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/sections/adversarial.md.tmpl",
+          "sha256": "65da4f6c04809389a26e07b8d3a0305753c6635322cc486219ad33d3e0546b52",
+          "bytes": 1774,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/sections/manifest.json",
+          "sha256": "5df80189f24c12d5cf3577594d374d1c27bce133c17d6904ac24ac7e4eacab94",
+          "bytes": 1382,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/sections/plan-completion.md",
+          "sha256": "45b94ef902efd70b8524d8628ef28a4f420d9b40c37df6b8a380113065603380",
+          "bytes": 13977,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/sections/plan-completion.md.tmpl",
+          "sha256": "40ffb5c2b6808d398b325d20e08e82ed8268e4d267610d07e683734b2cba52ce",
+          "bytes": 306,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/sections/review-army.md",
+          "sha256": "5bf1fafce23c3723b67d17e9a9063bfce7762268b5a24a4cc9ea93e4bf43f872",
+          "bytes": 11879,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/sections/review-army.md.tmpl",
+          "sha256": "c732b138d7bf4280203bc128ee83e295bc449a48a2d0a1dde0b4fa6b7ea18917",
+          "bytes": 16,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/api-contract.md",
+          "sha256": "263d23ac119dd601d315c191dbdbd503d47c00264c9c0ca81959559ca11d4e95",
+          "bytes": 2357,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/data-migration.md",
+          "sha256": "b6fd9eb229002ea598f8fe9ff53b1cd8821e3bd37a7aa7b07b5526556c71ebca",
+          "bytes": 2306,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/maintainability.md",
+          "sha256": "7d945a69e0763fd1be26ffdff65f1088cab555d80630ed4ad44313e5e6623036",
+          "bytes": 2325,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/performance.md",
+          "sha256": "545c294ae53638b4c8524e8cde08246a4ce3b5c287ec7c44e27f5556a3b0e8cc",
+          "bytes": 2618,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/red-team.md",
+          "sha256": "9ea05149f5b13d6a19ecec26285142d09d259cf80a515af828abdd1f43320427",
+          "bytes": 2258,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/security.md",
+          "sha256": "d0dc1cf0f1c7450507cfc663a67624cbcd5d4cfd0258a3bfeb51dba6f09c7df2",
+          "bytes": 3025,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/simplification.md",
+          "sha256": "b6d2e9041bf18bc3ff85f4e27555f60188713c5745e977e061170ce17e3cc974",
+          "bytes": 4421,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "review/specialists/testing.md",
+          "sha256": "3fd6dc5d802fd112f75934c4c168c3f03e25275b70e1e403eb670cbf7447e4e7",
+          "bytes": 2226,
+          "disposition": "reference-only-excluded"
+        },
+        {
+          "path": "setup",
+          "sha256": "24deebc43e7df1e0e79f16f077d5e006ae42e3997e49ea2b48a47f6243a6bfcf",
+          "bytes": 161678,
+          "disposition": "reference-only-excluded"
+        }
+      ],
+      "excluded_closure": "All upstream executables, plugin manifests, hooks, external services and further transitive dependencies are rejected as runtime dependencies. Reference-only hashes record audit identity, not a claim of line-by-line code security review."
+    }
+  ],
+  "original_skills": [
+    "delivery-evidence"
+  ],
+  "runtime_dependencies": []
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "cases": {
+    "timeout": {
+      "stop_reason": "timeout",
+      "elapsed_seconds": 0.463464,
+      "term_sent": true,
+      "kill_sent": true,
+      "leader_reaped": true,
+      "process_group_gone": true,
+      "term_resistant_child_gone": true,
+      "passed": true
+    },
+    "cancellation": {
+      "stop_reason": "cancelled",
+      "elapsed_seconds": 0.468437,
+      "term_sent": true,
+      "kill_sent": true,
+      "leader_reaped": true,
+      "process_group_gone": true,
+      "term_resistant_child_gone": true,
+      "passed": true
+    }
+  },
+  "limitations": [
+    "Local POSIX process-group containment only.",
+    "Detached descendants, pre-existing services and remote provider cancellation are unsupported."
+  ],
+  "passed": true
+}

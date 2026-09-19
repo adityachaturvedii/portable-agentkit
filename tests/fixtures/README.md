@@ -1,0 +1,5 @@
+# Disposable evaluation fixtures
+
+The 18 cases in tasks.json define a development corpus. Intent selection checks the explicit catalog API, not natural-language model routing. Six executable fixture families exercise known CPU defects (invoice, split leakage, scalar gradient, inference cache, numerical softmax and SQLite idempotency). Each runs buggy and corrected synthetic source in a new temporary directory against fixed external expectations. Other cases cover handoff consistency, provenance and honest blocked results. Browser, GPU and controller-recovery behavior is not measured here.
+
+Expected values in tests are separate from the disposable implementation files. This separation aids fixture independence but is not filesystem enforcement against a hostile worker. CPU scripts are trusted synthetic code, not a sandbox test. The suite has no model/provider calls and cannot measure model quality, review precision/recall or provider cost. Forward task and matched native-baseline observations are recorded separately in docs/validation-report.md. These are development cases; held-out calibration remains Phase 7.

@@ -1,0 +1,2 @@
+{"argv": ["python3", "-c", "from invoice import invoice_total; print([(s, invoice_total([(1000,2)],s,10)) for s in [0,500]])"], "cwd": "/private/tmp/agentkit-forward-test/invoice-worktree", "returncode": 0}
+[(0, 1800), (500, 2250)]

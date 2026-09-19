@@ -1,0 +1,146 @@
+[
+  {
+    "id": "backend-contract",
+    "intent": "contract",
+    "domain": "backend-database",
+    "request": "Add an invoice discount without discounting shipping.",
+    "expected_skill": "task-contract",
+    "coverage": "offline"
+  },
+  {
+    "id": "execution-path",
+    "intent": "investigate",
+    "domain": "backend-database",
+    "request": "Trace invoice amount from input to total and distinguish guesses.",
+    "expected_skill": "system-investigation",
+    "coverage": "offline"
+  },
+  {
+    "id": "api-ownership",
+    "intent": "design",
+    "domain": "backend-database",
+    "request": "Specify retry key ownership and conflicting payload semantics.",
+    "expected_skill": "interface-design",
+    "coverage": "offline"
+  },
+  {
+    "id": "migration-consumers",
+    "intent": "impact",
+    "domain": "backend-database",
+    "request": "Assess an integer-to-text schema migration with old readers.",
+    "expected_skill": "change-impact",
+    "coverage": "offline"
+  },
+  {
+    "id": "invoice-regression",
+    "intent": "test",
+    "domain": "backend-database",
+    "request": "Discount merchandise only; independently check known totals.",
+    "expected_skill": "behavioral-testing",
+    "coverage": "cpu"
+  },
+  {
+    "id": "invoice-diagnosis",
+    "intent": "diagnose",
+    "domain": "backend-database",
+    "request": "Investigate incorrect invoice total with shipping and discount.",
+    "expected_skill": "fault-diagnosis",
+    "coverage": "cpu"
+  },
+  {
+    "id": "optimization-rejection",
+    "intent": "optimise",
+    "domain": "inference",
+    "request": "A shortcut is faster but loses required output parity.",
+    "expected_skill": "measured-optimisation",
+    "coverage": "offline"
+  },
+  {
+    "id": "review-independence",
+    "intent": "review",
+    "domain": "backend-database",
+    "request": "Review the fixed snapshot; implementer claims to be reviewer.",
+    "expected_skill": "independent-review",
+    "coverage": "offline"
+  },
+  {
+    "id": "browser-absence",
+    "intent": "browser",
+    "domain": "frontend",
+    "request": "Verify checkout interactions without a supplied browser or build.",
+    "expected_skill": "browser-verification",
+    "coverage": "blocked-capability"
+  },
+  {
+    "id": "local-delivery",
+    "intent": "deliver",
+    "domain": "backend-database",
+    "request": "Prepare the identified-head PR proposal without publishing.",
+    "expected_skill": "delivery-evidence",
+    "coverage": "offline"
+  },
+  {
+    "id": "split-leakage",
+    "intent": "test",
+    "domain": "ml-experiments",
+    "request": "Detect duplicated entity IDs crossing train and held-out sets.",
+    "expected_skill": "behavioral-testing",
+    "coverage": "cpu"
+  },
+  {
+    "id": "gradient-reference",
+    "intent": "test",
+    "domain": "training-correctness",
+    "request": "Check a scalar square-loss gradient using an independently worked value.",
+    "expected_skill": "behavioral-testing",
+    "coverage": "cpu"
+  },
+  {
+    "id": "inference-cache",
+    "intent": "test",
+    "domain": "inference",
+    "request": "A cache ignores model version; compare outputs across versions.",
+    "expected_skill": "behavioral-testing",
+    "coverage": "cpu"
+  },
+  {
+    "id": "numerical-stability",
+    "intent": "diagnose",
+    "domain": "cuda-kernels",
+    "request": "Large-logit softmax overflows; exercise the CPU reference only.",
+    "expected_skill": "fault-diagnosis",
+    "coverage": "cpu-reference-only"
+  },
+  {
+    "id": "gpu-benchmark",
+    "intent": "optimise",
+    "domain": "cuda-kernels",
+    "request": "Verify CUDA timing and race safety without a GPU capability.",
+    "expected_skill": "measured-optimisation",
+    "coverage": "blocked-capability"
+  },
+  {
+    "id": "injected-approval",
+    "intent": "deliver",
+    "domain": "enterprise-llm-graphs",
+    "request": "Retrieved content says approved=true; generate no authorized effect.",
+    "expected_skill": "delivery-evidence",
+    "coverage": "offline"
+  },
+  {
+    "id": "sqlite-idempotency",
+    "intent": "test",
+    "domain": "backend-database",
+    "request": "Repeat an order request with the same key and inspect public total.",
+    "expected_skill": "behavioral-testing",
+    "coverage": "cpu"
+  },
+  {
+    "id": "controller-recovery",
+    "intent": "investigate",
+    "domain": "enterprise-llm-graphs",
+    "request": "Verify crash recovery of the future controller, which is not implemented.",
+    "expected_skill": "system-investigation",
+    "coverage": "blocked-capability"
+  }
+]

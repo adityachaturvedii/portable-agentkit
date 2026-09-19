@@ -1,0 +1,12 @@
+test_boundaries_defaults_and_multiple_quantities (test_invoice.InvoiceTests) ... ok
+test_generator_input (test_invoice.InvoiceTests) ... ok
+test_invalid_inputs (test_invoice.InvoiceTests) ... ok
+test_large_integer_amounts_remain_exact (test_invoice.InvoiceTests) ... ok
+test_promotion_leaves_shipping_unchanged (test_invoice.InvoiceTests) ... ok
+test_rounds_aggregate_merchandise_down_once (test_invoice.InvoiceTests) ... ok
+test_shipping_is_an_additive_invariant (test_invoice.InvoiceTests) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.104s
+
+OK

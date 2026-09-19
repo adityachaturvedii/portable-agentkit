@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "task_id": "toolkit-independent-review-probe",
+  "kind": "measured-optimisation",
+  "revision": "dfe59c52a9bce4d83d3cdfeeec9d4010f8ef305c",
+  "status": "complete",
+  "summary": "Deliberately contradictory probe: complete but decision incomplete and correctness not run.",
+  "payload": {
+    "protocol": "Example only; replace with task evidence.",
+    "baseline": "Example only; replace with task evidence.",
+    "experiments": [],
+    "correctness": "not_run",
+    "decision": "incomplete",
+    "final_evaluation": "Example only; replace with task evidence."
+  },
+  "evidence": [],
+  "limitations": [],
+  "next_actions": []
+}

@@ -1,0 +1,13 @@
+{
+  "engine": "codex",
+  "task_id": "phase3-live-implementer",
+  "cwd": "/private/tmp/portable-agentkit-phase4-live-342423e-20260919/managed/worker-copies/phase4-live-342423e-implement-calculator-core",
+  "timeout_seconds": 60,
+  "max_output_bytes": 1048576,
+  "model": null,
+  "effort": null,
+  "mode": "owned-code",
+  "schema_version": 1,
+  "prompt_sha256": "b81024a2caaf2c469d9302d379504e5e3f8ebbb351878b1af21145308fd8f613",
+  "prompt_bytes": 4959
+}

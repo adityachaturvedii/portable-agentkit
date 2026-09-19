@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "algorithm": "sha256",
+  "files": {
+    "codex-offline-config.json": "ae97e6f36dbeacfdfa4fa28083e8cedffee4c83c1e372eebb664d63ea8ff911a",
+    "doctor-host.json": "f85025f0b2a195d6b40b65c177dc165a2cfc33a0957c31be472820815df4eb07",
+    "doctor-nested.json": "8b057a1f2a254624a739d4d2aeb176d6fcc43e906623634956c05d201ecc063d",
+    "intake.json": "cdc25c0bf25e6d62c645ff13f372165c497a640c2bda04ba6ee9468e77c783f1",
+    "live-claude/acceptance.json": "32afb2ec5c0769edfc1ec473872368bb5fa8e7cb6fa358774a46dac68ece015d",
+    "live-claude/request.json": "744a45ead4097044c5675c8cc57432b002a6fb31b3670e5e53e2a9af50d6b1eb",
+    "live-claude/result.json": "720762a99020b5fe7ba4a52bb54e12677b23951fb08426822b33b68cb6d176e5",
+    "live-claude/stderr.redacted.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "live-claude/stdout.redacted.jsonl": "66a4f81fb797eb9aa1b9bfeaac0a2e2359ddf600aafaf708b1793ca70608499f",
+    "live-claude-replay.json": "9cfef0702fb7521632477ada99e184a221623c5e322f876a63f51491eb95bbe4",
+    "live-codex/acceptance.json": "32afb2ec5c0769edfc1ec473872368bb5fa8e7cb6fa358774a46dac68ece015d",
+    "live-codex/request.json": "7269e7f2f97bedf46d78b1a3df42cee5d524b7b82cc6cc631d95a6a237990dc8",
+    "live-codex/result.json": "ec8d49c7165d51d272e832dd1d0dcf7fd106636ca89db794758c7056df49e6a2",
+    "live-codex/stderr.redacted.txt": "591e80b1536f862bfd45f8e86670c08d6dc14bc666047ea2e59199e5c6c68d5a",
+    "live-codex/stdout.redacted.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "live-codex-final/acceptance.json": "32afb2ec5c0769edfc1ec473872368bb5fa8e7cb6fa358774a46dac68ece015d",
+    "live-codex-final/request.json": "9714b1379841b16f1d1fa96955d10f0eb5236acee992daa5ef1e6403a862ea69",
+    "live-codex-final/result.json": "f37a5b9d77112ed87de02ed05a09b5459caf30cba2b05efb5ff75de57a4dc2ac",
+    "live-codex-final/stderr.redacted.txt": "2d8b902fb51c4fb0108c58a40b037f3ed52641f00cdae67901d7cbda9b4b8473",
+    "live-codex-final/stdout.redacted.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sandbox-canaries-complete.json": "e2132eb79c52a073ebd540d1e6c59cd01a28bd1cdcf6fac2521e6807e38b05df",
+    "sandbox-canaries-final.json": "2e629c6cf2a84ee8b6517c16b7bbe2f2cc6138073ed0f50cf17002e549a75900",
+    "sandbox-canaries-profiles.json": "0aa7fca1c365df20d9246236ac160a15a85fd4639ec84d988b4e0f3f4d8a6e5a",
+    "sandbox-canaries.json": "eb33ec8fc3987b533dc3e6f34d03e29afe514c86d2a3c5e646f96967b959ba2d"
+  },
+  "excluded_regenerated_checks": [
+    "tests.txt",
+    "pack-check.json"
+  ],
+  "note": "Redacted local evidence only; historical failures retained."
+}

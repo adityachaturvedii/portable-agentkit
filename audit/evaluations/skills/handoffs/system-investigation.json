@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "task_id": "synthetic-invoice-promotion",
+  "kind": "system-investigation",
+  "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+  "status": "complete",
+  "summary": "Local invoice promotion system-investigation artifact.",
+  "payload": {
+    "question": "Why does a shipping-bearing invoice promotion undercharge?",
+    "paths": [
+      "340549c566b6e70b5cf1516d0f5b088ef97c1221:invoice.py:2 invoice_total entry -> line 3 subtotal sum -> line 4 shared shipping/merchandise discount -> returned cents"
+    ],
+    "findings": [
+      "Observed old subtotal 2000 plus shipping 500 is discounted together to 2250. Contract requires merchandise 1800 then shipping 500 = 2300.",
+      "No validation existed before arithmetic; negative quantity could reduce the total.",
+      "Candidate validates ranges while consuming items, computes merchandise subtotal, floors discounted merchandise, then adds shipping."
+    ],
+    "hypotheses": [
+      "Shipping included in discount predicts shipping delta 450 for shipping 500 at 10%; observed.",
+      "Rounding-only fault predicts discrepancy at fractional-cent cases; integer-cent reproduction and shipping delta reject it as explanation for original 50-cent error."
+    ],
+    "gaps": [
+      "Fixture has no historical rationale or checkout callers; no production intent inferred."
+    ]
+  },
+  "evidence": [
+    {
+      "id": "red",
+      "revision": "340549c566b6e70b5cf1516d0f5b088ef97c1221",
+      "method": "command",
+      "status": "failed",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/red.txt",
+          "sha256": "1a9d0f0abef08bf72b00de65cae28c6e599fa16b409664745a10e5891047f8b1"
+        }
+      ],
+      "observation": "Six test methods run; promotion returned 2250 instead of 2300; boundary and input-validation assertions also failed."
+    },
+    {
+      "id": "probe",
+      "revision": "340549c566b6e70b5cf1516d0f5b088ef97c1221",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-c",
+        "from invoice import invoice_total; print([(s, invoice_total([(1000,2)],s,10)) for s in [0,500]])"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/probe.txt",
+          "sha256": "c4f4561450e0735eb19eaa49d4612f15a7b3c9dfdf26e879f22ab6cd40934a40"
+        }
+      ],
+      "observation": "Changing shipping alone from 0 to 500 changes total from 1800 to 2250; only 450 added."
+    },
+    {
+      "id": "green",
+      "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/green.txt",
+          "sha256": "7cd064b7eb67086f377376471b38b4f6e47c69344fad07a419de01fca786d916"
+        }
+      ],
+      "observation": "Six test methods pass on immutable candidate."
+    },
+    {
+      "id": "diff",
+      "revision": "0f2fd97567a2840c3698a17186ccebb0c3360703",
+      "method": "command",
+      "status": "passed",
+      "command": [
+        "git",
+        "diff",
+        "43f9607c1830fb374886bbbdbb00188b0a41e50c",
+        "0f2fd97567a2840c3698a17186ccebb0c3360703"
+      ],
+      "environment_digest": "c83a9d325f116d31d4098ad3a426205244163de94165ddc9d2cfe22a3cf8ff8f",
+      "artifacts": [
+        {
+          "path": "/private/tmp/agentkit-forward-test/evidence/diff.txt",
+          "sha256": "2bfde36ab6609bcb23f8276c5c6d933d59e826486c1f143a5b712b9ccd827678"
+        }
+      ],
+      "observation": "Candidate diff contains invoice.py and public behavior tests only."
+    }
+  ],
+  "limitations": [],
+  "next_actions": []
+}

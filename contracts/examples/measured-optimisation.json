@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "task_id": "example-measured-optimisation",
+  "kind": "measured-optimisation",
+  "revision": "0000000000000000000000000000000000000000",
+  "status": "blocked",
+  "summary": "Example shape only; no verification has run.",
+  "payload": {
+    "protocol": "Example only; replace with task evidence.",
+    "baseline": "Example only; replace with task evidence.",
+    "experiments": [],
+    "correctness": "not_run",
+    "decision": "incomplete",
+    "final_evaluation": "Example only; replace with task evidence."
+  },
+  "evidence": [],
+  "limitations": [
+    "Template only; no capability or evidence supplied."
+  ],
+  "next_actions": [
+    "Supply task-specific observations and validate."
+  ]
+}

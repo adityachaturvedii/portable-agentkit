@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "task_id": "example-delivery-evidence",
+  "kind": "delivery-evidence",
+  "revision": "0000000000000000000000000000000000000000",
+  "status": "blocked",
+  "summary": "Example shape only; no verification has run.",
+  "payload": {
+    "repository": "Example only; replace with task evidence.",
+    "branch": "Example only; replace with task evidence.",
+    "base_revision": "0000000000000000000000000000000000000000",
+    "head_revision": "0000000000000000000000000000000000000000",
+    "acceptance_results": [],
+    "findings": [],
+    "usage": {
+      "provider_calls": null,
+      "api_money": null,
+      "compute_seconds": null,
+      "confidence": "unknown"
+    },
+    "proposed_pr": {
+      "title": "Example only; replace with task evidence.",
+      "body": "Example only; replace with task evidence."
+    }
+  },
+  "evidence": [],
+  "limitations": [
+    "Template only; no capability or evidence supplied."
+  ],
+  "next_actions": [
+    "Supply task-specific observations and validate."
+  ]
+}

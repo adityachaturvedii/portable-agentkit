@@ -1,0 +1,42 @@
+{
+  "note": "Separate post-review recheck of parent fixes; original review remains bound to dfe59c5",
+  "validator_sha256": "88b3bc57f6fcf68723ae11e50a90ba8b55ebc09d2d25e7adf511e7358d3c824a",
+  "results": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "agentkit",
+        "validate",
+        "/private/tmp/agentkit-toolkit-review/probe-complete-optimisation-incomplete.json"
+      ],
+      "returncode": 2,
+      "output": "agentkit: complete optimization requires a terminal decision and observed correctness\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "agentkit",
+        "validate",
+        "/private/tmp/agentkit-toolkit-review/probe-findings-verdict-empty.json"
+      ],
+      "returncode": 2,
+      "output": "agentkit: findings verdict requires at least one finding\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "agentkit",
+        "validate",
+        "/private/tmp/agentkit-toolkit-review/measured-optimisation-rejected.json"
+      ],
+      "returncode": 0,
+      "output": "{\"valid\": true, \"kind\": \"measured-optimisation\", \"status\": \"complete\", \"authority\": \"none\", \"note\": \"Structure and consistency only; claims are not authenticated.\"}\n"
+    }
+  ]
+}

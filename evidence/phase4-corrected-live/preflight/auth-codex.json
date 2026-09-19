@@ -1,0 +1,7 @@
+{
+  "provider": "codex",
+  "state": "verified",
+  "mode": "subscription",
+  "reason": "authenticated",
+  "executable": "/Users/aditya/.nvm/versions/node/v22.19.0/bin/codex"
+}
