@@ -20,14 +20,50 @@ class ProcessOutcome:
     cancellation: CancellationStatus
 
 
+def _live_group_member(pgid):
+    """Return whether a non-exited member of pgid remains, or None without /proc.
+
+    A killed member stays addressable by os.killpg until its new parent reaps
+    it, so signal probing alone reports a contained group as still present on
+    hosts whose init defers reaping.
+    """
+    try:
+        entries = os.listdir("/proc")
+    except OSError:
+        return None
+    for name in entries:
+        if not name.isdigit():
+            continue
+        try:
+            with open("/proc/" + name + "/stat", "rb") as handle:
+                data = handle.read()
+        except OSError:
+            continue
+        # The comm field may contain spaces or parentheses; state, ppid and
+        # pgrp are the first three fields after its closing parenthesis.
+        fields = data.rpartition(b")")[2].split()
+        if len(fields) < 3:
+            continue
+        try:
+            if int(fields[2]) != pgid:
+                continue
+        except ValueError:
+            continue
+        if fields[0] != b"Z":
+            return True
+    return False
+
+
 def group_exists(pgid):
+    """True only while the group still holds a process that has not exited."""
     try:
         os.killpg(pgid, 0)
-        return True
     except ProcessLookupError:
         return False
     except PermissionError:
         return True
+    live = _live_group_member(pgid)
+    return True if live is None else live
 
 
 def run_process(argv, *, cwd, env, stdin=b"", timeout=30.0,
